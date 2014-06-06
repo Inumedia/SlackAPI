@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace SlackAPI
 {
-    public class Slack
+    public class SlackClient
     {
         readonly string APIToken;
         bool authWorks = false;

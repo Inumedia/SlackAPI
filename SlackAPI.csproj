@@ -83,7 +83,7 @@
     <Compile Include="SearchResponseAll.cs" />
     <Compile Include="SearchResponseFiles.cs" />
     <Compile Include="SearchResponseMessages.cs" />
-    <Compile Include="Slack.cs" />
+    <Compile Include="SlackClient.cs" />
     <Compile Include="StarListResponse.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="TeamPreferences.cs" />
