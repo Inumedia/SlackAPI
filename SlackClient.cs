@@ -59,7 +59,7 @@ namespace SlackAPI
         public event Action<ReceivingMessage> OnPresenceChanged;
         public event Action<ReceivingMessage> OnHello;
 
-        public Slack(string token)
+        public SlackClient(string token)
         {
             APIToken = token;
         }
