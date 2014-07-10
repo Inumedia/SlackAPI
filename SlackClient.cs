@@ -5,12 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using WebSocket4Net;
 using System.Text;
 using System.Threading;
 
 namespace SlackAPI
 {
+    /// <summary>
+    /// SlackClient is intended to solely handle RPC (HTTP-based) functionality. Does not handle WebSocket connectivity.
+    /// 
+    /// For WebSocket connectivity, refer to <see cref="SlackAPI.SlackSocketClient"/>
+    /// </summary>
     public class SlackClient
     {
         readonly string APIToken;
@@ -28,15 +32,7 @@ namespace SlackAPI
             new Tuple<string,string>(">", "&gt;")
         };
 
-        public bool Connected { get { return MySelf != null && socket != null && socket.State == WebSocketState.Open; } }
-        public bool IsReady { get { return helloReceived == 1; } }
-
-        int helloReceived;
-        int pingBlocking;
-        int currentId = 1;
-        Timer pingTimer;
-        WebSocket socket;
-        Dictionary<int, Action<ReceivingMessage>> socketCallbacks;
+        //Dictionary<int, Action<ReceivingMessage>> socketCallbacks;
 
         public Self MySelf;
         public User MyData;
@@ -54,180 +50,55 @@ namespace SlackAPI
         public Dictionary<string, Channel> GroupLookup;
         public Dictionary<string, DirectMessageConversation> DirectMessageLookup;
 
-        public event Action<ReceivingMessage> OnUserTyping;
-        public event Action<ReceivingMessage> OnMessageReceived;
-        public event Action<ReceivingMessage> OnPresenceChanged;
-        public event Action<ReceivingMessage> OnHello;
+        //public event Action<ReceivingMessage> OnUserTyping;
+        //public event Action<ReceivingMessage> OnMessageReceived;
+        //public event Action<ReceivingMessage> OnPresenceChanged;
+        //public event Action<ReceivingMessage> OnHello;
 
         public SlackClient(string token)
         {
             APIToken = token;
         }
 
-        public void Connect(Action<LoginResponse> onConnected)
+        public virtual void Connect(Action<LoginResponse> onConnected = null)
         {
             EmitLogin((loginDetails) =>
             {
-                MySelf = loginDetails.self;
-                MyData = loginDetails.users.First((c) => c.id == MySelf.id);
-                MyTeam = loginDetails.team;
-
-                Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
-                Channels = new List<Channel>(loginDetails.channels);
-                Groups = new List<Channel>(loginDetails.groups);
-                DirectMessages = new List<DirectMessageConversation>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.user) && c.id != MySelf.id));
-                starredChannels =
-                        Groups.Where((c) => c.is_starred).Select((c) => c.id)
-                    .Union(
-                        DirectMessages.Where((c) => c.is_starred).Select((c) => c.user)
-                    ).Union(
-                        Channels.Where((c) => c.is_starred).Select((c) => c.id)
-                    ).ToList();
-
-                UserLookup = new Dictionary<string, User>();
-                foreach (User u in Users) UserLookup.Add(u.id, u);
-
-                ChannelLookup = new Dictionary<string, Channel>();
-                foreach (Channel c in Channels) ChannelLookup.Add(c.id, c);
-
-                GroupLookup = new Dictionary<string, Channel>();
-                foreach (Channel g in Groups) GroupLookup.Add(g.id, g);
-
-                DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
-                foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
-
-                //socket = new ClientWebSocket();
-                //clientBuffer = ClientWebSocket.CreateClientBuffer(4096, 4096);
-                //socket.ConnectAsync(new Uri(string.Format("{0}?svn_rev={1}&login_with_boot_data-0-{2}&on_login-0-{2}&connect-1-{2}", loginDetails.url, loginDetails.svn_rev, DateTime.Now.Subtract(new DateTime(1970,1,1)).TotalSeconds)), token);
-                
-                //socket.SendAsync()
-                
-                //socket.ReceiveAsync(clientBuffer, token);
-
-                socket = new WebSocket(string.Format("{0}?svn_rev={1}&login_with_boot_data-0-{2}&on_login-0-{2}&connect-1-{2}", loginDetails.url, loginDetails.svn_rev, DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds));
-                socket.MessageReceived += socket_MessageReceived;
-                socket.Closed += socket_Closed;
-                socket.Opened += socket_Opened;
-
-                socket.Open();
-
+                Connected(loginDetails);
                 if (onConnected != null)
                     onConnected(loginDetails);
             });
         }
 
-        void socket_Opened(object sender, EventArgs e)
+        protected virtual void Connected(LoginResponse loginDetails)
         {
+            MySelf = loginDetails.self;
+            MyData = loginDetails.users.First((c) => c.id == MySelf.id);
+            MyTeam = loginDetails.team;
 
-        }
+            Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
+            Channels = new List<Channel>(loginDetails.channels);
+            Groups = new List<Channel>(loginDetails.groups);
+            DirectMessages = new List<DirectMessageConversation>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.user) && c.id != MySelf.id));
+            starredChannels =
+                    Groups.Where((c) => c.is_starred).Select((c) => c.id)
+                .Union(
+                    DirectMessages.Where((c) => c.is_starred).Select((c) => c.user)
+                ).Union(
+                    Channels.Where((c) => c.is_starred).Select((c) => c.id)
+                ).ToList();
 
-        //TODO: Attempt to reconnect.
-        void socket_Closed(object sender, EventArgs e)
-        {
+            UserLookup = new Dictionary<string, User>();
+            foreach (User u in Users) UserLookup.Add(u.id, u);
 
-        }
+            ChannelLookup = new Dictionary<string, Channel>();
+            foreach (Channel c in Channels) ChannelLookup.Add(c.id, c);
 
-        //send: ping, message (channel, text, id), typing (channel)
-        /// <summary>
-        /// Hacked together. Please revise.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void socket_MessageReceived(object sender, MessageReceivedEventArgs e)
-        {
-            ReceivingMessage message = JsonConvert.DeserializeObject<ReceivingMessage>(e.Message, new JavascriptDateTimeConverter());
+            GroupLookup = new Dictionary<string, Channel>();
+            foreach (Channel g in Groups) GroupLookup.Add(g.id, g);
 
-            if (message.reply_to != 0)
-            {
-                if (socketCallbacks.ContainsKey(message.reply_to))
-                {
-                    socketCallbacks[message.reply_to](message);
-                    socketCallbacks.Remove(message.reply_to);
-                }
-                return;
-            }
-
-            switch (message.type)
-            {
-                case "channel_marked":
-                    //TODO?
-                    break;
-
-                case "user_typing":
-                    if (OnUserTyping != null)
-                        OnUserTyping(message);
-                    break;
-
-                case "message":
-                    if (OnMessageReceived != null)
-                        OnMessageReceived(message);
-                    break;
-
-                case "presence_change":
-                    Users.Find((c) => c.id == message.user).presence = message.presence;
-
-                    if (OnPresenceChanged != null)
-                        OnPresenceChanged(message);
-                    break;
-
-                case "hello":
-                    if (Interlocked.CompareExchange(ref helloReceived, 1, 0) == 0)
-                    {
-                        socketCallbacks = new Dictionary<int, Action<ReceivingMessage>>();
-                        new Timer((o) =>
-                        {
-                            if (socket != null && Interlocked.CompareExchange(ref pingBlocking, 1, 0) == 0)
-                            {
-                                SendSocket(new SendingMessage() { type = "ping" }, (r) =>
-                                {
-
-                                });
-                                pingBlocking = 0;
-                            }
-                        }, null, 2000, 2000);
-                    }
-                    if (OnHello != null)
-                        OnHello(message);
-                    break;
-            }
-        }
-
-        //TODO: Check connected, reconnect if possible.
-        internal void SendSocket(SendingMessage message, Action<ReceivingMessage> callback)
-        {
-            if (callback != null)
-            {
-                int id = Interlocked.Increment(ref currentId);
-                message.id = id;
-                socketCallbacks.Add(id, callback);
-            }
-
-            socket.Send(JsonConvert.SerializeObject(message));
-        }
-
-        public class SendingMessage
-        {
-            public string type;
-            public int id;
-            public string channel;
-            public string text;
-            public string user;
-            public string presence;
-        }
-
-        /// <summary>
-        /// Hacking ftw!
-        /// </summary>
-        public class ReceivingMessage
-        {
-            public string type;
-            public int reply_to;
-            public string user;
-            public string presence;
-            public DateTime ts;
-            public string text;
-            public string team;
-            public string channel;
+            DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
+            foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
         }
 
         public static void APIRequest<K>(Action<K> callback, Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
@@ -571,34 +442,6 @@ namespace SlackAPI
         public void EmitPresence(Action<PresenceResponse> callback, Presence status)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("presence", status.ToString()));
-        }
-
-        public void SendPresence(Presence status)
-        {
-            SendSocket(new SendingMessage()
-            {
-                type = "presence_change",
-                presence = status.ToString()
-            }, null);
-        }
-
-        public void SendTyping(string channelId)
-        {
-            SendSocket(new SendingMessage()
-            {
-                type = "typing",
-                channel = channelId
-            }, null);
-        }
-
-        public void SendMessage(Action<ReceivingMessage> onSent, string channelId, string textData)
-        {
-            SendSocket(new SendingMessage()
-            {
-                type = "message",
-                channel = channelId,
-                text = textData
-            }, onSent);
         }
 
         public void GetPreferences(Action<UserPreferencesResponse> callback)
