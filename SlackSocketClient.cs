@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace SlackAPI
 {
-    class SlackSocketClient : SlackClient
+    public class SlackSocketClient : SlackClient
     {
         SlackSocket underlyingSocket;
 
