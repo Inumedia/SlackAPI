@@ -3,7 +3,7 @@
 namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("hello")]
-    class Hello : SlackSocketMessage
+    public class Hello : SlackSocketMessage
     {
     }
 }

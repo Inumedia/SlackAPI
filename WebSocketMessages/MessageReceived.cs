@@ -2,7 +2,7 @@
 
 namespace SlackAPI.WebSocketMessages
 {
-    class MessageReceived : SlackSocketMessage
+    public class MessageReceived : SlackSocketMessage
     {
         public string text;
         public DateTime ts;
