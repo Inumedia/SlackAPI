@@ -71,7 +71,7 @@ namespace SlackAPI
             {
                 ParameterInfo[] parameters = m.GetParameters();
                 if (parameters.Length != 1) continue;
-                if(parameters[0].ParameterType.IsSubclassOf(slackMessage))
+                if (parameters[0].ParameterType.IsSubclassOf(slackMessage))
                 {
                     Type t = parameters[0].ParameterType;
                     foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
@@ -142,13 +142,21 @@ namespace SlackAPI
                 message.id = Interlocked.Increment(ref currentId);
             //socket.Send(JsonConvert.SerializeObject(message));
 
-            SlackSocketRouting route = message.GetType().GetCustomAttribute<SlackSocketRouting>();
-            if (route == null && message.type == null) throw new InvalidProgramException("Cannot send without a proper route!");
-
-            if (route != null)
+            if (message.type == null)
             {
-                message.type = route.Type;
-                message.subtype = route.SubType;
+                IEnumerable<SlackSocketRouting> routes = message.GetType().GetCustomAttributes<SlackSocketRouting>();
+
+                SlackSocketRouting route = null;
+                foreach (SlackSocketRouting r in routes)
+                {
+                    route = r;
+                }
+                if (route == null) throw new InvalidProgramException("Cannot send without a proper route!");
+                else
+                {
+                    message.type = route.Type;
+                    message.subtype = route.SubType;
+                }
             }
 
             sendingQueue.Push(JsonConvert.SerializeObject(message));
@@ -204,7 +212,7 @@ namespace SlackAPI
         public bool ok;
     }
 
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public class SlackSocketRouting : Attribute
     {
         public string Type;

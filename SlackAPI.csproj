@@ -98,6 +98,7 @@
     <Compile Include="Utilities\LockFreeQueue.cs" />
     <Compile Include="WebSocketMessages\ChannelMarked.cs" />
     <Compile Include="WebSocketMessages\DeletedMessage.cs" />
+    <Compile Include="WebSocketMessages\FileMessage.cs" />
     <Compile Include="WebSocketMessages\Hello.cs" />
     <Compile Include="WebSocketMessages\MessageReceived.cs" />
     <Compile Include="WebSocketMessages\NewMessage.cs" />
