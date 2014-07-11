@@ -9,6 +9,6 @@ namespace SlackAPI.WebSocketMessages
         public string channel;
         public string text;
         public string team;
-        public DateTime? ts;
+        public DateTime ts;
     }
 }

@@ -81,7 +81,8 @@ namespace SlackAPI
                             object message = JsonConvert.DeserializeObject(s, t, new JavascriptDateTimeConverter());
                             m.Invoke(routingTo, new object[] { message });
                         });*/
-                        Delegate d = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(parameters[0].ParameterType), m, false);
+                        Type genericAction = typeof(Action<>).MakeGenericType(parameters[0].ParameterType);
+                        Delegate d = Delegate.CreateDelegate(genericAction, routingTo, m, false);
                         if (d == null)
                         {
                             System.Diagnostics.Debug.WriteLine(string.Format("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name));
@@ -103,20 +104,20 @@ namespace SlackAPI
             string data = e.Message;
             SlackSocketMessage message = JsonConvert.DeserializeObject<SlackSocketMessage>(data, new JavascriptDateTimeConverter());
 
-            if (message.reply_to.HasValue && callbacks.ContainsKey(message.reply_to.Value))
-                callbacks[message.reply_to.Value](data);
+            if (callbacks.ContainsKey(message.reply_to))
+                callbacks[message.reply_to](data);
             else if (routes.ContainsKey(message.type) && routes[message.type].ContainsKey(message.subtype ?? "null"))
             {
                 object o = null;
                 if (routing.ContainsKey(message.type) && routing[message.type].ContainsKey(message.subtype ?? "null"))
-                    o = JsonConvert.DeserializeObject(data, routing[message.type][message.subtype], new JavascriptDateTimeConverter());
+                    o = JsonConvert.DeserializeObject(data, routing[message.type][message.subtype ?? "null"], new JavascriptDateTimeConverter());
                 else
                 {
                     //I believe this method is slower than the former. If I'm wrong we can just use this instead. :D
-                    Type t = routes[message.type][message.subtype].Method.GetParameters()[0].ParameterType;
+                    Type t = routes[message.type][message.subtype ?? "null"].Method.GetParameters()[0].ParameterType;
                     o = JsonConvert.DeserializeObject(data, t, new JavascriptDateTimeConverter());
                 }
-                routes[message.type][message.subtype ?? "null"].DynamicInvoke();
+                routes[message.type][message.subtype ?? "null"].DynamicInvoke(o);
             }
             else
                 System.Diagnostics.Debug.Write(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
@@ -166,7 +167,7 @@ namespace SlackAPI
                 if (!routes[route.Type].ContainsKey(route.SubType ?? "null"))
                     routes[route.Type].Add(route.SubType ?? "null", callback);
                 else
-                    routes[route.Type][route.SubType] = Delegate.Combine(routes[route.Type][route.SubType ?? "null"], callback);
+                    routes[route.Type][route.SubType ?? "null"] = Delegate.Combine(routes[route.Type][route.SubType ?? "null"], callback);
             }
         }
 
@@ -197,7 +198,7 @@ namespace SlackAPI
     public class SlackSocketMessage
     {
         public int id;
-        public int? reply_to;
+        public int reply_to;
         public string type;
         public string subtype;
         public bool ok;
