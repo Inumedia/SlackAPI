@@ -120,7 +120,7 @@ namespace SlackAPI
                 routes[message.type][message.subtype ?? "null"].DynamicInvoke(o);
             }
             else
-                System.Diagnostics.Debug.Write(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
+                System.Diagnostics.Debug.WriteLine(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
         }
 
         public void Send<K>(SlackSocketMessage message, Action<K> callback)
