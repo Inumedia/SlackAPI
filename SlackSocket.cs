@@ -35,11 +35,11 @@ namespace SlackAPI
                             if (!routing.ContainsKey(route.Type))
                                 routing.Add(route.Type, new Dictionary<string, Type>()
                             {
-                                {route.SubType, t}
+                                {route.SubType ?? "null", t}
                             });
                             else
-                                if (!routing[route.Type].ContainsKey(route.SubType))
-                                    routing[route.Type].Add(route.SubType, t);
+                                if (!routing[route.Type].ContainsKey(route.SubType ?? "null"))
+                                    routing[route.Type].Add(route.SubType ?? "null", t);
                                 else
                                     throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
                         }
