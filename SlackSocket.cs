@@ -18,7 +18,6 @@ namespace SlackAPI
         int currentId;
 
         Dictionary<string, Dictionary<string, Delegate>> routes;
-        Type routingType;
         public bool Connected { get { return socket != null && socket.State == WebSocketState.Open; } }
 
         //This would be done for hinting but I don't think we really need this.
@@ -133,6 +132,34 @@ namespace SlackAPI
             sendingQueue.Push(JsonConvert.SerializeObject(message));
             if (Interlocked.CompareExchange(ref currentlySending, 1, 0) == 0)
                 ThreadPool.QueueUserWorkItem(HandleSending);
+        }
+
+        public void BindCallback<K>(Action<K> callback)
+        {
+            Type t = typeof(K);
+            foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+            {
+                if (!routes.ContainsKey(route.Type))
+                    routes.Add(route.Type, new Dictionary<string, Delegate>());
+                if (!routes[route.Type].ContainsKey(route.SubType))
+                    routes[route.Type].Add(route.SubType, callback);
+                else
+                    routes[route.Type][route.SubType] = Delegate.Combine(routes[route.Type][route.SubType], callback);
+            }
+        }
+
+        public void UnbindCallback<K>(Action<K> callback)
+        {
+            Type t = typeof(K);
+            foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+            {
+                Delegate d = routes.ContainsKey(route.Type) ? (routes.ContainsKey(route.SubType) ? routes[route.Type][route.SubType] : null) : null;
+                if (d != null)
+                {
+                    Delegate newd = Delegate.Remove(d, callback);
+                    routes[route.Type][route.SubType] = newd;
+                }
+            }
         }
 
         void HandleSending(object stateful)

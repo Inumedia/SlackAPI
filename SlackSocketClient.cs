@@ -31,6 +31,16 @@ namespace SlackAPI
             underlyingSocket = new SlackSocket(loginDetails, this);
         }
 
+        public void BindCallback<K>(Action<K> callback)
+        {
+            underlyingSocket.BindCallback(callback);
+        }
+
+        public void UnbindCallback<K>(Action<K> callback)
+        {
+            underlyingSocket.UnbindCallback(callback);
+        }
+
         public void SendPresence(Presence status)
         {
             underlyingSocket.Send(new PresenceChange() { presence = Presence.Active, user = base.MySelf.id });
