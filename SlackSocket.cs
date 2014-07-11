@@ -22,26 +22,29 @@ namespace SlackAPI
 
         //This would be done for hinting but I don't think we really need this.
 
-        //static Dictionary<string, Dictionary<string, Type>> routing;
-        /*static SlackSocket()
+        static Dictionary<string, Dictionary<string, Type>> routing;
+        static SlackSocket()
         {
             routing = new Dictionary<string, Dictionary<string, Type>>();
-            foreach(Assembly assy in AppDomain.CurrentDomain.GetAssemblies())
-                foreach(Type t in assy.GetTypes())
-                    foreach(SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
-                    {
-                        if (!routing.ContainsKey(route.Type))
-                            routing.Add(route.Type, new Dictionary<string, Type>()
+            foreach (Assembly assy in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (!assy.GlobalAssemblyCache)
+                    foreach (Type t in assy.GetTypes())
+                        foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+                        {
+                            if (!routing.ContainsKey(route.Type))
+                                routing.Add(route.Type, new Dictionary<string, Type>()
                             {
                                 {route.SubType, t}
                             });
-                        else
-                            if (!routing[route.Type].ContainsKey(route.SubType))
-                                routing[route.Type].Add(route.SubType, t);
                             else
-                                throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
-                    }
-        }*/
+                                if (!routing[route.Type].ContainsKey(route.SubType))
+                                    routing[route.Type].Add(route.SubType, t);
+                                else
+                                    throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
+                        }
+            }
+        }
 
         public SlackSocket(LoginResponse loginDetails, object routingTo)
         {
@@ -61,7 +64,8 @@ namespace SlackAPI
         void BuildRoutes(object routingTo)
         {
             routes = new Dictionary<string, Dictionary<string, Delegate>>();
-            
+
+            Type routingToType = routingTo.GetType();
             Type slackMessage = typeof(SlackSocketMessage);
             foreach (MethodInfo m in routingTo.GetType().GetMethods(BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Public))
             {
@@ -72,11 +76,17 @@ namespace SlackAPI
                     Type t = parameters[0].ParameterType;
                     foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
                     {
-                        Delegate d = new Action<string>((s) =>
+                        /*Delegate d = new Action<string>((s) =>
                         {
                             object message = JsonConvert.DeserializeObject(s, t, new JavascriptDateTimeConverter());
                             m.Invoke(routingTo, new object[] { message });
-                        });
+                        });*/
+                        Delegate d = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(parameters[0].ParameterType), m, false);
+                        if (d == null)
+                        {
+                            System.Diagnostics.Debug.WriteLine(string.Format("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name));
+                            continue;
+                        }
                         if (!routes.ContainsKey(route.Type))
                             routes.Add(route.Type, new Dictionary<string, Delegate>());
                         if (!routes[route.Type].ContainsKey(route.SubType ?? "null"))
@@ -96,7 +106,18 @@ namespace SlackAPI
             if (message.reply_to.HasValue && callbacks.ContainsKey(message.reply_to.Value))
                 callbacks[message.reply_to.Value](data);
             else if (routes.ContainsKey(message.type) && routes[message.type].ContainsKey(message.subtype ?? "null"))
-                routes[message.type][message.subtype ?? "null"].DynamicInvoke(data);
+            {
+                object o = null;
+                if (routing.ContainsKey(message.type) && routing[message.type].ContainsKey(message.subtype ?? "null"))
+                    o = JsonConvert.DeserializeObject(data, routing[message.type][message.subtype], new JavascriptDateTimeConverter());
+                else
+                {
+                    //I believe this method is slower than the former. If I'm wrong we can just use this instead. :D
+                    Type t = routes[message.type][message.subtype].Method.GetParameters()[0].ParameterType;
+                    o = JsonConvert.DeserializeObject(data, t, new JavascriptDateTimeConverter());
+                }
+                routes[message.type][message.subtype ?? "null"].DynamicInvoke();
+            }
             else
                 System.Diagnostics.Debug.Write(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
         }
