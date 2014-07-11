@@ -52,7 +52,7 @@ namespace SlackAPI
             currentId = 1;
             socket.MessageReceived += socket_MessageReceived;
 
-            //socket.Open();
+            socket.Open();
 
             //if (onConnected != null)
             //    onConnected(loginDetails);
@@ -67,7 +67,7 @@ namespace SlackAPI
             {
                 ParameterInfo[] parameters = m.GetParameters();
                 if (parameters.Length != 1) continue;
-                if(parameters[0].ParameterType.IsAssignableFrom(slackMessage))
+                if(parameters[0].ParameterType.IsSubclassOf(slackMessage))
                 {
                     Type t = parameters[0].ParameterType;
                     foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
@@ -79,10 +79,10 @@ namespace SlackAPI
                         });
                         if (!routes.ContainsKey(route.Type))
                             routes.Add(route.Type, new Dictionary<string, Delegate>());
-                        if (!routes[route.Type].ContainsKey(route.SubType))
-                            routes[route.Type].Add(route.SubType, d);
+                        if (!routes[route.Type].ContainsKey(route.SubType ?? "null"))
+                            routes[route.Type].Add(route.SubType ?? "null", d);
                         else
-                            routes[route.Type][route.SubType] = Delegate.Combine(routes[route.Type][route.SubType], d);
+                            routes[route.Type][route.SubType ?? "null"] = Delegate.Combine(routes[route.Type][route.SubType ?? "null"], d);
                     }
                 }
             }
@@ -93,12 +93,12 @@ namespace SlackAPI
             string data = e.Message;
             SlackSocketMessage message = JsonConvert.DeserializeObject<SlackSocketMessage>(data, new JavascriptDateTimeConverter());
 
-            if (callbacks.ContainsKey(message.reply_to))
-                callbacks[message.reply_to](data);
-            else if (routes.ContainsKey(message.type) && routes[message.type].ContainsKey(message.subtype))
-                routes[message.type][message.subtype].DynamicInvoke(data);
+            if (message.reply_to.HasValue && callbacks.ContainsKey(message.reply_to.Value))
+                callbacks[message.reply_to.Value](data);
+            else if (routes.ContainsKey(message.type) && routes[message.type].ContainsKey(message.subtype ?? "null"))
+                routes[message.type][message.subtype ?? "null"].DynamicInvoke(data);
             else
-                System.Diagnostics.Debug.Write(string.Format("No valid route for {0} - {1}", message.type, message.subtype));
+                System.Diagnostics.Debug.Write(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
         }
 
         public void Send<K>(SlackSocketMessage message, Action<K> callback)
@@ -137,14 +137,15 @@ namespace SlackAPI
         public void BindCallback<K>(Action<K> callback)
         {
             Type t = typeof(K);
+
             foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
             {
                 if (!routes.ContainsKey(route.Type))
                     routes.Add(route.Type, new Dictionary<string, Delegate>());
-                if (!routes[route.Type].ContainsKey(route.SubType))
-                    routes[route.Type].Add(route.SubType, callback);
+                if (!routes[route.Type].ContainsKey(route.SubType ?? "null"))
+                    routes[route.Type].Add(route.SubType ?? "null", callback);
                 else
-                    routes[route.Type][route.SubType] = Delegate.Combine(routes[route.Type][route.SubType], callback);
+                    routes[route.Type][route.SubType] = Delegate.Combine(routes[route.Type][route.SubType ?? "null"], callback);
             }
         }
 
@@ -153,11 +154,11 @@ namespace SlackAPI
             Type t = typeof(K);
             foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
             {
-                Delegate d = routes.ContainsKey(route.Type) ? (routes.ContainsKey(route.SubType) ? routes[route.Type][route.SubType] : null) : null;
+                Delegate d = routes.ContainsKey(route.Type) ? (routes.ContainsKey(route.SubType ?? "null") ? routes[route.Type][route.SubType ?? "null"] : null) : null;
                 if (d != null)
                 {
                     Delegate newd = Delegate.Remove(d, callback);
-                    routes[route.Type][route.SubType] = newd;
+                    routes[route.Type][route.SubType ?? "null"] = newd;
                 }
             }
         }
@@ -175,7 +176,7 @@ namespace SlackAPI
     public class SlackSocketMessage
     {
         public int id;
-        public int reply_to;
+        public int? reply_to;
         public string type;
         public string subtype;
         public bool ok;

@@ -28,6 +28,7 @@ namespace SlackAPI
 
         protected override void Connected(LoginResponse loginDetails)
         {
+            base.Connected(loginDetails);
             underlyingSocket = new SlackSocket(loginDetails, this);
         }
 
