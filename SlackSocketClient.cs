@@ -70,6 +70,11 @@ namespace SlackAPI
                 OnHello();
         }
 
+        public void HandlePresence(PresenceChange change)
+        {
+            UserLookup[change.user].presence = change.presence.ToString().ToLower();
+        }
+
         void StartPing()
         {
             pingingThread = new Timer(Ping, null, PingInterval, PingInterval);
