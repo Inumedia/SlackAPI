@@ -3,6 +3,7 @@
 namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("message")]
+    [SlackSocketRouting("message", "bot_message")]
     public class NewMessage : SlackSocketMessage
     {
         public string user;

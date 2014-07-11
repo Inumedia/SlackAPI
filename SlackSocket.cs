@@ -204,6 +204,7 @@ namespace SlackAPI
         public bool ok;
     }
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class SlackSocketRouting : Attribute
     {
         public string Type;
