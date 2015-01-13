@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-    public class Message
+    public class Message : SlackSocketMessage
     {
+        public string channel;
         public string type;
+        public string subtype;
         public DateTime ts;
         public string user;
         /// <summary>

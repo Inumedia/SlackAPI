@@ -9,6 +9,8 @@ namespace SlackAPI
     {
         SlackSocket underlyingSocket;
 
+        public event Action<Message> OnMessageReceived;
+
         bool HelloReceived;
         public const int PingInterval = 3000;
         int pinging;
@@ -54,7 +56,7 @@ namespace SlackAPI
 
         public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData)
         {
-            underlyingSocket.Send(new NewMessage() { channel = channelId, text = textData }, new Action<MessageReceived>((mr) =>
+            underlyingSocket.Send(new Message() { channel = channelId, text = textData }, new Action<MessageReceived>((mr) =>
             {
                 if (onSent != null)
                     onSent(mr);
@@ -105,9 +107,10 @@ namespace SlackAPI
 
         }
 
-        public void Message(NewMessage m)
+        public void Message(Message m)
         {
-
+            if (OnMessageReceived != null)
+                OnMessageReceived(m);
         }
 
         public void PresenceChange(PresenceChange p)
