@@ -60,7 +60,7 @@ namespace SlackAPI
             APIToken = token;
         }
 
-        public virtual void Connect(Action<LoginResponse> onConnected = null)
+		public virtual void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
         {
             EmitLogin((loginDetails) =>
             {
@@ -69,7 +69,6 @@ namespace SlackAPI
                 if (onConnected != null)
                     onConnected(loginDetails);
             });
-
         }
 
         protected virtual void Connected(LoginResponse loginDetails)

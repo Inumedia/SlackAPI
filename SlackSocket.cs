@@ -146,8 +146,7 @@ namespace SlackAPI
                 message.id = Interlocked.Increment(ref currentId);
             //socket.Send(JsonConvert.SerializeObject(message));
 
-            if (message.type == null)
-            {
+			if (string.IsNullOrEmpty(message.type)){
                 IEnumerable<SlackSocketRouting> routes = message.GetType().GetCustomAttributes<SlackSocketRouting>();
 
                 SlackSocketRouting route = null;
@@ -163,7 +162,7 @@ namespace SlackAPI
                 }
             }
 
-            sendingQueue.Push(JsonConvert.SerializeObject(message));
+			sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             if (Interlocked.CompareExchange(ref currentlySending, 1, 0) == 0)
                 ThreadPool.QueueUserWorkItem(HandleSending);
         }

@@ -44,7 +44,7 @@ namespace SlackAPI
 		}
 
 		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this);
+			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
 		}
 
         public void BindCallback<K>(Action<K> callback)
@@ -69,11 +69,10 @@ namespace SlackAPI
 
         public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData)
         {
-            underlyingSocket.Send(new Message() { channel = channelId, text = textData }, new Action<MessageReceived>((mr) =>
-            {
-                if (onSent != null)
-                    onSent(mr);
-            }));
+			underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = MySelf.id, type = "message" }, new Action<MessageReceived>((mr) => {
+				if(onSent != null)
+					onSent(mr);
+			}));
         }
 
         public void HandleHello(Hello hello)
