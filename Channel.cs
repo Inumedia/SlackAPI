@@ -19,6 +19,7 @@ namespace SlackAPI
         public bool is_member;
         public bool is_general;
         public bool is_starred;
+        public bool is_channel;
         public bool IsPrivateGroup { get { return id != null && id[0] == 'G'; } }
 
         public int num_members;

@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachment.cs" />
+    <Compile Include="Group.cs" />
     <Compile Include="RPCMessages\AuthSigninResponse.cs" />
     <Compile Include="RPCMessages\AuthStartResponse.cs" />
     <Compile Include="RPCMessages\AuthTestResponse.cs" />
@@ -56,6 +57,20 @@
     <Compile Include="RPCMessages\ChannelMessageHistory.cs" />
     <Compile Include="ContextMessage.cs" />
     <Compile Include="DirectMessageConversation.cs" />
+    <Compile Include="RPCMessages\GroupUnarchiveResponse.cs" />
+    <Compile Include="RPCMessages\GroupSetTopicResponse.cs" />
+    <Compile Include="RPCMessages\GroupSetPurposeResponse.cs" />
+    <Compile Include="RPCMessages\GroupMarkResponse.cs" />
+    <Compile Include="RPCMessages\GroupOpenResponse.cs" />
+    <Compile Include="RPCMessages\GroupRenameResponse.cs" />
+    <Compile Include="RPCMessages\GroupArchiveResponse.cs" />
+    <Compile Include="RPCMessages\GroupLeaveResponse.cs" />
+    <Compile Include="RPCMessages\GroupKickResponse.cs" />
+    <Compile Include="RPCMessages\GroupCreateChildResponse.cs" />
+    <Compile Include="RPCMessages\GroupCreateResponse.cs" />
+    <Compile Include="RPCMessages\GroupResponse.cs" />
+    <Compile Include="RPCMessages\GroupInviteResponse.cs" />
+    <Compile Include="RPCMessages\GroupCloseResponse.cs" />
     <Compile Include="RPCMessages\DirectMessageConversationListResponse.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="File.cs" />

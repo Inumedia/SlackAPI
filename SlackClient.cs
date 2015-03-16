@@ -283,6 +283,98 @@ namespace SlackAPI
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
+        #region group
+        public void GroupsArchive(Action<GroupArchiveResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void GroupsClose(Action<GroupCloseResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void GroupsCreate(Action<GroupCreateResponse> callback, string name)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("name", name));
+        }
+
+        public void GroupsCreateChild(Action<GroupCreateChildResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void GroupsInvite(Action<GroupInviteResponse> callback, string userId, string channelId)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("user", userId));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void GroupsKick(Action<GroupKickResponse> callback, string userId, string channelId)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("user", userId));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void GroupsLeave(Action<GroupLeaveResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void GroupsMark(Action<GroupMarkResponse> callback, string channelId, DateTime ts)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId), new Tuple<string, string>("ts", ts.ToProperTimeStamp()));
+        }
+
+        public void GroupsOpen(Action<GroupOpenResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void GroupsRename(Action<GroupRenameResponse> callback, string channelId, string name)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("name", name));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void GroupsSetPurpose(Action<GroupSetPurposeResponse> callback, string channelId, string purpose)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("purpose", purpose));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void GroupsSetTopic(Action<GroupSetPurposeResponse> callback, string channelId, string topic)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("topic", topic));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void GroupsUnarchive(Action<GroupUnarchiveResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        #endregion
 
         public void SearchAll(Action<SearchResponseAll> callback, string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
@@ -409,7 +501,7 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
-        public void UploadFile(Action<FileUploadResponse> callback, byte[] fileData, string fileName, string[] channelIds, string title = null, string initialComment = null, bool useAsync = false)
+        public void UploadFile(Action<FileUploadResponse> callback, byte[] fileData, string fileName, string[] channelIds, string title = null, string initialComment = null, bool useAsync = false, string fileType = null)
         {
             Uri target = new Uri(Path.Combine(APIBaseLocation, useAsync ? "files.uploadAsync" : "files.upload"));
 
@@ -417,7 +509,8 @@ namespace SlackAPI
             parameters.Add(string.Format("token={0}", APIToken));
 
             //File/Content
-            //FileType?
+            if (!string.IsNullOrEmpty(fileType))
+                parameters.Add(string.Format("{0}={1}", "filetype", fileType));
 
             if (!string.IsNullOrEmpty(fileName))
                 parameters.Add(string.Format("{0}={1}", "filename", fileName));

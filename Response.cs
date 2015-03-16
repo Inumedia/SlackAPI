@@ -14,12 +14,8 @@ namespace SlackAPI
         public bool ok;
 
         /// <summary>
-        /// Purely speculative. Might not be bools, and might not always be included when a request fails.
+        /// if ok is false, then this is the reason-code
         /// </summary>
-        public bool invalid_auth;
-        /// <summary>
-        /// Purely speculative. Might not be bools, and might not always be included when a request fails.
-        /// </summary>
-        public bool account_inactive;
+        public string error;
     }
 }
