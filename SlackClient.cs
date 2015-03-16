@@ -64,10 +64,12 @@ namespace SlackAPI
         {
             EmitLogin((loginDetails) =>
             {
-                Connected(loginDetails);
+				if(loginDetails.ok)
+					Connected(loginDetails);
                 if (onConnected != null)
                     onConnected(loginDetails);
             });
+
         }
 
         protected virtual void Connected(LoginResponse loginDetails)
@@ -109,7 +111,7 @@ namespace SlackAPI
             //Maybe store custom path in the requestpath.path itself?
 
             string parameters = getParameters
-                .Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", WebUtility.UrlEncode(a.Item1), WebUtility.UrlEncode(a.Item2))))
+                .Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", Uri.UnescapeDataString(a.Item1), Uri.UnescapeDataString(a.Item2))))
                 .Aggregate((a, b) =>
             {
                 if (string.IsNullOrEmpty(a))
@@ -120,7 +122,7 @@ namespace SlackAPI
 
             Uri requestUri = new Uri(string.Format("{0}?{1}", Path.Combine(APIBaseLocation, path.Path), parameters));
 
-            HttpWebRequest request = WebRequest.CreateHttp(requestUri);
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(requestUri);
 
             //This will handle all of the processing.
             RequestState<K> state = new RequestState<K>(request, postParameters, callback);

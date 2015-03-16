@@ -21,6 +21,7 @@ namespace SlackAPI
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
         public event Action OnHello;
+		internal LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
             : base(token)
@@ -28,11 +29,23 @@ namespace SlackAPI
             
         }
 
+		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
+		{
+			base.Connect((s) => {
+				onConnected(s);
+				ConnectSocket(onSocketConnected);
+			});
+		}
+
         protected override void Connected(LoginResponse loginDetails)
-        {
-            base.Connected(loginDetails);
-            underlyingSocket = new SlackSocket(loginDetails, this);
-        }
+		{
+			this.loginDetails = loginDetails;
+			base.Connected(loginDetails);
+		}
+
+		public void ConnectSocket(Action onSocketConnected){
+			underlyingSocket = new SlackSocket(loginDetails, this);
+		}
 
         public void BindCallback<K>(Action<K> callback)
         {
@@ -122,5 +135,10 @@ namespace SlackAPI
         {
             
         }
+
+		public void CloseSocket()
+		{
+			underlyingSocket.Close();
+		}
     }
 }

@@ -14,7 +14,7 @@ namespace SlackAPI
         int currentlySending;
 
         Dictionary<int, Action<string>> callbacks;
-        WebSocket socket;
+        internal WebSocket socket;
         int currentId;
 
         Dictionary<string, Dictionary<string, Delegate>> routes;
@@ -46,7 +46,7 @@ namespace SlackAPI
             }
         }
 
-        public SlackSocket(LoginResponse loginDetails, object routingTo)
+		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
         {
             BuildRoutes(routingTo);
             socket = new WebSocket(string.Format("{0}?svn_rev={1}&login_with_boot_data-0-{2}&on_login-0-{2}&connect-1-{2}", loginDetails.url, loginDetails.svn_rev, DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds));
@@ -56,6 +56,10 @@ namespace SlackAPI
             socket.MessageReceived += socket_MessageReceived;
 
             socket.Open();
+			socket.Opened += (o,e) =>{
+				if(onConnected != null)
+					onConnected();
+			};
 
             //if (onConnected != null)
             //    onConnected(loginDetails);
@@ -201,6 +205,11 @@ namespace SlackAPI
 
             currentlySending = 0;
         }
+
+		public void Close()
+		{
+			this.socket.Close();
+		}
     }
 
     public class SlackSocketMessage
