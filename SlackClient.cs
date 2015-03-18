@@ -283,7 +283,7 @@ namespace SlackAPI
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
-        #region group
+        #region Groups
         public void GroupsArchive(Action<GroupArchiveResponse> callback, string channelId)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
