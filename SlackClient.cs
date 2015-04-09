@@ -110,7 +110,7 @@ namespace SlackAPI
             //Maybe store custom path in the requestpath.path itself?
 
             string parameters = getParameters
-                .Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", Uri.UnescapeDataString(a.Item1), Uri.UnescapeDataString(a.Item2))))
+				.Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2))))
                 .Aggregate((a, b) =>
             {
                 if (string.IsNullOrEmpty(a))
