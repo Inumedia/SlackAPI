@@ -9,7 +9,7 @@ namespace SlackAPI
     {
         SlackSocket underlyingSocket;
 
-        public event Action<Message> OnMessageReceived;
+        public event Action<NewMessage> OnMessageReceived;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -119,7 +119,7 @@ namespace SlackAPI
 
         }
 
-        public void Message(Message m)
+        public void Message(NewMessage m)
         {
             if (OnMessageReceived != null)
                 OnMessageReceived(m);
