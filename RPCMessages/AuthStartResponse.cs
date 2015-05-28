@@ -8,7 +8,6 @@ namespace SlackAPI
         public string email;
         public string domain;
         public UserTeamCombo[] users;
-        //string[] teams; //Not sure?
         /// <summary>
         /// Path to create a new team?
         /// </summary>
