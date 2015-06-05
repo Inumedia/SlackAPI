@@ -19,3 +19,9 @@ I have a Slack setup for personal projects with a few friends, this includes thi
 Want committer access? Feel like I'm too lazy to keep up with Slack's ever changing API? Want a bug fixed but don't want to log an issue for it?
 
 Create some pull requests, give me a reason to give you access.
+
+# Creating NuGet package
+
+Example:
+
+```nuget pack SlackAPI.csproj -version 1.2.3```
