@@ -51,9 +51,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Connect.cs" />
-    <None Include="OAuthToken.private">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
