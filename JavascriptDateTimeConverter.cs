@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace SlackAPI
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
         {
-            double value = double.Parse(reader.Value.ToString());
+            double value = double.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture);
             return new DateTime(1970, 1, 1).Add(TimeSpan.FromSeconds(value)).ToLocalTime();
         }
 
