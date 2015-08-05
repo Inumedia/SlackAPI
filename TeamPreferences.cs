@@ -21,7 +21,8 @@ namespace SlackAPI
 
         public enum AuthMode
         {
-            normal
+            normal,
+            saml
         }
     }
 }
