@@ -178,7 +178,12 @@ namespace SlackAPI
                     ArraySegment<byte> buffer = new ArraySegment<byte>(bytes);
                     while (socket.State == WebSocketState.Open)
                     {
-                        WebSocketReceiveResult result = await socket.ReceiveAsync(buffer, cts.Token);
+                        WebSocketReceiveResult result = null;
+                        try
+                        {
+                            result = await socket.ReceiveAsync(buffer, cts.Token);
+                        }
+                        catch (Exception) { break; }
 
                         if (!result.EndOfMessage && buffer.Count == buffer.Array.Length)
                         {
@@ -188,7 +193,7 @@ namespace SlackAPI
                             continue;
                         }
 
-                        string data = string.Join("", buffers.Select((c) => Encoding.UTF8.GetString(c)));
+                        string data = string.Join("", buffers.Select((c) => Encoding.UTF8.GetString(c).TrimEnd('\0')));
                         SlackSocketMessage message = null;
                         try
                         {
@@ -206,6 +211,7 @@ namespace SlackAPI
                             HandleMessage(message, data);
                             buffers = new List<byte[]>();
                             bytes = new byte[1024];
+                            buffers.Add(bytes);
                             buffer = new ArraySegment<byte>(bytes);
                         }
                     }
@@ -240,7 +246,15 @@ namespace SlackAPI
             {
                 byte[] sending = Encoding.UTF8.GetBytes(message);
                 ArraySegment<byte> buffer = new ArraySegment<byte>(sending);
-                socket.SendAsync(buffer, WebSocketMessageType.Text, true, cts.Token).Wait();
+                try
+                {
+                    socket.SendAsync(buffer, WebSocketMessageType.Text, true, cts.Token).Wait();
+                }
+                catch (Exception)
+                {
+                    //TODO: Callback for failed sending?
+                    break;
+                }
             }
 
             currentlySending = 0;
@@ -258,7 +272,6 @@ namespace SlackAPI
         public int reply_to;
         public string type;
         public string subtype;
-        public bool ok;
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]

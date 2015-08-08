@@ -54,6 +54,7 @@
     <Compile Include="RPCMessages\ChannelMessageHistory.cs" />
     <Compile Include="ContextMessage.cs" />
     <Compile Include="DirectMessageConversation.cs" />
+    <Compile Include="RPCMessages\DeletedResponse.cs" />
     <Compile Include="RPCMessages\GroupUnarchiveResponse.cs" />
     <Compile Include="RPCMessages\GroupSetTopicResponse.cs" />
     <Compile Include="RPCMessages\GroupSetPurposeResponse.cs" />
