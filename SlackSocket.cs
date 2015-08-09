@@ -15,6 +15,7 @@ namespace SlackAPI
     {
         LockFreeQueue<string> sendingQueue;
         int currentlySending;
+        int closedEmitted;
         CancellationTokenSource cts;
 
         Dictionary<int, Action<string>> callbacks;
@@ -23,6 +24,9 @@ namespace SlackAPI
 
         Dictionary<string, Dictionary<string, Delegate>> routes;
         public bool Connected { get { return socket != null && socket.State == WebSocketState.Open; } }
+        public event Action<WebSocketException> ErrorSending;
+        public event Action<WebSocketException> ErrorReceiving;
+        public event Action ConnectionClosed;
 
         //This would be done for hinting but I don't think we really need this.
 
@@ -183,7 +187,13 @@ namespace SlackAPI
                         {
                             result = await socket.ReceiveAsync(buffer, cts.Token);
                         }
-                        catch (Exception) { break; }
+                        catch (WebSocketException wex)
+                        {
+                            if (ErrorReceiving != null)
+                                ErrorReceiving(wex);
+                            Close();
+                            break;
+                        }
 
                         if (!result.EndOfMessage && buffer.Count == buffer.Array.Length)
                         {
@@ -250,9 +260,11 @@ namespace SlackAPI
                 {
                     socket.SendAsync(buffer, WebSocketMessageType.Text, true, cts.Token).Wait();
                 }
-                catch (Exception)
+                catch (WebSocketException wex)
                 {
-                    //TODO: Callback for failed sending?
+                    if (ErrorSending != null)
+                        ErrorSending(wex);
+                    Close();
                     break;
                 }
             }
@@ -262,7 +274,17 @@ namespace SlackAPI
 
 		public void Close()
 		{
-			this.socket.Abort();
+            try
+            {
+                this.socket.Abort();
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
+                ConnectionClosed();
 		}
     }
 
