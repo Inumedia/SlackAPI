@@ -11,11 +11,12 @@ namespace IntegrationTest
     [TestClass]
     public class Connect
     {
+        string testText = "Test :D";
+        string testChannel = "SuperSecretChannel";
+        string token = "token-tokentoken-tokentoken-tokentoken-token";
         [TestMethod]
         public void TestConnect()
         {
-            string token = "token-tokentoken-tokentoken-tokentoken-token";
-
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
 
             SlackSocketClient client = new SlackSocketClient(token);
@@ -36,10 +37,6 @@ namespace IntegrationTest
         [TestMethod]
         public void TestConnectPostAndDelete()
         {
-            string testText = "Test :D";
-            string testChannel = "SuperSecretChannel";
-            string token = "token-tokentoken-tokentoken-tokentoken-token";
-
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
 
             SlackSocketClient client = new SlackSocketClient(token);
