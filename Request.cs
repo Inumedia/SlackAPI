@@ -31,12 +31,12 @@ namespace SlackAPI
             if (Post.Length == 0)
             {
                 request.Method = "GET";
-                request.BeginGetResponse(GotResponse, this);
+                IAsyncResult result = request.BeginGetResponse(GotResponse, this);
             }
             else
             {
                 request.Method = "POST";
-                request.BeginGetRequestStream(GotRequest, this);
+                IAsyncResult result = request.BeginGetRequestStream(GotRequest, this);
             }
         }
 
