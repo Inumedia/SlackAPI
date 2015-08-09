@@ -294,6 +294,14 @@ namespace SlackAPI
         public int reply_to;
         public string type;
         public string subtype;
+        public bool ok = true;
+        public Error error;
+    }
+
+    public class Error
+    {
+        public int code;
+        public string msg;
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
