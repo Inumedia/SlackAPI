@@ -32,8 +32,8 @@ namespace SlackAPI
 		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
 		{
 			base.Connect((s) => {
-				onConnected(s);
 				ConnectSocket(onSocketConnected);
+				onConnected(s);
 			});
 		}
 
