@@ -86,7 +86,7 @@ namespace IntegrationTest
         {
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
 
-            SlackSocketClient client = new SlackSocketClient("IDon'tThinkBotsHaveRTMSupport:(");
+            SlackSocketClient client = new SlackSocketClient("BotsTotallySupportRTM:)");
             client.Connect((o) =>
             {
                 Debug.WriteLine("RTM Start");

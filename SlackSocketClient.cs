@@ -90,6 +90,77 @@ namespace SlackAPI
             UserLookup[change.user].presence = change.presence.ToString().ToLower();
         }
 
+        public void HandleUserChange(UserChange change)
+        {
+            UserLookup[change.user.id] = change.user;
+        }
+
+        public void HandleTeamJoin(TeamJoin newuser)
+        {
+            UserLookup.Add(newuser.user.id, newuser.user);
+        }
+
+        public void HandleChannelCreated(ChannelCreated created)
+        {
+            ChannelLookup.Add(created.channel.id, created.channel);
+        }
+
+        public void HandleChannelRename(ChannelRename rename)
+        {
+            ChannelLookup[rename.channel.id].name = rename.channel.name;
+        }
+
+        public void HandleChannelDeleted(ChannelDeleted deleted)
+        {
+            ChannelLookup.Remove(deleted.channel);
+        }
+
+        public void HandleChannelArchive(ChannelArchive archive)
+        {
+            ChannelLookup[archive.channel].is_archived = true;
+        }
+
+        public void HandleChannelUnarchive(ChannelUnarchive unarchive)
+        {
+            ChannelLookup[unarchive.channel].is_archived = false;
+        }
+
+        public void HandleGroupJoined(GroupJoined joined)
+        {
+            GroupLookup.Add(joined.channel.id, joined.channel);
+        }
+
+        public void HandleGroupLeft(GroupLeft left)
+        {
+            GroupLookup.Remove(left.channel.id);
+        }
+
+        public void HandleGroupOpen(GroupOpen open)
+        {
+            GroupLookup[open.channel].is_open = true;
+        }
+
+        public void HandleGroupClose(GroupClose close)
+        {
+            GroupLookup[close.channel].is_open = false;
+        }
+
+        public void HandleGroupArchive(GroupArchive archive)
+        {
+            GroupLookup[archive.channel].is_archived = true;
+        }
+
+        public void HandleGroupUnarchive(GroupUnarchive unarchive)
+        {
+            GroupLookup[unarchive.channel].is_archived = false;
+        }
+
+        public void HandleGroupRename(GroupRename rename)
+        {
+            GroupLookup[rename.channel.id].name = rename.channel.name;
+            GroupLookup[rename.channel.id].created = rename.channel.created;
+        }
+
         void StartPing()
         {
             pingingThread = new Timer(Ping, null, PingInterval, PingInterval);
