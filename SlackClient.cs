@@ -102,6 +102,22 @@ namespace SlackAPI
             foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
         }
 
+        private static Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
+        {
+            string parameters = getParameters
+                .Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2))))
+                .Aggregate((a, b) =>
+                {
+                    if (string.IsNullOrEmpty(a))
+                        return b;
+                    else
+                        return string.Format("{0}&{1}", a, b);
+                });
+
+            Uri requestUri = new Uri(string.Format("{0}?{1}", path, parameters));
+            return requestUri;
+        }
+
         public static void APIRequest<K>(Action<K> callback, Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
             where K : Response
         {
@@ -109,17 +125,18 @@ namespace SlackAPI
             //TODO: Custom paths? Appropriate subdomain paths? Not sure.
             //Maybe store custom path in the requestpath.path itself?
 
-            string parameters = getParameters
-				.Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2))))
-                .Aggregate((a, b) =>
-            {
-                if (string.IsNullOrEmpty(a))
-                    return b;
-                else
-                    return string.Format("{0}&{1}", a, b);
-            });
+            //string parameters = getParameters
+            //    .Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2))))
+            //    .Aggregate((a, b) =>
+            //{
+            //    if (string.IsNullOrEmpty(a))
+            //        return b;
+            //    else
+            //        return string.Format("{0}&{1}", a, b);
+            //});
 
-            Uri requestUri = new Uri(string.Format("{0}?{1}", Path.Combine(APIBaseLocation, path.Path), parameters));
+            //Uri requestUri = new Uri(string.Format("{0}?{1}", Path.Combine(APIBaseLocation, path.Path), parameters));
+            Uri requestUri = GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
 
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(requestUri);
 
@@ -565,6 +582,21 @@ namespace SlackAPI
         public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia<3")
         {
             APIRequestWithToken(callback, new Tuple<string, string>("agent", agent));
+        }
+
+        public static Uri GetAuthorizeUri(string clientId, string redirectUri = null, string state = null, string team = null)
+        {
+            return GetSlackUri("https://slack.com/oauth/authorize", new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
+                new Tuple<string, string>("redirect_uri", redirectUri),
+                new Tuple<string, string>("state", state), 
+                new Tuple<string, string>("team", team)});
+        }
+
+        public static void GetAccessToken(Action<AccessTokenResponse> callback, string clientId, string clientSecret, string redirectUri, string code)
+        {
+            APIRequest<AccessTokenResponse>(callback, new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
+                new Tuple<string, string>("client_secret", clientSecret), new Tuple<string, string>("code", code),
+                new Tuple<string, string>("redirect_uri", redirectUri) }, new Tuple<string, string>[] {});
         }
     }
 }
