@@ -1,6 +1,7 @@
 ﻿{
   "slack": {
     "authToken": "token-tokentoken-tokentoken-tokentoken-token",
-    "testChannel": "SuperSecretChannel"
+    "testChannel": "SuperSecretChannel",
+    "directMessageUser":  "someUser"
   }
 }

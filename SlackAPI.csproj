@@ -75,6 +75,7 @@
     <Compile Include="RPCMessages\FileInfoResponse.cs" />
     <Compile Include="RPCMessages\FileListResponse.cs" />
     <Compile Include="RPCMessages\FileUploadResponse.cs" />
+    <Compile Include="RPCMessages\JoinDirectMessageChannelResponse.cs" />
     <Compile Include="RPCMessages\UserCountsResponse.cs" />
     <Compile Include="RPCMessages\GroupListResponse.cs" />
     <Compile Include="RPCMessages\GroupMessageHistory.cs" />
