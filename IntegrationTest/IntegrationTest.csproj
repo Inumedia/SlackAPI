@@ -54,7 +54,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\Config.cs" />
+    <Compile Include="Configuration\SlackConfig.cs" />
     <Compile Include="Connect.cs" />
+    <Compile Include="JoinDirectMessageChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +67,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Configuration\config.default.json" />
+    <None Include="Configuration\config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Choose>

@@ -2,9 +2,8 @@
 using SlackAPI;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
-using Newtonsoft.Json;
+using IntegrationTest.Configuration;
 
 namespace IntegrationTest
 {
@@ -12,8 +11,16 @@ namespace IntegrationTest
     public class Connect
     {
         string testText = "Test :D";
-        string testChannel = "SuperSecretChannel";
-        string token = "token-tokentoken-tokentoken-tokentoken-token";
+        readonly string testChannel;
+        readonly string token;
+
+        public Connect()
+        {
+            var config = Config.GetConfig();
+            testChannel = config.Slack.TestChannel;
+            token = config.Slack.AuthToken;
+        }
+
         [TestMethod]
         public void TestConnect()
         {
