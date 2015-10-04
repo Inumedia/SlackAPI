@@ -1,0 +1,8 @@
+﻿{
+  "slack": {
+    "token": "token-tokentoken-tokentoken-tokentoken-token",
+    "test": {
+      "channel": "SuperSecretChannel"
+    }
+  }
+}
