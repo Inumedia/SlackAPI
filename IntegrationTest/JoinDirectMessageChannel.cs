@@ -12,7 +12,7 @@ namespace IntegrationTest
     [TestClass]
     public class JoinDirectMessageChannel
     {
-        private Config _config;
+        private readonly Config _config;
 
         public JoinDirectMessageChannel()
         {
@@ -32,15 +32,19 @@ namespace IntegrationTest
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
             client.JoinDirectMessageChannel(response =>
             {
-                if (response != null)
-                {
-
-                }
+                Assert.IsTrue(response.ok, "Error while joining user channel");
+                Assert.IsTrue(!string.IsNullOrEmpty(response.channel.id), "We expected a channel id to be returned");
                 wait.Set();
             }, user);
 
             // then
-            Assert.IsTrue(wait.WaitOne(TimeSpan.FromSeconds(3)), "Took too long to do the THING");
+            Policy
+                .Handle<AssertFailedException>()
+                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
+                .Execute(() =>
+                {
+                    Assert.IsTrue(wait.WaitOne(), "Took too long to do the THING");
+                });
         }
 
         private SlackSocketClient Connect()
@@ -48,24 +52,31 @@ namespace IntegrationTest
             var wait = new EventWaitHandle(false, EventResetMode.ManualReset);
 
             var client = new SlackSocketClient(_config.Slack.AuthToken);
-            client.Connect((o) =>
+            client.Connect(x =>
             {
-                Debug.WriteLine("RTM Start");
+                Console.WriteLine("RTM Start");
             }, () =>
             {
-                Debug.WriteLine("Connected");
+                Console.WriteLine("Connected");
                 wait.Set();
             });
 
             Policy
                 .Handle<AssertFailedException>()
-                .Retry(15)
+                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
                 .Execute(() =>
                 {
-                    Assert.IsTrue(wait.WaitOne(TimeSpan.FromSeconds(0.1)));
-                    Assert.IsTrue(client.IsConnected);
+                    Assert.IsTrue(wait.WaitOne(), "Still waiting for things to happen...");
                 });
 
+            Policy
+                .Handle<AssertFailedException>()
+                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
+                .Execute(() =>
+                {
+                    Assert.IsTrue(client.IsConnected, "Doh, still isn't connected");
+                });
+            
             return client;
         }
     }
