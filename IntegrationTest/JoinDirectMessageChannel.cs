@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using IntegrationTest.Configuration;
+using IntegrationTest.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Polly;
-using SlackAPI;
 
 namespace IntegrationTest
 {
@@ -20,10 +19,10 @@ namespace IntegrationTest
         }
 
         [TestMethod]
-        public void should_join_direct_message_channel()
+        public void ShouldJoinDirectMessageChannel()
         {
             // given
-            var client = Connect();
+            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
 
             string userName = _config.Slack.DirectMessageUser;
             string user = client.Users.First(x => x.name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).id;
@@ -45,39 +44,6 @@ namespace IntegrationTest
                 {
                     Assert.IsTrue(wait.WaitOne(), "Took too long to do the THING");
                 });
-        }
-
-        private SlackSocketClient Connect()
-        {
-            var wait = new EventWaitHandle(false, EventResetMode.ManualReset);
-
-            var client = new SlackSocketClient(_config.Slack.AuthToken);
-            client.Connect(x =>
-            {
-                Console.WriteLine("RTM Start");
-            }, () =>
-            {
-                Console.WriteLine("Connected");
-                wait.Set();
-            });
-
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
-                {
-                    Assert.IsTrue(wait.WaitOne(), "Still waiting for things to happen...");
-                });
-
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
-                {
-                    Assert.IsTrue(client.IsConnected, "Doh, still isn't connected");
-                });
-            
-            return client;
         }
     }
 }

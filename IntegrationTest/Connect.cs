@@ -1,78 +1,58 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SlackAPI;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using IntegrationTest.Configuration;
+using IntegrationTest.Helpers;
 
 namespace IntegrationTest
 {
     [TestClass]
     public class Connect
     {
-        string testText = "Test :D";
-        readonly string testChannel;
-        readonly string token;
+        const string TestText = "Test :D";
+        private readonly Config _config;
 
         public Connect()
         {
-            var config = Config.GetConfig();
-            testChannel = config.Slack.TestChannel;
-            token = config.Slack.AuthToken;
+            _config = Config.GetConfig();
         }
 
         [TestMethod]
-        public void TestConnect()
+        public void TestConnectAsUser()
         {
-            EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
+            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            Assert.IsTrue(client.IsConnected, "Invalid, doesn't think it's connected.");
+        }
 
-            SlackSocketClient client = new SlackSocketClient(token);
-            client.Connect((o) =>
-            {
-                Debug.WriteLine("RTM Start");
-            }, () =>
-            {
-                Debug.WriteLine("Connected");
-                wait.Set();
-            });
-
-            Assert.IsTrue(wait.WaitOne(10000), "Didn't return within a reasonable time.");
-            Thread.Sleep(500);
+        [TestMethod]
+        public void TestConnectAsBot()
+        {
+            var client = ClientHelper.GetClient(_config.Slack.BotAuthToken);
             Assert.IsTrue(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
         [TestMethod]
         public void TestConnectPostAndDelete()
         {
-            EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
+            // given
+            SlackSocketClient client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            string channel = _config.Slack.TestChannel;
 
-            SlackSocketClient client = new SlackSocketClient(token);
-            client.Connect((o) =>
-            {
-                Debug.WriteLine("RTM Start");
-            }, () =>
-            {
-                Debug.WriteLine("Connected");
-                wait.Set();
-            });
-
-            Assert.IsTrue(wait.WaitOne(10000), "Didn't return within a reasonable time.");
-            Thread.Sleep(500);
-            Assert.IsTrue(client.IsConnected, "Invalid, doesn't think it's connected.");
-
-            wait = new EventWaitHandle(false, EventResetMode.ManualReset);
+            // when
+            var wait = new EventWaitHandle(false, EventResetMode.ManualReset);
             DateTime ts = DateTime.MinValue;
             SlackAPI.WebSocketMessages.MessageReceived a = null;
             client.SendMessage((resp) =>
             {
                 a = resp;
                 wait.Set();
-            }, testChannel, testText);
+            }, channel, TestText);
 
             Assert.IsTrue(wait.WaitOne(1000), "Took too long for Slack to acknowledge message.");
             
             ts = a.ts;
-            Assert.AreEqual(a.text, testText, "Got invalid returned text, something's not right here...");
+            Assert.AreEqual(a.text, TestText, "Got invalid returned text, something's not right here...");
 
             DeletedResponse r = null;
             wait = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -80,31 +60,13 @@ namespace IntegrationTest
             {
                 r = resp;
                 wait.Set();
-            }, testChannel, ts);
+            }, channel, ts);
 
+            // then
             Assert.IsTrue(wait.WaitOne(1000), "Took too long for Slack to acknowledge delete.");
             Assert.IsTrue(r.ok, "Message not deleted!");
-            Assert.AreEqual(r.channel, testChannel, "Got invalid channel? Something's not right here...");
+            Assert.AreEqual(r.channel, channel, "Got invalid channel? Something's not right here...");
             Assert.AreEqual(r.ts, ts, "Got invalid time stamp? Something's not right here...");
-        }
-
-        [TestMethod]
-        public void TestConnectBot()
-        {
-            EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
-
-            SlackSocketClient client = new SlackSocketClient("BotsTotallySupportRTM:)");
-            client.Connect((o) =>
-            {
-                Debug.WriteLine("RTM Start");
-            }, () =>
-            {
-                Debug.WriteLine("Connected");
-                wait.Set();
-            });
-
-            Assert.IsTrue(wait.WaitOne(10000), "Didn't return within a reasonable time.");
-            Assert.IsTrue(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
     }
 }
