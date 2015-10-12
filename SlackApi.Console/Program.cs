@@ -31,7 +31,7 @@ namespace SlackApi
 
                 // start...
                 var state = Guid.NewGuid().ToString();
-                var uri = SlackClient.GetAuthorizeUri(clientId, redirectUri, state, "socialsaleslounge");
+                var uri = SlackClient.GetAuthorizeUri(clientId, SlackScope.Identify | SlackScope.Read | SlackScope.Post, redirectUri, state, "socialsaleslounge");
                 Console.WriteLine("Directing to: " + uri);
                 Process.Start(uri.ToString());
 
