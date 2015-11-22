@@ -147,6 +147,7 @@ namespace SlackAPI
             APIRequest(callback, tokenArray, new Tuple<string, string>[0]);
         }
 
+        [Obsolete("Please use the OAuth method for authenticating users")]
         public static void StartAuth(Action<AuthStartResponse> callback, string email)
         {
             APIRequest(callback, new Tuple<string, string>[] { new Tuple<string, string>("email", email) }, new Tuple<string, string>[0]);
