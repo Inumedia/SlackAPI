@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachment.cs" />
+    <Compile Include="RequestStateForTask.cs" />
+    <Compile Include="RPCMessages\AccessTokenResponse.cs" />
     <Compile Include="RPCMessages\AuthSigninResponse.cs" />
     <Compile Include="RPCMessages\AuthStartResponse.cs" />
     <Compile Include="RPCMessages\AuthTestResponse.cs" />
@@ -98,8 +100,10 @@
     <Compile Include="RPCMessages\SearchResponseMessages.cs" />
     <Compile Include="SlackClient.cs" />
     <Compile Include="RPCMessages\StarListResponse.cs" />
+    <Compile Include="SlackScope.cs" />
     <Compile Include="SlackSocket.cs" />
     <Compile Include="SlackSocketClient.cs" />
+    <Compile Include="SlackTaskClient.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="TeamPreferences.cs" />
     <Compile Include="User.cs" />

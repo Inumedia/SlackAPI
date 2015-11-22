@@ -87,7 +87,8 @@ namespace SlackAPI
                 responseObj = JsonConvert.DeserializeObject<K>(responseData, new JavascriptDateTimeConverter());
             }
 
-            callback(responseObj);
+            if(callback != null)
+                callback(responseObj);
         }
     }
 

@@ -7,15 +7,11 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-    /// <summary>
-    /// SlackClient is intended to solely handle RPC (HTTP-based) functionality. Does not handle WebSocket connectivity.
-    /// 
-    /// For WebSocket connectivity, refer to <see cref="SlackAPI.SlackSocketClient"/>
-    /// </summary>
-    public class SlackClient
+    public class SlackTaskClient
     {
         readonly string APIToken;
         bool authWorks = false;
@@ -55,20 +51,18 @@ namespace SlackAPI
         //public event Action<ReceivingMessage> OnPresenceChanged;
         //public event Action<ReceivingMessage> OnHello;
 
-        public SlackClient(string token)
+        public SlackTaskClient(string token)
         {
             APIToken = token;
         }
 
-		public virtual void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
+		public virtual async Task<LoginResponse> ConnectAsync()
         {
-            EmitLogin((loginDetails) =>
-            {
-				if(loginDetails.ok)
-					Connected(loginDetails);
-                if (onConnected != null)
-                    onConnected(loginDetails);
-            });
+            var loginDetails = await EmitLoginAsync();
+			if(loginDetails.ok)
+				Connected(loginDetails);
+
+            return loginDetails;
         }
 
         protected virtual void Connected(LoginResponse loginDetails)
@@ -102,33 +96,7 @@ namespace SlackAPI
             foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
         }
 
-        internal static Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
-        {
-            string parameters = getParameters
-                .Select(new Func<Tuple<string, string>, string>(a => 
-                    {
-                        try
-                        {
-                            return string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2));
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException(string.Format("Failed when processing '{0}'.", a), ex);
-                        }
-                    }))
-                .Aggregate((a, b) =>
-                {
-                    if (string.IsNullOrEmpty(a))
-                        return b;
-                    else
-                        return string.Format("{0}&{1}", a, b);
-                });
-
-            Uri requestUri = new Uri(string.Format("{0}?{1}", path, parameters));
-            return requestUri;
-        }
-
-        public static void APIRequest<K>(Action<K> callback, Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
+        public static Task<K> APIRequestAsync<K>(Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
             where K : Response
         {
             RequestPath path = RequestPath.GetRequestPath<K>();
@@ -146,22 +114,28 @@ namespace SlackAPI
             //});
 
             //Uri requestUri = new Uri(string.Format("{0}?{1}", Path.Combine(APIBaseLocation, path.Path), parameters));
-            Uri requestUri = GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
+            Uri requestUri = SlackClient.GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
 
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(requestUri);
 
             //This will handle all of the processing.
-            RequestState<K> state = new RequestState<K>(request, postParameters, callback);
-            state.Begin();
+            var state = new RequestStateForTask<K>(request, postParameters);
+            return state.Execute();
         }
 
-        public static void APIGetRequest<K>(Action<K> callback, params Tuple<string, string>[] getParameters)
+        public static Task<K> APIGetRequestAsync<K>(params Tuple<string, string>[] getParameters)
             where K : Response
         {
-            APIRequest<K>(callback, getParameters, new Tuple<string, string>[0]);
+            return APIRequestAsync<K>(getParameters, new Tuple<string, string>[0]);
         }
 
-        public void APIRequestWithToken<K>(Action<K> callback, params Tuple<string,string>[] getParameters)
+        public Task<K> APIRequestWithTokenAsync<K>()
+            where K : Response
+        {
+            return APIRequestWithTokenAsync<K>(new Tuple<string, string>[] { });
+        }
+ 
+        public Task<K> APIRequestWithTokenAsync<K>(params Tuple<string,string>[] getParameters)
             where K : Response
         {
             Tuple<string, string>[] tokenArray = new Tuple<string, string>[]{
@@ -171,50 +145,49 @@ namespace SlackAPI
             if (getParameters != null && getParameters.Length > 0)
                 tokenArray = tokenArray.Concat(getParameters).ToArray();
 
-            APIRequest(callback, tokenArray, new Tuple<string, string>[0]);
+            return APIRequestAsync<K>(tokenArray, new Tuple<string, string>[0]);
         }
 
-        [Obsolete("Please use the OAuth method for authenticating users")]
-        public static void StartAuth(Action<AuthStartResponse> callback, string email)
+        public static Task<AuthStartResponse> StartAuthAsync(string email)
         {
-            APIRequest(callback, new Tuple<string, string>[] { new Tuple<string, string>("email", email) }, new Tuple<string, string>[0]);
+            return APIRequestAsync<AuthStartResponse>(new Tuple<string, string>[] { new Tuple<string, string>("email", email) }, new Tuple<string, string>[0]);
         }
 
-        public static void AuthSignin(Action<AuthSigninResponse> callback, string userId, string teamId, string password)
+        public static Task<AuthSigninResponse> AuthSignin(string userId, string teamId, string password)
         {
-            APIRequest(callback, new Tuple<string, string>[] { 
+            return APIRequestAsync<AuthSigninResponse>(new Tuple<string, string>[] { 
                 new Tuple<string,string>("user", userId),
                 new Tuple<string,string>("team", teamId),
                 new Tuple<string,string>("password", password)
             }, new Tuple<string, string>[0]);
         }
 
-        public void TestAuth(Action<AuthTestResponse> callback)
+        public Task<AuthTestResponse> TestAuthAsync()
         {
-            APIRequestWithToken(callback);
+            return APIRequestWithTokenAsync<AuthTestResponse>();
         }
 
-        public void GetUserList(Action<UserListResponse> callback)
+        public Task<UserListResponse> GetUserListAsync()
         {
-            APIRequestWithToken(callback);
+            return APIRequestWithTokenAsync<UserListResponse>();
         }
 
-        public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
+        public Task<ChannelListResponse> GetChannelListAsync(bool ExcludeArchived = true)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
+            return APIRequestWithTokenAsync<ChannelListResponse>(new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
-        public void GetGroupsList(Action<GroupListResponse> callback, bool ExcludeArchived = true)
+        public Task<GroupListResponse> GetGroupsListAsync(bool ExcludeArchived = true)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
+            return APIRequestWithTokenAsync<GroupListResponse>(new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
-        public void GetDirectMessageList(Action<DirectMessageConversationListResponse> callback)
+        public Task<DirectMessageConversationListResponse> GetDirectMessageListAsync()
         {
-            APIRequestWithToken(callback);
+            return APIRequestWithTokenAsync<DirectMessageConversationListResponse>();
         }
 
-        public void GetFiles(Action<FileListResponse> callback, string userId = null, DateTime? from = null, DateTime? to = null, int? count = null, int? page = null, FileTypes types = FileTypes.all)
+        public Task<FileListResponse> GetFilesAsync(string userId = null, DateTime? from = null, DateTime? to = null, int? count = null, int? page = null, FileTypes types = FileTypes.all)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
@@ -255,10 +228,10 @@ namespace SlackAPI
             if (page.HasValue)
                 parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<FileListResponse>(parameters.ToArray());
         }
 
-        void GetHistory<K>(Action<K> historyCallback, string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        private Task<K> GetHistoryAsync<K>(string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null)
             where K : MessageHistory
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
@@ -271,33 +244,32 @@ namespace SlackAPI
             if(count.HasValue)
                 parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
 
-            APIRequestWithToken(historyCallback, parameters.ToArray());
+            return APIRequestWithTokenAsync<K>(parameters.ToArray());
         }
 
-        public void GetChannelHistory(Action<ChannelMessageHistory> callback, Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<ChannelMessageHistory> GetChannelHistoryAsync(Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            GetHistory(callback, channelInfo.id, latest, oldest, count);
+            return GetHistoryAsync<ChannelMessageHistory>(channelInfo.id, latest, oldest, count);
         }
 
-        public void GetDirectMessageHistory(Action<MessageHistory> callback, DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<MessageHistory> GetDirectMessageHistoryAsync(DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            GetHistory(callback, conversationInfo.id, latest, oldest, count);
+            return GetHistoryAsync<MessageHistory>(conversationInfo.id, latest, oldest, count);
         }
 
-        public void GetGroupHistory(Action<GroupMessageHistory> callback, Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<GroupMessageHistory> GetGroupHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            GetHistory(callback, groupInfo.id, latest, oldest, count);
+            return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count);
         }
 
-        public void MarkChannel(Action<MarkResponse> callback, string channelId, DateTime ts)
+        public Task<MarkResponse> MarkChannelAsync(string channelId, DateTime ts)
         {
-            APIRequestWithToken(callback,
-                new Tuple<string, string>("channel", channelId),
+            return APIRequestWithTokenAsync<MarkResponse>(new Tuple<string, string>("channel", channelId),
                 new Tuple<string, string>("ts", ts.ToProperTimeStamp())
             );
         }
 
-        public void GetFileInfo(Action<FileInfoResponse> callback, string fileId, int? page = null, int? count = null)
+        public Task<FileInfoResponse> GetFileInfoAsync(string fileId, int? page = null, int? count = null)
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
@@ -309,102 +281,102 @@ namespace SlackAPI
             if (page.HasValue)
                 parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<FileInfoResponse>(parameters.ToArray());
         }
         #region Groups
-        public void GroupsArchive(Action<GroupArchiveResponse> callback, string channelId)
+        public Task<GroupArchiveResponse> GroupsArchiveAsync(string channelId)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+            return APIRequestWithTokenAsync<GroupArchiveResponse>(new Tuple<string, string>("channel", channelId));
         }
 
-        public void GroupsClose(Action<GroupCloseResponse> callback, string channelId)
+        public Task<GroupCloseResponse> GroupsCloseAsync(string channelId)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+            return APIRequestWithTokenAsync<GroupCloseResponse>(new Tuple<string, string>("channel", channelId));
         }
 
-        public void GroupsCreate(Action<GroupCreateResponse> callback, string name)
+        public Task<GroupCreateResponse> GroupsCreateAsync(string name)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("name", name));
+            return APIRequestWithTokenAsync<GroupCreateResponse>(new Tuple<string, string>("name", name));
         }
 
-        public void GroupsCreateChild(Action<GroupCreateChildResponse> callback, string channelId)
+        public Task<GroupCreateChildResponse> GroupsCreateChildAsync(string channelId)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+            return APIRequestWithTokenAsync<GroupCreateChildResponse>(new Tuple<string, string>("channel", channelId));
         }
 
-        public void GroupsInvite(Action<GroupInviteResponse> callback, string userId, string channelId)
-        {
-            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
-            parameters.Add(new Tuple<string, string>("channel", channelId));
-            parameters.Add(new Tuple<string, string>("user", userId));
-
-            APIRequestWithToken(callback, parameters.ToArray());
-        }
-
-        public void GroupsKick(Action<GroupKickResponse> callback, string userId, string channelId)
+        public Task<GroupInviteResponse> GroupsInviteAsync(string userId, string channelId)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("channel", channelId));
             parameters.Add(new Tuple<string, string>("user", userId));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<GroupInviteResponse>(parameters.ToArray());
         }
 
-        public void GroupsLeave(Action<GroupLeaveResponse> callback, string channelId)
+        public Task<GroupKickResponse> GroupsKickAsync(string userId, string channelId)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("user", userId));
+
+            return APIRequestWithTokenAsync<GroupKickResponse>(parameters.ToArray());
         }
 
-        public void GroupsMark(Action<GroupMarkResponse> callback, string channelId, DateTime ts)
+        public Task<GroupLeaveResponse> GroupsLeaveAsync(string channelId)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId), new Tuple<string, string>("ts", ts.ToProperTimeStamp()));
+            return APIRequestWithTokenAsync<GroupLeaveResponse>(new Tuple<string, string>("channel", channelId));
         }
 
-        public void GroupsOpen(Action<GroupOpenResponse> callback, string channelId)
+        public Task<GroupMarkResponse> GroupsMarkAsync(string channelId, DateTime ts)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+            return APIRequestWithTokenAsync<GroupMarkResponse>(new Tuple<string, string>("channel", channelId), new Tuple<string, string>("ts", ts.ToProperTimeStamp()));
         }
 
-        public void GroupsRename(Action<GroupRenameResponse> callback, string channelId, string name)
+        public Task<GroupOpenResponse> GroupsOpenAsync(string channelId)
+        {
+            return APIRequestWithTokenAsync<GroupOpenResponse>(new Tuple<string, string>("channel", channelId));
+        }
+
+        public Task<GroupRenameResponse> GroupsRenameAsync(string channelId, string name)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("channel", channelId));
             parameters.Add(new Tuple<string, string>("name", name));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<GroupRenameResponse>(parameters.ToArray());
         }
 
-        public void GroupsSetPurpose(Action<GroupSetPurposeResponse> callback, string channelId, string purpose)
+        public Task<GroupSetPurposeResponse> GroupsSetPurposeAsync(string channelId, string purpose)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("channel", channelId));
             parameters.Add(new Tuple<string, string>("purpose", purpose));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<GroupSetPurposeResponse>(parameters.ToArray());
         }
 
-        public void GroupsSetTopic(Action<GroupSetPurposeResponse> callback, string channelId, string topic)
+        public Task<GroupSetTopicResponse> GroupsSetTopicAsync(string channelId, string topic)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("channel", channelId));
             parameters.Add(new Tuple<string, string>("topic", topic));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<GroupSetTopicResponse>(parameters.ToArray());
         }
 
-        public void GroupsUnarchive(Action<GroupUnarchiveResponse> callback, string channelId)
+        public Task<GroupUnarchiveResponse> GroupsUnarchiveAsync(string channelId)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+            return APIRequestWithTokenAsync<GroupUnarchiveResponse>(new Tuple<string, string>("channel", channelId));
         }
 
         #endregion
 
-        public void SearchAll(Action<SearchResponseAll> callback, string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public Task<SearchResponseAll> SearchAllAsync(string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
@@ -424,10 +396,10 @@ namespace SlackAPI
             if (page.HasValue)
                 parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<SearchResponseAll>(parameters.ToArray());
         }
 
-        public void SearchMessages(Action<SearchResponseMessages> callback, string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public Task<SearchResponseMessages> SearchMessagesAsync(string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
@@ -447,10 +419,10 @@ namespace SlackAPI
             if (page.HasValue)
                 parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<SearchResponseMessages>(parameters.ToArray());
         }
 
-        public void SearchFiles(Action<SearchResponseFiles> callback, string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public Task<SearchResponseFiles> SearchFilesAsync(string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
@@ -470,10 +442,10 @@ namespace SlackAPI
             if (page.HasValue)
                 parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<SearchResponseFiles>(parameters.ToArray());
         }
 
-        public void GetStars(Action<StarListResponse> callback, string userId = null, int? count = null, int? page = null){
+        public Task<StarListResponse> GetStarsAsync(string userId = null, int? count = null, int? page = null){
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
             
             if(!string.IsNullOrEmpty(userId))
@@ -485,10 +457,10 @@ namespace SlackAPI
             if(page.HasValue)
                 parameters.Add(new Tuple<string,string>("page", page.Value.ToString()));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<StarListResponse>(parameters.ToArray());
         }
 
-        public void DeleteMessage(Action<DeletedResponse> callback, string channelId, DateTime ts)
+        public Task<DeletedResponse> DeleteMessageAsync(string channelId, DateTime ts)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>()
             {
@@ -496,11 +468,10 @@ namespace SlackAPI
                 new Tuple<string,string>("channel", channelId)
             };
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<DeletedResponse>(parameters.ToArray());
         }
 
-        public void PostMessage(
-            Action<PostMessageResponse> callback,
+        public Task<PostMessageResponse> PostMessageAsync(
             string channelId,
             string text,
             string botName = null,
@@ -540,10 +511,10 @@ namespace SlackAPI
 
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+            return APIRequestWithTokenAsync<PostMessageResponse>(parameters.ToArray());
         }
 
-        public void UploadFile(Action<FileUploadResponse> callback, byte[] fileData, string fileName, string[] channelIds, string title = null, string initialComment = null, bool useAsync = false, string fileType = null)
+        public Task<FileUploadResponse> UploadFileAsync(byte[] fileData, string fileName, string[] channelIds, string title = null, string initialComment = null, bool useAsync = false, string fileType = null)
         {
             Uri target = new Uri(Path.Combine(APIBaseLocation, useAsync ? "files.uploadAsync" : "files.upload"));
 
@@ -571,84 +542,29 @@ namespace SlackAPI
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
                 HttpResponseMessage response = client.PostAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form).Result;
                 string result = response.Content.ReadAsStringAsync().Result;
-                callback(JsonConvert.DeserializeObject<FileUploadResponse>(result, new JavascriptDateTimeConverter()));
+                //callback(JsonConvert.DeserializeObject<FileUploadResponse>(result, new JavascriptDateTimeConverter()));
+                throw new NotImplementedException("This operation has not been implemented.");
             }
         }
 
-        public void EmitPresence(Action<PresenceResponse> callback, Presence status)
+        public Task<PresenceResponse> EmitPresence(Presence status)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("presence", status.ToString()));
+            return APIRequestWithTokenAsync<PresenceResponse>(new Tuple<string, string>("presence", status.ToString()));
         }
 
-        public void GetPreferences(Action<UserPreferencesResponse> callback)
+        public Task<UserPreferencesResponse> GetPreferencesAsync()
         {
-            APIRequestWithToken(callback);
+            return APIRequestWithTokenAsync<UserPreferencesResponse>();
         }
 
-        public void GetCounts(Action<UserCountsResponse> callback)
+        public Task<UserCountsResponse> GetCountsAsync()
         {
-            APIRequestWithToken(callback);
+            return APIRequestWithTokenAsync<UserCountsResponse>();
         }
 
-        public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia.SlackAPI")
+        public Task<LoginResponse> EmitLoginAsync(string agent = "Inumedia.SlackAPI")
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("agent", agent));
-        }
-        public void JoinDirectMessageChannel(Action<JoinDirectMessageChannelResponse> callback, string user)
-        {
-            var param = new Tuple<string, string>("user", user);
-
-            APIRequestWithToken(callback, param);
-        }
-        private static string BuildScope(SlackScope scope)
-        {
-            var builder = new StringBuilder();
-            if ((int)(scope & SlackScope.Identify) != 0)
-                builder.Append("identify");
-            if ((int)(scope & SlackScope.Read) != 0)
-            {
-                if(builder.Length > 0)
-                    builder.Append(",");
-                builder.Append("read");
-            }
-            if ((int)(scope & SlackScope.Post) != 0)
-            {
-                if(builder.Length > 0)
-                    builder.Append(",");
-                builder.Append("post");
-            }
-            if ((int)(scope & SlackScope.Client) != 0)
-            {
-                if(builder.Length > 0)
-                    builder.Append(",");
-                builder.Append("client");
-            }
-            if ((int)(scope & SlackScope.Admin) != 0)
-            {
-                if(builder.Length > 0)
-                    builder.Append(",");
-                builder.Append("admin");
-            }
-
-            return builder.ToString();
-        }
-
-        public static Uri GetAuthorizeUri(string clientId, SlackScope scopes, string redirectUri = null, string state = null, string team = null)
-        {
-            string theScopes = BuildScope(scopes);
-
-            return GetSlackUri("https://slack.com/oauth/authorize", new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
-                new Tuple<string, string>("redirect_uri", redirectUri),
-                new Tuple<string, string>("state", state), 
-                new Tuple<string, string>("scope", theScopes), 
-                new Tuple<string, string>("team", team)});
-        }
-
-        public static void GetAccessToken(Action<AccessTokenResponse> callback, string clientId, string clientSecret, string redirectUri, string code)
-        {
-            APIRequest<AccessTokenResponse>(callback, new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
-                new Tuple<string, string>("client_secret", clientSecret), new Tuple<string, string>("code", code),
-                new Tuple<string, string>("redirect_uri", redirectUri) }, new Tuple<string, string>[] {});
+            return APIRequestWithTokenAsync<LoginResponse>(new Tuple<string, string>("agent", agent));
         }
     }
 }
