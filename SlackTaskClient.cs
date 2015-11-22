@@ -103,19 +103,7 @@ namespace SlackAPI
             //TODO: Custom paths? Appropriate subdomain paths? Not sure.
             //Maybe store custom path in the requestpath.path itself?
 
-            //string parameters = getParameters
-            //    .Select(new Func<Tuple<string, string>, string>(a => string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2))))
-            //    .Aggregate((a, b) =>
-            //{
-            //    if (string.IsNullOrEmpty(a))
-            //        return b;
-            //    else
-            //        return string.Format("{0}&{1}", a, b);
-            //});
-
-            //Uri requestUri = new Uri(string.Format("{0}?{1}", Path.Combine(APIBaseLocation, path.Path), parameters));
             Uri requestUri = SlackClient.GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
-
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(requestUri);
 
             //This will handle all of the processing.
@@ -148,9 +136,18 @@ namespace SlackAPI
             return APIRequestAsync<K>(tokenArray, new Tuple<string, string>[0]);
         }
 
+        [Obsolete("Please use the OAuth method for authenticating users")]
         public static Task<AuthStartResponse> StartAuthAsync(string email)
         {
             return APIRequestAsync<AuthStartResponse>(new Tuple<string, string>[] { new Tuple<string, string>("email", email) }, new Tuple<string, string>[0]);
+        }
+
+        public static Task<FindTeamResponse> FindTeam(string team)
+        {
+            //This seems to accept both 'team.slack.com' and just plain 'team'.
+            //Going to go with the latter.
+            Tuple<string, string> domainName = new Tuple<string, string>("domain", team);
+            return APIRequestAsync<FindTeamResponse>(new Tuple<string, string>[] { domainName }, new Tuple<string, string>[0]);
         }
 
         public static Task<AuthSigninResponse> AuthSignin(string userId, string teamId, string password)

@@ -10,15 +10,30 @@ namespace SlackAPI
         /// <summary>
         /// Supported domains emails can be registered from.
         /// </summary>
+        /// TODO: Is this obsolete?
         public string email_domain;
+        /// <summary>
+        /// Supported domains emails can be registered from.
+        /// </summary>
+        public string[] email_domains;
 
         public string id;
         public long limit_ts;
         public DateTime LimitTimestamp { get { return new DateTime(1970, 1, 1).AddMilliseconds(limit_ts); } }
         public int msg_edit_window_mins;
         public string name;
-        public bool over_storage_limit;
+        public bool over_storage_limit, sso;
         public TeamPreferences prefs;
+        public string sso_required;
+        public string sso_type;
+        public string url;
+        public SSOProvider[] sso_provider;
+    }
+
+    public class SSOProvider
+    {
+        public string name;
+        public string type;
     }
 
     public class BotList
