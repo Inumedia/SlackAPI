@@ -471,6 +471,32 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<DeletedResponse>(parameters.ToArray());
         }
 
+        public Task<PresenceResponse> EmitPresence(Presence status)
+        {
+            return APIRequestWithTokenAsync<PresenceResponse>(new Tuple<string, string>("presence", status.ToString()));
+        }
+
+        public Task<UserPreferencesResponse> GetPreferencesAsync()
+        {
+            return APIRequestWithTokenAsync<UserPreferencesResponse>();
+        }
+
+        public Task<UserCountsResponse> GetCountsAsync()
+        {
+            return APIRequestWithTokenAsync<UserCountsResponse>();
+        }
+
+        public Task<LoginResponse> EmitLoginAsync(string agent = "Inumedia.SlackAPI")
+        {
+            return APIRequestWithTokenAsync<LoginResponse>(new Tuple<string, string>("agent", agent));
+        }
+
+        public Task<JoinDirectMessageChannelResponse> JoinDirectMessageChannelAsync(string user)
+        {
+            var param = new Tuple<string, string>("user", user);
+            return APIRequestWithTokenAsync<JoinDirectMessageChannelResponse>(param);
+        }
+
         public Task<PostMessageResponse> PostMessageAsync(
             string channelId,
             string text,
@@ -545,26 +571,6 @@ namespace SlackAPI
                 //callback(JsonConvert.DeserializeObject<FileUploadResponse>(result, new JavascriptDateTimeConverter()));
                 throw new NotImplementedException("This operation has not been implemented.");
             }
-        }
-
-        public Task<PresenceResponse> EmitPresence(Presence status)
-        {
-            return APIRequestWithTokenAsync<PresenceResponse>(new Tuple<string, string>("presence", status.ToString()));
-        }
-
-        public Task<UserPreferencesResponse> GetPreferencesAsync()
-        {
-            return APIRequestWithTokenAsync<UserPreferencesResponse>();
-        }
-
-        public Task<UserCountsResponse> GetCountsAsync()
-        {
-            return APIRequestWithTokenAsync<UserCountsResponse>();
-        }
-
-        public Task<LoginResponse> EmitLoginAsync(string agent = "Inumedia.SlackAPI")
-        {
-            return APIRequestWithTokenAsync<LoginResponse>(new Tuple<string, string>("agent", agent));
         }
     }
 }

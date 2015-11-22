@@ -499,6 +499,32 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
+        public void EmitPresence(Action<PresenceResponse> callback, Presence status)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("presence", status.ToString()));
+        }
+
+        public void GetPreferences(Action<UserPreferencesResponse> callback)
+        {
+            APIRequestWithToken(callback);
+        }
+
+        public void GetCounts(Action<UserCountsResponse> callback)
+        {
+            APIRequestWithToken(callback);
+        }
+
+        public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia.SlackAPI")
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("agent", agent));
+        }
+
+        public void JoinDirectMessageChannel(Action<JoinDirectMessageChannelResponse> callback, string user)
+        {
+            var param = new Tuple<string, string>("user", user);
+            APIRequestWithToken(callback, param);
+        }
+
         public void PostMessage(
             Action<PostMessageResponse> callback,
             string channelId,
@@ -575,31 +601,6 @@ namespace SlackAPI
             }
         }
 
-        public void EmitPresence(Action<PresenceResponse> callback, Presence status)
-        {
-            APIRequestWithToken(callback, new Tuple<string, string>("presence", status.ToString()));
-        }
-
-        public void GetPreferences(Action<UserPreferencesResponse> callback)
-        {
-            APIRequestWithToken(callback);
-        }
-
-        public void GetCounts(Action<UserCountsResponse> callback)
-        {
-            APIRequestWithToken(callback);
-        }
-
-        public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia.SlackAPI")
-        {
-            APIRequestWithToken(callback, new Tuple<string, string>("agent", agent));
-        }
-        public void JoinDirectMessageChannel(Action<JoinDirectMessageChannelResponse> callback, string user)
-        {
-            var param = new Tuple<string, string>("user", user);
-
-            APIRequestWithToken(callback, param);
-        }
         private static string BuildScope(SlackScope scope)
         {
             var builder = new StringBuilder();
