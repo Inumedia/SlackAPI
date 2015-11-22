@@ -562,7 +562,7 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<UserCountsResponse>();
         }
 
-        public Task<LoginResponse> EmitLoginAsync(string agent = "Inmumedia<3")
+        public Task<LoginResponse> EmitLoginAsync(string agent = "Inumedia.SlackAPI")
         {
             return APIRequestWithTokenAsync<LoginResponse>(new Tuple<string, string>("agent", agent));
         }

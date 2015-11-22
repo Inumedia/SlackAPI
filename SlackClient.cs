@@ -589,7 +589,7 @@ namespace SlackAPI
             APIRequestWithToken(callback);
         }
 
-        public void EmitLogin(Action<LoginResponse> callback, string agent = "Inmumedia<3")
+        public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia.SlackAPI")
         {
             APIRequestWithToken(callback, new Tuple<string, string>("agent", agent));
         }
