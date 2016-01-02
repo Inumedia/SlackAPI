@@ -18,7 +18,11 @@ namespace SlackAPI
         {
             decimal value = decimal.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture);
             DateTime res = new DateTime(621355968000000000 + (long)(value * 10000000m)).ToLocalTime();
-            System.Diagnostics.Debug.Assert(Decimal.Equals(Decimal.Parse(res.ToProperTimeStamp()), Decimal.Parse(reader.Value.ToString())), "Precision loss :(");
+            System.Diagnostics.Debug.Assert(
+                Decimal.Equals(
+                    Decimal.Parse(res.ToProperTimeStamp()), 
+                    Decimal.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture)), 
+                "Precision loss :(");
             return res;
         }
 
