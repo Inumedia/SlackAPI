@@ -196,6 +196,12 @@ namespace SlackAPI
                 OnMessageReceived(m);
         }
 
+        public void FileShareMessage(FileShareMessage m)
+        {
+            if (OnMessageReceived != null)
+                OnMessageReceived(m);
+        }
+
         public void PresenceChange(PresenceChange p)
         {
 
