@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SlackAPI
 {
@@ -13,6 +9,7 @@ namespace SlackAPI
     public class File
     {
         public string id;
+        public DateTime created;
         public DateTime timestamp;
 
         public string name;
@@ -26,9 +23,10 @@ namespace SlackAPI
         public bool editable;
         public bool is_external;
         public string external_type;
-        
+        public string username;
+
         /// <summary>
-        /// Looks it's in bytes?
+        /// File size in bytes
         /// </summary>
         public int size;
 
@@ -39,12 +37,17 @@ namespace SlackAPI
 
         public string thumb_64;
         public string thumb_80;
+        public string thumb_160;
         public string thumb_360;
         public string thumb_360_gif;
         public int thumb_360_w;
         public int thumb_360_h;
+        public string thumb_480;
+        public int thumb_480_w;
+        public int thumb_480_h;
 
         public string permalink;
+        public string permalink_public;
         public string edit_link;
         public string preview;
         public string preview_highlight;
@@ -53,12 +56,17 @@ namespace SlackAPI
 
         public bool is_public;
         public bool public_url_shared;
+        public bool display_as_bot;
         public string[] channels;
         public string[] groups;
         public string[] ims;
         public FileComment initial_comment;
+        public int comments_count;
         public int num_stars;
         public bool is_starred;
+        public string[] pinned_to;
+
+        public Reaction[] reactions;
     }
 
     [Flags]

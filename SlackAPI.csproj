@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachment.cs" />
+    <Compile Include="Reaction.cs" />
     <Compile Include="RequestStateForTask.cs" />
     <Compile Include="RPCMessages\AccessTokenResponse.cs" />
     <Compile Include="RPCMessages\AuthSigninResponse.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="WebSocketMessages\ChannelRename.cs" />
     <Compile Include="WebSocketMessages\ChannelUnarchive.cs" />
     <Compile Include="WebSocketMessages\DeletedMessage.cs" />
+    <Compile Include="WebSocketMessages\FileShareMessage.cs" />
     <Compile Include="WebSocketMessages\GroupArchive.cs" />
     <Compile Include="WebSocketMessages\GroupClose.cs" />
     <Compile Include="WebSocketMessages\GroupJoined.cs" />
