@@ -13,6 +13,8 @@ namespace SlackAPI
         public string fallback;
         public string color;
         public Field[] fields;
+        public string image_url;
+        public string thumb_url;
         ///I have absolutely no idea what goes on in here.
     }
 
