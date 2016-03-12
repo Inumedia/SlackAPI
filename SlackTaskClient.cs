@@ -569,5 +569,12 @@ namespace SlackAPI
                 throw new NotImplementedException("This operation has not been implemented.");
             }
         }
+
+        public Task<ChannelSetTopicResponse> ChannelSetTopicAsync(string channelId, string newTopic)
+        {
+            return APIRequestWithTokenAsync<ChannelSetTopicResponse>(
+                    new Tuple<string, string>("channel", channelId),
+                    new Tuple<string, string>("topic", newTopic));
+        }
     }
 }
