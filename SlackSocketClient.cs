@@ -73,12 +73,18 @@ namespace SlackAPI
             underlyingSocket.Send(new Typing() { channel = channelId });
         }
 
-        public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData)
+        public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData, string userName = null)
         {
-			underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = MySelf.id, type = "message" }, new Action<MessageReceived>((mr) => {
-				if(onSent != null)
-					onSent(mr);
-			}));
+            if (onSent != null)
+            {
+                if (userName == null)
+                {
+                    userName = MySelf.id;
+                }
+                underlyingSocket.Send(
+                    new Message() {channel = channelId, text = textData, user = userName, type = "message"},
+                    new Action<MessageReceived>(onSent.Invoke));
+            }
         }
 
         public void HandleHello(Hello hello)
