@@ -255,7 +255,7 @@ namespace SlackAPI
         }
 
         void GetHistory<K>(Action<K> historyCallback, string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null)
-            where K : MessageHistory
+            where K : MessageHistoryResponse
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
             parameters.Add(new Tuple<string, string>("channel", channel));
@@ -270,17 +270,17 @@ namespace SlackAPI
             APIRequestWithToken(historyCallback, parameters.ToArray());
         }
 
-        public void GetChannelHistory(Action<ChannelMessageHistory> callback, Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public void GetChannelHistory(Action<ChannelMessageHistoryResponse> callback, Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
             GetHistory(callback, channelInfo.id, latest, oldest, count);
         }
 
-        public void GetDirectMessageHistory(Action<MessageHistory> callback, DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public void GetDirectMessageHistory(Action<MessageHistoryResponse> callback, DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
             GetHistory(callback, conversationInfo.id, latest, oldest, count);
         }
 
-        public void GetGroupHistory(Action<GroupMessageHistory> callback, Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public void GetGroupHistory(Action<GroupMessageHistoryResponse> callback, Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
             GetHistory(callback, groupInfo.id, latest, oldest, count);
         }

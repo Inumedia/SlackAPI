@@ -54,7 +54,7 @@
     <Compile Include="Bot.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="RPCMessages\ChannelListResponse.cs" />
-    <Compile Include="RPCMessages\ChannelMessageHistory.cs" />
+    <Compile Include="RPCMessages\ChannelMessageHistoryResponse.cs" />
     <Compile Include="ContextMessage.cs" />
     <Compile Include="DirectMessageConversation.cs" />
     <Compile Include="RPCMessages\DeletedResponse.cs" />
@@ -82,13 +82,13 @@
     <Compile Include="RPCMessages\JoinDirectMessageChannelResponse.cs" />
     <Compile Include="RPCMessages\UserCountsResponse.cs" />
     <Compile Include="RPCMessages\GroupListResponse.cs" />
-    <Compile Include="RPCMessages\GroupMessageHistory.cs" />
+    <Compile Include="RPCMessages\GroupMessageHistoryResponse.cs" />
     <Compile Include="JavascriptBotsToArray.cs" />
     <Compile Include="JavascriptDateTimeConverter.cs" />
     <Compile Include="RPCMessages\LoginResponse.cs" />
     <Compile Include="RPCMessages\MarkResponse.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="RPCMessages\MessageHistory.cs" />
+    <Compile Include="RPCMessages\MessageHistoryResponse.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="OwnedStampedMessage.cs" />
     <Compile Include="RPCMessages\PostMessageResponse.cs" />
