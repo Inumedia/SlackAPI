@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachment.cs" />
+    <Compile Include="MessageEventArgs.cs" />
     <Compile Include="Reaction.cs" />
     <Compile Include="RequestStateForTask.cs" />
     <Compile Include="RPCMessages\AccessTokenResponse.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="UserTeamCombo.cs" />
     <Compile Include="Utilities\ILockFree.cs" />
     <Compile Include="Utilities\LockFreeQueue.cs" />
+    <Compile Include="WebSocketMessages\ActionMessage.cs" />
     <Compile Include="WebSocketMessages\ChannelArchive.cs" />
     <Compile Include="WebSocketMessages\ChannelCreated.cs" />
     <Compile Include="WebSocketMessages\ChannelDeleted.cs" />

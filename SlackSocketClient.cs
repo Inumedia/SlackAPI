@@ -9,7 +9,7 @@ namespace SlackAPI
     {
         SlackSocket underlyingSocket;
 
-        public event Action<SlackMessage> OnMessageReceived;
+        public event EventHandler<MessageEventArgs> OnMessageReceived;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -198,14 +198,22 @@ namespace SlackAPI
 
         public void Message(SlackMessage m)
         {
-            if (OnMessageReceived != null)
-                OnMessageReceived(m);
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
         }
 
         public void FileShareMessage(FileShareMessage m)
         {
-            if (OnMessageReceived != null)
-                OnMessageReceived(m);
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
+        }
+
+        public void Action(ActionMessage m)
+        {
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
+        }
+
+        public void Topic(TopicMessage m)
+        {
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
         }
 
         public void PresenceChange(PresenceChange p)
@@ -215,12 +223,12 @@ namespace SlackAPI
 
         public void ChannelMarked(ChannelMarked m)
         {
-            
+
         }
 
-		public void CloseSocket()
-		{
-			underlyingSocket.Close();
-		}
+        public void CloseSocket()
+        {
+            underlyingSocket.Close();
+        }
     }
 }
