@@ -9,7 +9,7 @@ namespace SlackAPI
     {
         SlackSocket underlyingSocket;
 
-        public event Action<NewMessage> OnMessageReceived;
+        public event Action<SlackMessage> OnMessageReceived;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -21,31 +21,37 @@ namespace SlackAPI
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
         public event Action OnHello;
-		internal LoginResponse loginDetails;
+        internal LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
             : base(token)
         {
-            
+
         }
 
-		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
-		{
-			base.Connect((s) => {
-				ConnectSocket(onSocketConnected);
-				onConnected(s);
-			});
-		}
+        public override void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
+        {
+            if (onConnected == null)
+            {
+                onConnected = Connected;
+            }
+
+            base.Connect((s) =>
+            {
+                ConnectSocket(onSocketConnected);
+                onConnected(s);
+            });
+        }
 
         protected override void Connected(LoginResponse loginDetails)
-		{
-			this.loginDetails = loginDetails;
-			base.Connected(loginDetails);
-		}
+        {
+            this.loginDetails = loginDetails;
+            base.Connected(loginDetails);
+        }
 
 		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
-		}
+            underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
+        }
 
         public void BindCallback<K>(Action<K> callback)
         {
@@ -190,7 +196,7 @@ namespace SlackAPI
 
         }
 
-        public void Message(NewMessage m)
+        public void Message(SlackMessage m)
         {
             if (OnMessageReceived != null)
                 OnMessageReceived(m);
