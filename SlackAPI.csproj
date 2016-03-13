@@ -106,6 +106,7 @@
     <Compile Include="SlackScope.cs" />
     <Compile Include="SlackSocket.cs" />
     <Compile Include="SlackSocketClient.cs" />
+    <Compile Include="SlackSocketMessageEventArgs.cs" />
     <Compile Include="SlackTaskClient.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="TeamPreferences.cs" />

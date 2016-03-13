@@ -10,6 +10,7 @@ namespace SlackAPI
         SlackSocket underlyingSocket;
 
         public event EventHandler<MessageEventArgs> OnMessageReceived;
+        public event EventHandler<SlackSocketMessageEventArgs> OnHello;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -20,7 +21,6 @@ namespace SlackAPI
         public bool IsReady { get { return HelloReceived; } }
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
-        public event Action OnHello;
         internal LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
@@ -87,8 +87,7 @@ namespace SlackAPI
 
             StartPing();
 
-            if (OnHello != null)
-                OnHello();
+            OnHello?.Invoke( this, new SlackSocketMessageEventArgs(hello));
         }
 
         public void HandlePresence(PresenceChange change)
