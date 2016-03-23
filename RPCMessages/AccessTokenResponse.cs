@@ -12,5 +12,6 @@ namespace SlackAPI
         public string access_token;
         public string scope;
         public string team_name;
+        public Bot bot;
     }
 }

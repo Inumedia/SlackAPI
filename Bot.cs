@@ -15,5 +15,7 @@ namespace SlackAPI
         public UserProfile icons;
         public string id;
         public string name;
+        public string bot_user_id;
+        public string bot_access_token;
     }
 }

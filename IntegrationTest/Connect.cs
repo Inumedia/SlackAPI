@@ -28,6 +28,44 @@ namespace IntegrationTest
         }
 
         [TestMethod]
+        public void TestGetAccessToken()
+        {
+            // assemble
+            var clientId = _config.Slack.ClientId;
+            var clientSecret = _config.Slack.ClientSecret;
+            var authCode = _config.Slack.AuthCode;
+
+            // act
+            var accessTokenResponse = GetAccessToken(clientId, clientSecret, "", authCode);
+            
+            // assert
+            Assert.IsNotNull(accessTokenResponse, "accessTokenResponse != null");
+            Assert.IsNotNull(accessTokenResponse.bot, "bot != null");
+            Assert.IsNotNull(accessTokenResponse.bot.bot_user_id, "bot.user_id != null");
+            Assert.IsNotNull(accessTokenResponse.bot.bot_access_token, "bot.bot_access_token != null");
+        }
+
+        private AccessTokenResponse GetAccessToken(string clientId, string clientSecret, string redirectUri, string authCode)
+        {
+            var waiter = new EventWaitHandle(false, EventResetMode.ManualReset);
+            AccessTokenResponse accessTokenResponse = null;
+
+            SlackClient.GetAccessToken(response =>
+            {
+                accessTokenResponse = response;
+                waiter.Set(); 
+                
+            }, clientId, clientSecret, redirectUri, authCode);
+
+            Policy
+                .Handle<AssertFailedException>()
+                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
+                .Execute(() => { Assert.IsTrue(waiter.WaitOne(), "Still waiting for things to happen..."); });
+
+            return accessTokenResponse;
+        }
+
+        [TestMethod]
         public void TestConnectAsBot()
         {
             var client = ClientHelper.GetClient(_config.Slack.BotAuthToken);
