@@ -122,7 +122,7 @@ namespace SlackAPI
         {
             return APIRequestWithTokenAsync<K>(new Tuple<string, string>[] { });
         }
- 
+
         public Task<K> APIRequestWithTokenAsync<K>(params Tuple<string,string>[] getParameters)
             where K : Response
         {
@@ -152,7 +152,7 @@ namespace SlackAPI
 
         public static Task<AuthSigninResponse> AuthSignin(string userId, string teamId, string password)
         {
-            return APIRequestAsync<AuthSigninResponse>(new Tuple<string, string>[] { 
+            return APIRequestAsync<AuthSigninResponse>(new Tuple<string, string>[] {
                 new Tuple<string,string>("user", userId),
                 new Tuple<string,string>("team", teamId),
                 new Tuple<string,string>("password", password)
@@ -200,7 +200,7 @@ namespace SlackAPI
             if (!types.HasFlag(FileTypes.all))
             {
                 FileTypes[] values = (FileTypes[])Enum.GetValues(typeof(FileTypes));
-                
+
                 StringBuilder building = new StringBuilder();
                 bool first = true;
                 for (int i = 0; i < values.Length; ++i)
@@ -229,11 +229,11 @@ namespace SlackAPI
         }
 
         private Task<K> GetHistoryAsync<K>(string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null)
-            where K : MessageHistory
+            where K : MessageHistoryResponse
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
             parameters.Add(new Tuple<string, string>("channel", channel));
-            
+
             if(latest.HasValue)
                 parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
             if(oldest.HasValue)
@@ -244,19 +244,19 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<K>(parameters.ToArray());
         }
 
-        public Task<ChannelMessageHistory> GetChannelHistoryAsync(Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<ChannelMessageHistoryResponse> GetChannelHistoryAsync(Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            return GetHistoryAsync<ChannelMessageHistory>(channelInfo.id, latest, oldest, count);
+            return GetHistoryAsync<ChannelMessageHistoryResponse>(channelInfo.id, latest, oldest, count);
         }
 
-        public Task<MessageHistory> GetDirectMessageHistoryAsync(DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<MessageHistoryResponse> GetDirectMessageHistoryAsync(DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            return GetHistoryAsync<MessageHistory>(conversationInfo.id, latest, oldest, count);
+            return GetHistoryAsync<MessageHistoryResponse>(conversationInfo.id, latest, oldest, count);
         }
 
-        public Task<GroupMessageHistory> GetGroupHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<GroupMessageHistoryResponse> GetGroupHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count);
+            return GetHistoryAsync<GroupMessageHistoryResponse>(groupInfo.id, latest, oldest, count);
         }
 
         public Task<MarkResponse> MarkChannelAsync(string channelId, DateTime ts)
@@ -271,7 +271,7 @@ namespace SlackAPI
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
             parameters.Add(new Tuple<string,string>("file", fileId));
-            
+
             if(count.HasValue)
                 parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
 
@@ -444,7 +444,7 @@ namespace SlackAPI
 
         public Task<StarListResponse> GetStarsAsync(string userId = null, int? count = null, int? page = null){
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
-            
+
             if(!string.IsNullOrEmpty(userId))
                 parameters.Add(new Tuple<string,string>("user", userId));
 

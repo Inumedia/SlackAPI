@@ -4,7 +4,7 @@ using Newtonsoft.Json.Serialization;
 namespace SlackAPI
 {
     [RequestPath("im.history")]
-    public class MessageHistory : Response
+    public class MessageHistoryResponse : Response
     {
         /// <summary>
         /// I believe this is where the read cursor is?  IE: How far the user has read.

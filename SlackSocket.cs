@@ -274,17 +274,15 @@ namespace SlackAPI
 
 		public void Close()
 		{
-            try
-            {
-                this.socket.Abort();
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
-                ConnectionClosed();
+		    try
+		    {
+		        this.socket.Abort();
+		    }
+		    finally
+		    {
+		        if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
+		            ConnectionClosed();
+		    }
 		}
     }
 

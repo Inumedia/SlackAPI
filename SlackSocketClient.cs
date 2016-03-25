@@ -9,7 +9,8 @@ namespace SlackAPI
     {
         SlackSocket underlyingSocket;
 
-        public event Action<NewMessage> OnMessageReceived;
+        public event EventHandler<MessageEventArgs> OnMessageReceived;
+        public event EventHandler<SlackSocketMessageEventArgs> OnHello;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -20,32 +21,37 @@ namespace SlackAPI
         public bool IsReady { get { return HelloReceived; } }
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
-        public event Action OnHello;
-		internal LoginResponse loginDetails;
+        internal LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
             : base(token)
         {
-            
+
         }
 
-		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
-		{
-			base.Connect((s) => {
-				ConnectSocket(onSocketConnected);
-				onConnected(s);
-			});
-		}
+        public override void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
+        {
+            if (onConnected == null)
+            {
+                onConnected = Connected;
+            }
+
+            base.Connect((s) =>
+            {
+                ConnectSocket(onSocketConnected);
+                onConnected(s);
+            });
+        }
 
         protected override void Connected(LoginResponse loginDetails)
-		{
-			this.loginDetails = loginDetails;
-			base.Connected(loginDetails);
-		}
+        {
+            this.loginDetails = loginDetails;
+            base.Connected(loginDetails);
+        }
 
 		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
-		}
+            underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
+        }
 
         public void BindCallback<K>(Action<K> callback)
         {
@@ -67,12 +73,18 @@ namespace SlackAPI
             underlyingSocket.Send(new Typing() { channel = channelId });
         }
 
-        public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData)
+        public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData, string userName = null)
         {
-			underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = MySelf.id, type = "message" }, new Action<MessageReceived>((mr) => {
-				if(onSent != null)
-					onSent(mr);
-			}));
+            if (onSent != null)
+            {
+                if (userName == null)
+                {
+                    userName = MySelf.id;
+                }
+                underlyingSocket.Send(
+                    new Message() {channel = channelId, text = textData, user = userName, type = "message"},
+                    new Action<MessageReceived>(onSent.Invoke));
+            }
         }
 
         public void HandleHello(Hello hello)
@@ -81,8 +93,7 @@ namespace SlackAPI
 
             StartPing();
 
-            if (OnHello != null)
-                OnHello();
+            OnHello?.Invoke( this, new SlackSocketMessageEventArgs(hello));
         }
 
         public void HandlePresence(PresenceChange change)
@@ -190,16 +201,24 @@ namespace SlackAPI
 
         }
 
-        public void Message(NewMessage m)
+        public void Message(SlackMessage m)
         {
-            if (OnMessageReceived != null)
-                OnMessageReceived(m);
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
         }
 
         public void FileShareMessage(FileShareMessage m)
         {
-            if (OnMessageReceived != null)
-                OnMessageReceived(m);
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
+        }
+
+        public void Action(ActionMessage m)
+        {
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
+        }
+
+        public void Topic(TopicMessage m)
+        {
+            OnMessageReceived?.Invoke(this, new MessageEventArgs(m));
         }
 
         public void PresenceChange(PresenceChange p)
@@ -209,12 +228,12 @@ namespace SlackAPI
 
         public void ChannelMarked(ChannelMarked m)
         {
-            
+
         }
 
-		public void CloseSocket()
-		{
-			underlyingSocket.Close();
-		}
+        public void CloseSocket()
+        {
+            underlyingSocket.Close();
+        }
     }
 }
