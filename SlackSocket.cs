@@ -204,6 +204,7 @@ namespace SlackAPI
                         }
 
                         string data = string.Join("", buffers.Select((c) => Encoding.UTF8.GetString(c).TrimEnd('\0')));
+                        //Console.WriteLine("SlackSocket data = " + data);
                         SlackSocketMessage message = null;
                         try
                         {

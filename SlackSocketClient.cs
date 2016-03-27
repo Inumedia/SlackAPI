@@ -10,6 +10,7 @@ namespace SlackAPI
         SlackSocket underlyingSocket;
 
         public event Action<NewMessage> OnMessageReceived;
+        public event Action<ReactionAdded> OnReactionAdded;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -73,6 +74,12 @@ namespace SlackAPI
 				if(onSent != null)
 					onSent(mr);
 			}));
+        }
+
+        public void HandleReactionAdded(ReactionAdded reactionAdded)
+        {
+            if (OnReactionAdded != null)
+                OnReactionAdded(reactionAdded);            
         }
 
         public void HandleHello(Hello hello)
