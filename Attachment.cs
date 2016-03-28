@@ -8,7 +8,7 @@ namespace SlackAPI
 {
     public class Attachment
     {
-        public string Pretext;
+        public string pretext;
         public string text;
         public string fallback;
         public string color;
