@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-    [RequestPath("chat.postMessage")]
-    public class PostMessageResponse : Response
+    [RequestPath("reactions.add")]
+    public class ReactionAddedResponse : Response
     {
-        public string channel;
-        public string ts;
+
     }
 }

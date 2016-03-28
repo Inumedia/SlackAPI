@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Attachment.cs" />
     <Compile Include="Reaction.cs" />
+    <Compile Include="ReactionAddedResponse.cs" />
     <Compile Include="RequestStateForTask.cs" />
     <Compile Include="RPCMessages\AccessTokenResponse.cs" />
     <Compile Include="RPCMessages\AuthSigninResponse.cs" />
