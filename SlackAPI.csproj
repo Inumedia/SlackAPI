@@ -137,6 +137,7 @@
     <Compile Include="WebSocketMessages\Ping.cs" />
     <Compile Include="WebSocketMessages\Pong.cs" />
     <Compile Include="WebSocketMessages\PresenceChange.cs" />
+    <Compile Include="WebSocketMessages\ReactionAdded.cs" />
     <Compile Include="WebSocketMessages\TeamJoin.cs" />
     <Compile Include="WebSocketMessages\Typing.cs" />
     <Compile Include="WebSocketMessages\UserChange.cs" />
