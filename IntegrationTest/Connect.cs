@@ -86,8 +86,8 @@ namespace IntegrationTest
             // then
             Assert.IsNotNull(deletedResponse, "No response was found");
             Assert.IsTrue(deletedResponse.ok, "Message not deleted!");
-            Assert.AreEqual(deletedResponse.channel, channel, "Got invalid channel? Something's not right here...");
-            Assert.AreEqual(deletedResponse.ts, messageTimestamp, "Got invalid time stamp? Something's not right here...");
+            Assert.AreEqual(channel, deletedResponse.channel, "Got invalid channel? Something's not right here...");
+            Assert.AreEqual(messageTimestamp, deletedResponse.ts, "Got invalid time stamp? Something's not right here...");
         }
 
         private static DateTime PostMessage(SlackSocketClient client, string channel)
@@ -108,10 +108,10 @@ namespace IntegrationTest
                 {
                     Assert.IsTrue(waiter.WaitOne(), "Still waiting for things to happen...");
                 });
-            
+
             Assert.IsNotNull(sendMessageResponse, "sendMessageResponse != null");
-            Assert.AreEqual(sendMessageResponse.text, TestText, "Got invalid returned text, something's not right here...");
-            
+            Assert.AreEqual(TestText, sendMessageResponse.text, "Got invalid returned text, something's not right here...");
+
             return sendMessageResponse.ts;
         }
 
