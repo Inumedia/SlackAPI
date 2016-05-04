@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using SlackAPI.RPCMessages;
 
 namespace SlackAPI
 {
@@ -505,10 +506,24 @@ namespace SlackAPI
             APIRequestWithToken(callback);
         }
 
+        #region Users
+
         public void GetCounts(Action<UserCountsResponse> callback)
         {
             APIRequestWithToken(callback);
         }
+
+        public void GetPresence(Action<UserGetPresenceResponse> callback, string user)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("user", user));
+        }
+
+        public void GetInfo(Action<UserInfoResponse> callback, string user)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("user", user));
+        }
+
+        #endregion  
 
         public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia.SlackAPI")
         {

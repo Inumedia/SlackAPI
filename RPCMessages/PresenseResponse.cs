@@ -12,7 +12,7 @@ namespace SlackAPI
     }
     public enum Presence
     {
-        Active,
-        Away
+        active,
+        away
     }
 }

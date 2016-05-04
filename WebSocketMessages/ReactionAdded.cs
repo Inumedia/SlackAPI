@@ -14,7 +14,7 @@ namespace SlackAPI.WebSocketMessages
         public string reaction;
         public string item_user;
         public Item item;
-        public DateTime event_ts;
+        public string event_ts;
 
         public ReactionAdded(){}
     }
@@ -25,7 +25,7 @@ namespace SlackAPI.WebSocketMessages
         public string channel;
         public string file;
         public string file_comment;
-        public DateTime ts;
+        public string ts;
     }
 }
 

@@ -58,6 +58,7 @@
     <Compile Include="RPCMessages\ChannelMessageHistory.cs" />
     <Compile Include="ContextMessage.cs" />
     <Compile Include="DirectMessageConversation.cs" />
+    <Compile Include="RPCMessages\UserInfoResponse.cs" />
     <Compile Include="RPCMessages\DeletedResponse.cs" />
     <Compile Include="RPCMessages\FindTeamResponse.cs" />
     <Compile Include="RPCMessages\GroupUnarchiveResponse.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="RPCMessages\SearchResponseAll.cs" />
     <Compile Include="RPCMessages\SearchResponseFiles.cs" />
     <Compile Include="RPCMessages\SearchResponseMessages.cs" />
+    <Compile Include="RPCMessages\UserGetPresenceResponse.cs" />
     <Compile Include="SlackClient.cs" />
     <Compile Include="RPCMessages\StarListResponse.cs" />
     <Compile Include="SlackScope.cs" />

@@ -60,7 +60,7 @@ namespace SlackAPI
 
         public void SendPresence(Presence status)
         {
-            underlyingSocket.Send(new PresenceChange() { presence = Presence.Active, user = base.MySelf.id });
+            underlyingSocket.Send(new PresenceChange() { presence = Presence.active, user = base.MySelf.id });
         }
 
         public void SendTyping(string channelId)
