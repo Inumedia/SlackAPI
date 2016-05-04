@@ -25,6 +25,7 @@ namespace SlackAPI
         public bool has_files;
         public string presence;
         public bool is_bot;
+        public string tz;
         public string tz_label;
         public int tz_offset;
     }
