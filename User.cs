@@ -26,5 +26,6 @@ namespace SlackAPI
         public string presence;
         public bool is_bot;
         public string tz_label;
+        public int tz_offset;
     }
 }
