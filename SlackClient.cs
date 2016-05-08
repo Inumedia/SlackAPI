@@ -515,6 +515,40 @@ namespace SlackAPI
             APIRequestWithToken(callback, new Tuple<string, string>("agent", agent));
         }
 
+        public void Update(
+            Action<UpdateResponse> callback,
+            string ts,
+            string channelId,
+            string text,
+            string botName = null,
+            string parse = null,
+            bool linkNames = false,
+            Attachment[] attachments = null,
+            bool as_user = false)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("ts", ts));
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("text", text));
+
+            if (!string.IsNullOrEmpty(botName))
+                parameters.Add(new Tuple<string, string>("username", botName));
+
+            if (!string.IsNullOrEmpty(parse))
+                parameters.Add(new Tuple<string, string>("parse", parse));
+
+            if (linkNames)
+                parameters.Add(new Tuple<string, string>("link_names", "1"));
+
+            if (attachments != null && attachments.Length > 0)
+                parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments)));
+
+            parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
         public void JoinDirectMessageChannel(Action<JoinDirectMessageChannelResponse> callback, string user)
         {
             var param = new Tuple<string, string>("user", user);

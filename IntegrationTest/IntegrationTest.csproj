@@ -62,6 +62,10 @@
     <Compile Include="Configuration\SlackConfig.cs" />
     <Compile Include="Connect.cs" />
     <Compile Include="Helpers\ClientHelper.cs" />
+    <Compile Include="Helpers\InSync.cs" />
+    <Compile Include="Helpers\SlackMother.cs" />
+    <Compile Include="Update.cs" />
+    <Compile Include="PostMessage.cs" />
     <Compile Include="JoinDirectMessageChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
