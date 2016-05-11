@@ -11,6 +11,7 @@ namespace SlackAPI
 
         public event Action<NewMessage> OnMessageReceived;
         public event Action<ReactionAdded> OnReactionAdded;
+        public event Action<Pong> OnPongReceived;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -76,6 +77,17 @@ namespace SlackAPI
 			}));
         }
 
+        public void SendPing()
+        {
+            underlyingSocket.Send(new Ping());
+        }
+
+        public void HandlePongReceived(Pong pong)
+        {
+            if (OnPongReceived != null)
+                OnPongReceived(pong);
+        }
+
         public void HandleReactionAdded(ReactionAdded reactionAdded)
         {
             if (OnReactionAdded != null)
@@ -85,8 +97,6 @@ namespace SlackAPI
         public void HandleHello(Hello hello)
         {
             HelloReceived = true;
-
-            StartPing();
 
             if (OnHello != null)
                 OnHello();
@@ -166,30 +176,6 @@ namespace SlackAPI
         {
             GroupLookup[rename.channel.id].name = rename.channel.name;
             GroupLookup[rename.channel.id].created = rename.channel.created;
-        }
-
-        void StartPing()
-        {
-            pingingThread = new Timer(Ping, null, PingInterval, PingInterval);
-        }
-
-        void Ping(object state)
-        {
-            if (Interlocked.CompareExchange(ref pinging, 1, 0) == 0)
-            {
-                //This isn't ideal.
-                //TODO: Setup a callback on the messages so I get a hit when the message is just being sent. Messages are currently handled async.
-                Stopwatch w = Stopwatch.StartNew();
-                underlyingSocket.Send(new Ping()
-                {
-                    ping_interv_ms = PingInterval
-                }, new Action<Pong>((p) =>
-                {
-                    w.Stop();
-                    PingRoundTripMilliseconds = w.ElapsedMilliseconds;
-                    pinging = 0;
-                }));
-            }
         }
 
         public void UserTyping(Typing t)
