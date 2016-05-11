@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.IO;
+using Newtonsoft.Json;
 using SlackAPI.Utilities;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ namespace SlackAPI
         public bool Connected { get { return socket != null && socket.State == WebSocketState.Open; } }
         public event Action<WebSocketException> ErrorSending;
         public event Action<WebSocketException> ErrorReceiving;
+        public event Action<Exception> ErrorReceivingDesiralization;
+        public event Action<Exception> ErrorHandlingMessage;
         public event Action ConnectionClosed;
 
         //This would be done for hinting but I don't think we really need this.
@@ -212,6 +215,8 @@ namespace SlackAPI
                         }
                         catch (JsonSerializationException jsonExcep)
                         {
+                            if (ErrorReceivingDesiralization != null)
+                                ErrorReceivingDesiralization(jsonExcep);
                             continue;
                         }
 
@@ -235,19 +240,34 @@ namespace SlackAPI
                 callbacks[message.reply_to](data);
             else if (routes.ContainsKey(message.type) && routes[message.type].ContainsKey(message.subtype ?? "null"))
             {
-                object o = null;
-                if (routing.ContainsKey(message.type) && routing[message.type].ContainsKey(message.subtype ?? "null"))
-                    o = JsonConvert.DeserializeObject(data, routing[message.type][message.subtype ?? "null"], new JavascriptDateTimeConverter());
-                else
+                try
                 {
-                    //I believe this method is slower than the former. If I'm wrong we can just use this instead. :D
-                    Type t = routes[message.type][message.subtype ?? "null"].Method.GetParameters()[0].ParameterType;
-                    o = JsonConvert.DeserializeObject(data, t, new JavascriptDateTimeConverter());
+                    object o = null;
+                    if (routing.ContainsKey(message.type) &&
+                        routing[message.type].ContainsKey(message.subtype ?? "null"))
+                        o = JsonConvert.DeserializeObject(data, routing[message.type][message.subtype ?? "null"],
+                            new JavascriptDateTimeConverter());
+                    else
+                    {
+                        //I believe this method is slower than the former. If I'm wrong we can just use this instead. :D
+                        Type t = routes[message.type][message.subtype ?? "null"].Method.GetParameters()[0].ParameterType;
+                        o = JsonConvert.DeserializeObject(data, t, new JavascriptDateTimeConverter());
+                    }
+                    routes[message.type][message.subtype ?? "null"].DynamicInvoke(o);
                 }
-                routes[message.type][message.subtype ?? "null"].DynamicInvoke(o);
+                catch (Exception e)
+                {
+                    if (ErrorHandlingMessage != null)
+                        ErrorHandlingMessage(e);
+                    throw e;
+                }
             }
             else
+            {
                 System.Diagnostics.Debug.WriteLine(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
+                if (ErrorHandlingMessage != null)
+                    ErrorHandlingMessage(new InvalidDataException(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null")));
+            }
         }
 
         void HandleSending(object stateful)

@@ -1,7 +1,8 @@
-﻿using SlackAPI.WebSocketMessages;
+﻿using System.Net.WebSockets;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using SlackAPI.WebSocketMessages;
 
 namespace SlackAPI
 {
@@ -47,6 +48,21 @@ namespace SlackAPI
 		public void ConnectSocket(Action onSocketConnected){
 			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
 		}
+
+        public void ErrorReceiving<K>(Action<WebSocketException> callback)
+        {
+            if (callback != null) underlyingSocket.ErrorReceiving += callback;
+        }
+
+        public void ErrorReceivingDesiralization<K>(Action<Exception> callback)
+        {
+            if (callback != null) underlyingSocket.ErrorReceivingDesiralization += callback;
+        }
+
+        public void ErrorHandlingMessage<K>(Action<Exception> callback)
+        {
+            if (callback != null) underlyingSocket.ErrorHandlingMessage += callback;
+        }
 
         public void BindCallback<K>(Action<K> callback)
         {
