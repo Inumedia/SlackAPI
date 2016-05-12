@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-    [RequestPath("presense.set")]
-    public class PresenceResponse : Response
+    [RequestPath("reactions.add")]
+    public class ReactionAddedResponse : Response
     {
-    }
-    public enum Presence
-    {
-        active,
-        away
+
     }
 }

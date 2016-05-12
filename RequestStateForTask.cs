@@ -24,7 +24,7 @@ namespace SlackAPI
 
         internal Task<K> Execute()
         {
-            if (Post.Length == 0)
+            if (Post == null || Post.Length == 0)
             {
                 request.Method = "GET";
                 return this.ExecuteResult();
@@ -67,6 +67,7 @@ namespace SlackAPI
         private async Task<K> ExecutePost()
         {
             request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
             using (Stream requestStream = await request.GetRequestStreamAsync())
             {
                 if (Post.Length > 0)
@@ -77,7 +78,7 @@ namespace SlackAPI
                         foreach (Tuple<string, string> postEntry in Post)
                         {
                             if (!first)
-                                writer.Write(',');
+                                writer.Write('&');
 
                             await writer.WriteAsync(string.Format("{0}={1}", Uri.EscapeDataString(postEntry.Item1), Uri.EscapeDataString(postEntry.Item2)));
 

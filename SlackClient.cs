@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using SlackAPI.RPCMessages;
 
 namespace SlackAPI
 {
@@ -505,10 +506,24 @@ namespace SlackAPI
             APIRequestWithToken(callback);
         }
 
+        #region Users
+
         public void GetCounts(Action<UserCountsResponse> callback)
         {
             APIRequestWithToken(callback);
         }
+
+        public void GetPresence(Action<UserGetPresenceResponse> callback, string user)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("user", user));
+        }
+
+        public void GetInfo(Action<UserInfoResponse> callback, string user)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("user", user));
+        }
+
+        #endregion  
 
         public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia.SlackAPI")
         {
@@ -595,6 +610,27 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("icon_emoji", icon_emoji));
 
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+
+        public void AddReaction(
+            Action<ReactionAddedResponse> callback,
+            string name = null,
+            string channel = null,
+            string timestamp = null)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            if (!string.IsNullOrEmpty(name))
+                parameters.Add(new Tuple<string, string>("name", name));
+
+            if (!string.IsNullOrEmpty(channel))
+                parameters.Add(new Tuple<string, string>("channel", channel));
+
+            if (!string.IsNullOrEmpty(timestamp))
+                parameters.Add(new Tuple<string, string>("timestamp", timestamp));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }

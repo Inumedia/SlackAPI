@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Attachment.cs" />
     <Compile Include="Reaction.cs" />
+    <Compile Include="ReactionAddedResponse.cs" />
     <Compile Include="RequestStateForTask.cs" />
     <Compile Include="RPCMessages\AccessTokenResponse.cs" />
     <Compile Include="RPCMessages\AuthSigninResponse.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="RPCMessages\ChannelMessageHistory.cs" />
     <Compile Include="ContextMessage.cs" />
     <Compile Include="DirectMessageConversation.cs" />
+    <Compile Include="RPCMessages\UserInfoResponse.cs" />
     <Compile Include="RPCMessages\DeletedResponse.cs" />
     <Compile Include="RPCMessages\FindTeamResponse.cs" />
     <Compile Include="RPCMessages\GroupUnarchiveResponse.cs" />
@@ -74,6 +76,7 @@
     <Compile Include="RPCMessages\GroupInviteResponse.cs" />
     <Compile Include="RPCMessages\GroupCloseResponse.cs" />
     <Compile Include="RPCMessages\DirectMessageConversationListResponse.cs" />
+    <Compile Include="RPCMessages\ChannelSetTopicResponse.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="File.cs" />
     <Compile Include="RPCMessages\FileInfoResponse.cs" />
@@ -101,6 +104,7 @@
     <Compile Include="RPCMessages\SearchResponseAll.cs" />
     <Compile Include="RPCMessages\SearchResponseFiles.cs" />
     <Compile Include="RPCMessages\SearchResponseMessages.cs" />
+    <Compile Include="RPCMessages\UserGetPresenceResponse.cs" />
     <Compile Include="SlackClient.cs" />
     <Compile Include="RPCMessages\StarListResponse.cs" />
     <Compile Include="SlackScope.cs" />
@@ -137,6 +141,7 @@
     <Compile Include="WebSocketMessages\Ping.cs" />
     <Compile Include="WebSocketMessages\Pong.cs" />
     <Compile Include="WebSocketMessages\PresenceChange.cs" />
+    <Compile Include="WebSocketMessages\ReactionAdded.cs" />
     <Compile Include="WebSocketMessages\TeamJoin.cs" />
     <Compile Include="WebSocketMessages\Typing.cs" />
     <Compile Include="WebSocketMessages\UserChange.cs" />

@@ -1,7 +1,8 @@
-﻿using SlackAPI.WebSocketMessages;
+﻿using System.Net.WebSockets;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using SlackAPI.WebSocketMessages;
 
 namespace SlackAPI
 {
@@ -10,6 +11,8 @@ namespace SlackAPI
         SlackSocket underlyingSocket;
 
         public event Action<NewMessage> OnMessageReceived;
+        public event Action<ReactionAdded> OnReactionAdded;
+        public event Action<Pong> OnPongReceived;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -47,6 +50,21 @@ namespace SlackAPI
 			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
 		}
 
+        public void ErrorReceiving<K>(Action<WebSocketException> callback)
+        {
+            if (callback != null) underlyingSocket.ErrorReceiving += callback;
+        }
+
+        public void ErrorReceivingDesiralization<K>(Action<Exception> callback)
+        {
+            if (callback != null) underlyingSocket.ErrorReceivingDesiralization += callback;
+        }
+
+        public void ErrorHandlingMessage<K>(Action<Exception> callback)
+        {
+            if (callback != null) underlyingSocket.ErrorHandlingMessage += callback;
+        }
+
         public void BindCallback<K>(Action<K> callback)
         {
             underlyingSocket.BindCallback(callback);
@@ -59,7 +77,7 @@ namespace SlackAPI
 
         public void SendPresence(Presence status)
         {
-            underlyingSocket.Send(new PresenceChange() { presence = Presence.Active, user = base.MySelf.id });
+            underlyingSocket.Send(new PresenceChange() { presence = Presence.active, user = base.MySelf.id });
         }
 
         public void SendTyping(string channelId)
@@ -75,11 +93,26 @@ namespace SlackAPI
 			}));
         }
 
+        public void SendPing()
+        {
+            underlyingSocket.Send(new Ping());
+        }
+
+        public void HandlePongReceived(Pong pong)
+        {
+            if (OnPongReceived != null)
+                OnPongReceived(pong);
+        }
+
+        public void HandleReactionAdded(ReactionAdded reactionAdded)
+        {
+            if (OnReactionAdded != null)
+                OnReactionAdded(reactionAdded);            
+        }
+
         public void HandleHello(Hello hello)
         {
             HelloReceived = true;
-
-            StartPing();
 
             if (OnHello != null)
                 OnHello();
@@ -159,30 +192,6 @@ namespace SlackAPI
         {
             GroupLookup[rename.channel.id].name = rename.channel.name;
             GroupLookup[rename.channel.id].created = rename.channel.created;
-        }
-
-        void StartPing()
-        {
-            pingingThread = new Timer(Ping, null, PingInterval, PingInterval);
-        }
-
-        void Ping(object state)
-        {
-            if (Interlocked.CompareExchange(ref pinging, 1, 0) == 0)
-            {
-                //This isn't ideal.
-                //TODO: Setup a callback on the messages so I get a hit when the message is just being sent. Messages are currently handled async.
-                Stopwatch w = Stopwatch.StartNew();
-                underlyingSocket.Send(new Ping()
-                {
-                    ping_interv_ms = PingInterval
-                }, new Action<Pong>((p) =>
-                {
-                    w.Stop();
-                    PingRoundTripMilliseconds = w.ElapsedMilliseconds;
-                    pinging = 0;
-                }));
-            }
         }
 
         public void UserTyping(Typing t)
