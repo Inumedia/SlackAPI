@@ -29,7 +29,7 @@ namespace SlackAPI
         public SlackSocketClient(string token)
             : base(token)
         {
-            
+
         }
 
 		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
@@ -85,12 +85,18 @@ namespace SlackAPI
             underlyingSocket.Send(new Typing() { channel = channelId });
         }
 
-        public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData)
+        public void SendMessage(Action<MessageReceived> onSent, string channelId, string textData, string userName = null)
         {
-			underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = MySelf.id, type = "message" }, new Action<MessageReceived>((mr) => {
-				if(onSent != null)
-					onSent(mr);
-			}));
+            if (userName == null)
+            {
+                userName = MySelf.id;
+            }
+
+            if (onSent != null) {
+                underlyingSocket.Send( new Message() {channel = channelId, text = textData, user = userName, type = "message"}, onSent);
+            } else {
+                underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = userName, type = "message" });
+            }
         }
 
         public void SendPing()
@@ -218,7 +224,7 @@ namespace SlackAPI
 
         public void ChannelMarked(ChannelMarked m)
         {
-            
+
         }
 
 		public void CloseSocket()
