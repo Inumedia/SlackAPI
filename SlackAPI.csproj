@@ -76,6 +76,7 @@
     <Compile Include="RPCMessages\GroupInviteResponse.cs" />
     <Compile Include="RPCMessages\GroupCloseResponse.cs" />
     <Compile Include="RPCMessages\DirectMessageConversationListResponse.cs" />
+    <Compile Include="RPCMessages\ChannelSetTopicResponse.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="File.cs" />
     <Compile Include="RPCMessages\FileInfoResponse.cs" />
