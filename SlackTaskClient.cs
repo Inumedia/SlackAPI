@@ -123,17 +123,14 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<K>(new Tuple<string, string>[] { });
         }
  
-        public Task<K> APIRequestWithTokenAsync<K>(params Tuple<string,string>[] getParameters)
+        public Task<K> APIRequestWithTokenAsync<K>(params Tuple<string,string>[] postParameters)
             where K : Response
         {
             Tuple<string, string>[] tokenArray = new Tuple<string, string>[]{
                 new Tuple<string,string>("token", APIToken)
             };
 
-            if (getParameters != null && getParameters.Length > 0)
-                tokenArray = tokenArray.Concat(getParameters).ToArray();
-
-            return APIRequestAsync<K>(tokenArray, new Tuple<string, string>[0]);
+            return APIRequestAsync<K>(tokenArray, postParameters);
         }
 
         [Obsolete("Please use the OAuth method for authenticating users")]
@@ -568,6 +565,13 @@ namespace SlackAPI
                 //callback(JsonConvert.DeserializeObject<FileUploadResponse>(result, new JavascriptDateTimeConverter()));
                 throw new NotImplementedException("This operation has not been implemented.");
             }
+        }
+
+        public Task<ChannelSetTopicResponse> ChannelSetTopicAsync(string channelId, string newTopic)
+        {
+            return APIRequestWithTokenAsync<ChannelSetTopicResponse>(
+                    new Tuple<string, string>("channel", channelId),
+                    new Tuple<string, string>("topic", newTopic));
         }
     }
 }
