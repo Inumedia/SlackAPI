@@ -195,8 +195,10 @@ namespace SlackAPI
         {
             APIRequestWithToken(callback);
         }
-
-        public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
+		public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name) {
+			APIRequestWithToken(callback, new Tuple<string, string>("name", name));
+		}
+		public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
