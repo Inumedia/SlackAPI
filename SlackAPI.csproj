@@ -54,6 +54,7 @@
     <Compile Include="RPCMessages\AuthTestResponse.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Channel.cs" />
+    <Compile Include="RPCMessages\ChannelCreateResponse.cs" />
     <Compile Include="RPCMessages\ChannelListResponse.cs" />
     <Compile Include="RPCMessages\ChannelMessageHistory.cs" />
     <Compile Include="ContextMessage.cs" />
