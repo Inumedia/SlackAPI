@@ -665,7 +665,7 @@ namespace SlackAPI
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
                 HttpResponseMessage response = client.PostAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form).Result;
                 string result = response.Content.ReadAsStringAsync().Result;
-                callback(JsonConvert.DeserializeObject<FileUploadResponse>(result, new JavascriptDateTimeConverter()));
+                callback(result.Deserialize<FileUploadResponse>());
             }
         }
 
