@@ -214,7 +214,7 @@ namespace SlackAPI
                         {
                             message = data.Deserialize<SlackSocketMessage>();
                         }
-                        catch (JsonSerializationException jsonExcep)
+                        catch (JsonException jsonExcep)
                         {
                             if (ErrorReceivingDesiralization != null)
                                 ErrorReceivingDesiralization(jsonExcep);
