@@ -57,7 +57,7 @@ namespace SlackAPI
                 using (StreamReader reader = new StreamReader(responseReading))
                 {
                     string responseData = reader.ReadToEnd();
-                    responseObj = JsonConvert.DeserializeObject<K>(responseData, new JavascriptDateTimeConverter());
+                    responseObj = responseData.Deserialize<K>();
                 }
             }
 
