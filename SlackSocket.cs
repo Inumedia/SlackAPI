@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Runtime.Serialization;
 
 namespace SlackAPI
 {
@@ -113,7 +112,7 @@ namespace SlackAPI
             message.id = sendingId;
             callbacks.Add(sendingId, (c) =>
             {
-                K obj = c.Deserialize<K>();
+                K obj = JsonConvert.DeserializeObject<K>(c, new JavascriptDateTimeConverter());
                 callback(obj);
             });
             Send(message);
@@ -212,9 +211,9 @@ namespace SlackAPI
                         SlackSocketMessage message = null;
                         try
                         {
-                            message = data.Deserialize<SlackSocketMessage>();
+                            message = JsonConvert.DeserializeObject<SlackSocketMessage>(data, new JavascriptDateTimeConverter());
                         }
-                        catch (JsonException jsonExcep)
+                        catch (JsonSerializationException jsonExcep)
                         {
                             if (ErrorReceivingDesiralization != null)
                                 ErrorReceivingDesiralization(jsonExcep);
@@ -246,12 +245,13 @@ namespace SlackAPI
                     object o = null;
                     if (routing.ContainsKey(message.type) &&
                         routing[message.type].ContainsKey(message.subtype ?? "null"))
-                        o = data.Deserialize(routing[message.type][message.subtype ?? "null"]);
+                        o = JsonConvert.DeserializeObject(data, routing[message.type][message.subtype ?? "null"],
+                            new JavascriptDateTimeConverter());
                     else
                     {
                         //I believe this method is slower than the former. If I'm wrong we can just use this instead. :D
                         Type t = routes[message.type][message.subtype ?? "null"].Method.GetParameters()[0].ParameterType;
-                        o = data.Deserialize(t);
+                        o = JsonConvert.DeserializeObject(data, t, new JavascriptDateTimeConverter());
                     }
                     routes[message.type][message.subtype ?? "null"].DynamicInvoke(o);
                 }
@@ -317,13 +317,6 @@ namespace SlackAPI
         public string subtype;
         public bool ok = true;
         public Error error;
-        public string raw;
-
-        [OnDeserialized]
-        public void OnDeserialized(StreamingContext context)
-        {
-          this.raw = context.Context as string;
-        }
     }
 
     public class Error
