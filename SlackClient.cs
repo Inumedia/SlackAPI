@@ -106,6 +106,7 @@ namespace SlackAPI
         internal static Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
         {
             string parameters = getParameters
+                .Where(x => x.Item2 != null)
                 .Select(new Func<Tuple<string, string>, string>(a => 
                     {
                         try
