@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SlackAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,12 +40,12 @@ namespace SlackAPI
         public List<User> Users;
         public List<Channel> Channels;
         public List<Channel> Groups;
-        public List<DirectMessageConversation> DirectMessages;
+        public List<DirectMessage> DirectMessages;
 
         public Dictionary<string, User> UserLookup;
         public Dictionary<string, Channel> ChannelLookup;
         public Dictionary<string, Channel> GroupLookup;
-        public Dictionary<string, DirectMessageConversation> DirectMessageLookup;
+        public Dictionary<string, DirectMessage> DirectMessageLookup;
 
         //public event Action<ReceivingMessage> OnUserTyping;
         //public event Action<ReceivingMessage> OnMessageReceived;
@@ -59,7 +60,7 @@ namespace SlackAPI
 		public virtual async Task<LoginResponse> ConnectAsync()
         {
             var loginDetails = await EmitLoginAsync();
-			if(loginDetails.ok)
+			if(loginDetails.Ok)
 				Connected(loginDetails);
 
             return loginDetails;
@@ -74,26 +75,26 @@ namespace SlackAPI
             Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
             Channels = new List<Channel>(loginDetails.channels);
             Groups = new List<Channel>(loginDetails.groups);
-            DirectMessages = new List<DirectMessageConversation>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.user) && c.id != MySelf.id));
+            DirectMessages = new List<DirectMessage>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.UserId) && c.Id != MySelf.id));
             starredChannels =
-                    Groups.Where((c) => c.is_starred).Select((c) => c.id)
+                    Groups.Where((c) => c.IsStarred).Select((c) => c.Id)
                 .Union(
-                    DirectMessages.Where((c) => c.is_starred).Select((c) => c.user)
+                    DirectMessages.Where((c) => c.IsStarred).Select((c) => c.UserId)
                 ).Union(
-                    Channels.Where((c) => c.is_starred).Select((c) => c.id)
+                    Channels.Where((c) => c.IsStarred).Select((c) => c.Id)
                 ).ToList();
 
             UserLookup = new Dictionary<string, User>();
             foreach (User u in Users) UserLookup.Add(u.id, u);
 
             ChannelLookup = new Dictionary<string, Channel>();
-            foreach (Channel c in Channels) ChannelLookup.Add(c.id, c);
+            foreach (Channel c in Channels) ChannelLookup.Add(c.Id, c);
 
             GroupLookup = new Dictionary<string, Channel>();
-            foreach (Channel g in Groups) GroupLookup.Add(g.id, g);
+            foreach (Channel g in Groups) GroupLookup.Add(g.Id, g);
 
-            DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
-            foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
+            DirectMessageLookup = new Dictionary<string, DirectMessage>();
+            foreach (DirectMessage im in DirectMessages) DirectMessageLookup.Add(im.Id, im);
         }
 
         public static Task<K> APIRequestAsync<K>(Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
@@ -243,17 +244,17 @@ namespace SlackAPI
 
         public Task<ChannelMessageHistory> GetChannelHistoryAsync(Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            return GetHistoryAsync<ChannelMessageHistory>(channelInfo.id, latest, oldest, count);
+            return GetHistoryAsync<ChannelMessageHistory>(channelInfo.Id, latest, oldest, count);
         }
 
-        public Task<MessageHistory> GetDirectMessageHistoryAsync(DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<MessageHistory> GetDirectMessageHistoryAsync(DirectMessage conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            return GetHistoryAsync<MessageHistory>(conversationInfo.id, latest, oldest, count);
+            return GetHistoryAsync<MessageHistory>(conversationInfo.Id, latest, oldest, count);
         }
 
         public Task<GroupMessageHistory> GetGroupHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count);
+            return GetHistoryAsync<GroupMessageHistory>(groupInfo.Id, latest, oldest, count);
         }
 
         public Task<MarkResponse> MarkChannelAsync(string channelId, DateTime ts)

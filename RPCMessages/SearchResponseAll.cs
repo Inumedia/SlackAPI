@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     [RequestPath("search.all")]
     public class SearchResponseAll : Response

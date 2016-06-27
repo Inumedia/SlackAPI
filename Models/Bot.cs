@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SlackAPI
+namespace SlackAPI.Models
 {
     public class Bot
     {

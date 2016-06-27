@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     /// <summary>
     /// This is an undocumented response from an undocumented API. If anyone finds more info on this, please create a pull request.

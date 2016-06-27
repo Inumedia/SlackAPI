@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace IntegrationTest
 {
     using SlackAPI;
-
+    using SlackAPI.Models;
     [TestClass]
     public class Update 
     {
@@ -42,7 +42,7 @@ namespace IntegrationTest
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
+            Assert.IsTrue(actual.Ok, "Error while posting message to channel. ");
             Assert.AreEqual(actual.message.text, "[changed]");
             Assert.AreEqual(actual.message.type, "message");
         }
@@ -56,7 +56,7 @@ namespace IntegrationTest
                     response =>
                     {
                         messageId = response.ts;
-                        Assert.IsTrue(response.ok, "Error while posting message to channel. ");
+                        Assert.IsTrue(response.Ok, "Error while posting message to channel. ");
                         sync.Proceed();
                     },
                     _config.Slack.TestChannel,

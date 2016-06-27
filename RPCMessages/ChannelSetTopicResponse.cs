@@ -1,4 +1,4 @@
-namespace SlackAPI
+namespace SlackAPI.Models
 {
     [RequestPath("channels.setTopic")]
     public class ChannelSetTopicResponse : Response

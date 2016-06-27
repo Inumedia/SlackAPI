@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     [RequestPath("channels.list")]
     public class ChannelListResponse : Response

@@ -1,4 +1,4 @@
-﻿namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     [RequestPath("im.open")]
     public class JoinDirectMessageChannelResponse : Response

@@ -1,4 +1,6 @@
-﻿namespace SlackAPI.WebSocketMessages
+﻿using SlackAPI.Models;
+
+namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("channel_rename")]
     public class ChannelRename

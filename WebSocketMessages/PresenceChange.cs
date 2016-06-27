@@ -1,4 +1,4 @@
-﻿using System;
+﻿using SlackAPI.Models;
 
 namespace SlackAPI.WebSocketMessages
 {

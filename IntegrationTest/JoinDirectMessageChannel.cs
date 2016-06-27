@@ -31,8 +31,8 @@ namespace IntegrationTest
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
             client.JoinDirectMessageChannel(response =>
             {
-                Assert.IsTrue(response.ok, "Error while joining user channel");
-                Assert.IsTrue(!string.IsNullOrEmpty(response.channel.id), "We expected a channel id to be returned");
+                Assert.IsTrue(response.Ok, "Error while joining user channel");
+                Assert.IsTrue(!string.IsNullOrEmpty(response.channel.Id), "We expected a channel id to be returned");
                 wait.Set();
             }, user);
 

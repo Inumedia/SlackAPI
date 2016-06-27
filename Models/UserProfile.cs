@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     public class UserProfile
     {
@@ -19,7 +13,7 @@ namespace SlackAPI
         public string image_48;
         public string image_72;
         public string image_192;
-
+        public string image_512;
         public override string ToString()
         {
             return real_name;

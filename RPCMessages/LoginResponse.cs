@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SlackAPI
+namespace SlackAPI.Models
 {
-	[RequestPath("rtm.start")]
+    [RequestPath("rtm.start")]
 	public class LoginResponse : Response
 	{
 		public Bot[] bots;
 		public Channel[] channels;
 		public Channel[] groups;
-		public DirectMessageConversation[] ims;
+		public DirectMessage[] ims;
 		public Self self;
 		public int svn_rev;
 		public int min_svn_rev;

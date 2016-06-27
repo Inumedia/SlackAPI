@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     public class Preferences
     {
@@ -53,7 +51,7 @@ namespace SlackAPI
         public bool mark_msgs_read_immediately;
         public string tz;
         public string emoji_mode;
-        public string highlight_words;
+        public string hightlight_words;
         //public string newxp_slackbot_step; //I don't even...
         public SearchSort search_sort;
         public string push_loud_channels;

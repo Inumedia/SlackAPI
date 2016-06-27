@@ -13,7 +13,7 @@ namespace IntegrationTest.Helpers
             var wait = new EventWaitHandle(false, EventResetMode.ManualReset);
 
             var client = new SlackSocketClient(authToken);
-            client.Connect(x =>
+            client.Connect((x,sc) =>
             {
                 Console.WriteLine("RTM Start");
             }, () =>

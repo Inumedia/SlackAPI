@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using SlackAPI.WebSocketMessages;
+using SlackAPI.Models;
 
 namespace SlackAPI
 {
@@ -10,9 +11,16 @@ namespace SlackAPI
     {
         SlackSocket underlyingSocket;
 
-        public event Action<NewMessage> OnMessageReceived;
-        public event Action<ReactionAdded> OnReactionAdded;
-        public event Action<Pong> OnPongReceived;
+        public event Action<NewMessage, SlackSocketClient> OnMessageReceived;
+        public event Action<UserChange, SlackSocketClient> OnUserChange;
+        public event Action<PresenceChange, SlackSocketClient> OnPresenceChange;
+        public event Action<ChannelRename, SlackSocketClient> OnChannelRename;
+        public event Action<Typing, SlackSocketClient> OnTyping;
+        public event Action<ChannelMarked, SlackSocketClient> OnChannelMarked;
+        public event Action<Hello, SlackSocketClient> OnHello;
+        public event Action<ReactionAdded, SlackSocketClient> OnReactionAdded;
+        public event Action<Pong, SlackSocketClient> OnPongReceived;
+        public event Action<SlackSocketClient> OnConnectionClosed;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -23,8 +31,7 @@ namespace SlackAPI
         public bool IsReady { get { return HelloReceived; } }
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
-        public event Action OnHello;
-		internal LoginResponse loginDetails;
+        internal LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
             : base(token)
@@ -32,37 +39,58 @@ namespace SlackAPI
 
         }
 
-		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
-		{
-			base.Connect((s) => {
-				ConnectSocket(onSocketConnected);
-				onConnected(s);
-			});
-		}
+        public override void Connect(Action<LoginResponse, SlackClient> onConnected, Action onSocketConnected = null)
+        {
+            EmitLogin((loginDetails) =>
+            {
+                if (loginDetails.Ok)
+                {
+                    Connected(loginDetails);
+                    ConnectSocket(onSocketConnected);
+                }
+                if (onConnected != null)
+                    onConnected(loginDetails, this);
+            });
+        }
 
         protected override void Connected(LoginResponse loginDetails)
-		{
-			this.loginDetails = loginDetails;
-			base.Connected(loginDetails);
-		}
+        {
+            this.loginDetails = loginDetails;
+            base.Connected(loginDetails);
+        }
 
-		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
-		}
+        public void ConnectSocket(Action onSocketConnected)
+        {
+            underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
+            underlyingSocket.ConnectionClosed += UnderlyingSocketConnectionClosed;
+        }
 
-        public void ErrorReceiving<K>(Action<WebSocketException> callback)
+        /// <summary>
+        /// Invoke when the connection is closed
+        /// </summary>
+        private void UnderlyingSocketConnectionClosed()
+        {
+            if (OnConnectionClosed != null) OnConnectionClosed(this);
+        }
+
+        public void ErrorReceiving(Action<WebSocketException> callback)
         {
             if (callback != null) underlyingSocket.ErrorReceiving += callback;
         }
 
-        public void ErrorReceivingDesiralization<K>(Action<Exception> callback)
+        public void ErrorReceivingDesiralization(Action<Exception> callback)
         {
             if (callback != null) underlyingSocket.ErrorReceivingDesiralization += callback;
         }
 
-        public void ErrorHandlingMessage<K>(Action<Exception> callback)
+        public void ErrorHandlingMessage(Action<Exception> callback)
         {
             if (callback != null) underlyingSocket.ErrorHandlingMessage += callback;
+        }
+
+        public void ErrorLoopSocket(Action<Exception> callback)
+        {
+            if (callback != null) underlyingSocket.ErrorLoopSocket += callback;
         }
 
         public void BindCallback<K>(Action<K> callback)
@@ -92,9 +120,11 @@ namespace SlackAPI
                 userName = MySelf.id;
             }
 
-            if (onSent != null) {
-                underlyingSocket.Send( new Message() {channel = channelId, text = textData, user = userName, type = "message"}, onSent);
-            } else {
+            if (onSent != null)
+            {
+                underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = userName, type = "message" }, onSent);
+            }
+            else {
                 underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = userName, type = "message" });
             }
         }
@@ -107,13 +137,13 @@ namespace SlackAPI
         public void HandlePongReceived(Pong pong)
         {
             if (OnPongReceived != null)
-                OnPongReceived(pong);
+                OnPongReceived(pong, this);
         }
 
         public void HandleReactionAdded(ReactionAdded reactionAdded)
         {
             if (OnReactionAdded != null)
-                OnReactionAdded(reactionAdded);            
+                OnReactionAdded(reactionAdded, this);
         }
 
         public void HandleHello(Hello hello)
@@ -121,7 +151,7 @@ namespace SlackAPI
             HelloReceived = true;
 
             if (OnHello != null)
-                OnHello();
+                OnHello(hello, this);
         }
 
         public void HandlePresence(PresenceChange change)
@@ -132,6 +162,9 @@ namespace SlackAPI
         public void HandleUserChange(UserChange change)
         {
             UserLookup[change.user.id] = change.user;
+
+            if (OnUserChange != null)
+                OnUserChange(change, this);
         }
 
         public void HandleTeamJoin(TeamJoin newuser)
@@ -141,12 +174,15 @@ namespace SlackAPI
 
         public void HandleChannelCreated(ChannelCreated created)
         {
-            ChannelLookup.Add(created.channel.id, created.channel);
+            ChannelLookup.Add(created.channel.Id, created.channel);
         }
 
         public void HandleChannelRename(ChannelRename rename)
         {
-            ChannelLookup[rename.channel.id].name = rename.channel.name;
+            ChannelLookup[rename.channel.Id].Name = rename.channel.Name;
+
+            if (OnChannelRename != null)
+                OnChannelRename(rename, this);
         }
 
         public void HandleChannelDeleted(ChannelDeleted deleted)
@@ -156,80 +192,87 @@ namespace SlackAPI
 
         public void HandleChannelArchive(ChannelArchive archive)
         {
-            ChannelLookup[archive.channel].is_archived = true;
+            ChannelLookup[archive.channel].IsArchived = true;
         }
 
         public void HandleChannelUnarchive(ChannelUnarchive unarchive)
         {
-            ChannelLookup[unarchive.channel].is_archived = false;
+            ChannelLookup[unarchive.channel].IsArchived = false;
         }
 
         public void HandleGroupJoined(GroupJoined joined)
         {
-            GroupLookup.Add(joined.channel.id, joined.channel);
+            GroupLookup.Add(joined.channel.Id, joined.channel);
         }
 
         public void HandleGroupLeft(GroupLeft left)
         {
-            GroupLookup.Remove(left.channel.id);
+            GroupLookup.Remove(left.channel.Id);
         }
 
         public void HandleGroupOpen(GroupOpen open)
         {
-            GroupLookup[open.channel].is_open = true;
+            GroupLookup[open.channel].IsOpen = true;
         }
 
         public void HandleGroupClose(GroupClose close)
         {
-            GroupLookup[close.channel].is_open = false;
+            GroupLookup[close.channel].IsOpen = false;
         }
 
         public void HandleGroupArchive(GroupArchive archive)
         {
-            GroupLookup[archive.channel].is_archived = true;
+            GroupLookup[archive.channel].IsArchived = true;
         }
 
         public void HandleGroupUnarchive(GroupUnarchive unarchive)
         {
-            GroupLookup[unarchive.channel].is_archived = false;
+            GroupLookup[unarchive.channel].IsArchived = false;
         }
 
         public void HandleGroupRename(GroupRename rename)
         {
-            GroupLookup[rename.channel.id].name = rename.channel.name;
-            GroupLookup[rename.channel.id].created = rename.channel.created;
+            GroupLookup[rename.channel.Id].Name = rename.channel.Name;
+            GroupLookup[rename.channel.Id].Created = rename.channel.Created;
         }
 
         public void UserTyping(Typing t)
         {
-
+            if (OnTyping != null)
+                OnTyping(t, this);
         }
 
         public void Message(NewMessage m)
         {
             if (OnMessageReceived != null)
-                OnMessageReceived(m);
+                OnMessageReceived(m, this);
         }
 
         public void FileShareMessage(FileShareMessage m)
         {
             if (OnMessageReceived != null)
-                OnMessageReceived(m);
+                OnMessageReceived(m, this);
         }
 
         public void PresenceChange(PresenceChange p)
         {
-
+            if (OnPresenceChange != null)
+                OnPresenceChange(p, this);
         }
 
+        /// <summary>
+        /// Your channel read marker was updated
+        /// </summary>
+        /// <param name="m"></param>
         public void ChannelMarked(ChannelMarked m)
         {
-
+            if (OnChannelMarked != null)
+                OnChannelMarked(m, this);
         }
 
-		public void CloseSocket()
-		{
-			underlyingSocket.Close();
-		}
+        public void CloseSocket()
+        {
+            underlyingSocket.Close();
+        }
     }
 }

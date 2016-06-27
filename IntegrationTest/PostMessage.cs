@@ -9,7 +9,7 @@ using Polly;
 namespace IntegrationTest
 {
     using SlackAPI;
-
+    using SlackAPI.Models;
     [TestClass]
     public class PostMessage
     {
@@ -41,7 +41,7 @@ namespace IntegrationTest
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
+            Assert.IsTrue(actual.Ok, "Error while posting message to channel. ");
             Assert.AreEqual(actual.message.text, "Hi there!");
             Assert.AreEqual(actual.message.type, "message");
         }
@@ -68,7 +68,7 @@ namespace IntegrationTest
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
+            Assert.IsTrue(actual.Ok, "Error while posting message to channel. ");
         }
     }
 }

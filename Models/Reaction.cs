@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SlackAPI
+namespace SlackAPI.Models
 {
     public class Reaction
     {

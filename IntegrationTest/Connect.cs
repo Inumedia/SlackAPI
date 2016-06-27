@@ -6,6 +6,7 @@ using IntegrationTest.Configuration;
 using IntegrationTest.Helpers;
 using Polly;
 using SlackAPI.WebSocketMessages;
+using SlackAPI.Models;
 
 namespace IntegrationTest
 {
@@ -85,7 +86,7 @@ namespace IntegrationTest
 
             // then
             Assert.IsNotNull(deletedResponse, "No response was found");
-            Assert.IsTrue(deletedResponse.ok, "Message not deleted!");
+            Assert.IsTrue(deletedResponse.Ok, "Message not deleted!");
             Assert.AreEqual(channel, deletedResponse.channel, "Got invalid channel? Something's not right here...");
             Assert.AreEqual(messageTimestamp, deletedResponse.ts, "Got invalid time stamp? Something's not right here...");
         }

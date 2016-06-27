@@ -1,7 +1,6 @@
 ﻿using System;
-using Newtonsoft.Json.Serialization;
 
-namespace SlackAPI
+namespace SlackAPI.Models
 {
     [RequestPath("im.history")]
     public class MessageHistory : Response
