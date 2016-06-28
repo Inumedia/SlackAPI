@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/5n9e7sruxpo0mw79/branch/master?svg=true)](https://ci.appveyor.com/project/Inumedia/slackapi/branch/master)
+
 # SlackAPI
 
 This is a third party implementation of Slack's API written in C#. This supports their WebAPI aswell as their Real Time Messaging API.
