@@ -213,7 +213,7 @@ namespace SlackAPI
                         {
                             message = JsonConvert.DeserializeObject<SlackSocketMessage>(data, new JavascriptDateTimeConverter());
                         }
-                        catch (JsonSerializationException jsonExcep)
+                        catch (JsonException jsonExcep)
                         {
                             if (ErrorReceivingDesiralization != null)
                                 ErrorReceivingDesiralization(jsonExcep);
