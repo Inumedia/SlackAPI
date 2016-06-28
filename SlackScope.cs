@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace SlackAPI
 {
+    [Flags]
     public enum SlackScope
     {
         Identify = 1,
