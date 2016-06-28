@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachment.cs" />
+    <Compile Include="Conversation.cs" />
     <Compile Include="Reaction.cs" />
     <Compile Include="ReactionAddedResponse.cs" />
     <Compile Include="RequestStateForTask.cs" />
