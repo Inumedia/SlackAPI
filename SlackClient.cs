@@ -666,7 +666,7 @@ namespace SlackAPI
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
                 HttpResponseMessage response = client.PostAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form).Result;
                 string result = response.Content.ReadAsStringAsync().Result;
-                callback(JsonConvert.DeserializeObject<FileUploadResponse>(result, new JavascriptDateTimeConverter()));
+                callback(result.Deserialize<FileUploadResponse>());
             }
         }
 
@@ -719,6 +719,16 @@ namespace SlackAPI
             APIRequest<AccessTokenResponse>(callback, new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
                 new Tuple<string, string>("client_secret", clientSecret), new Tuple<string, string>("code", code),
                 new Tuple<string, string>("redirect_uri", redirectUri) }, new Tuple<string, string>[] {});
+        }
+
+        public static void RegisterConverter(JsonConverter converter)
+        {
+            if (converter == null)
+            {
+                throw new ArgumentNullException("converter");
+            }
+
+            Extensions.Converters.Add(converter);
         }
     }
 }
