@@ -1,5 +1,6 @@
 ﻿namespace SlackAPI.Models
 {
+    [Flags]
     public enum SlackScope
     {
         Identify = 1,
