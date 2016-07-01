@@ -17,6 +17,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+.vs
 
 # External tool builders
 .externalToolBuilders/
@@ -217,5 +218,4 @@ pip-log.txt
 .mr.developer.cfg
 *.chk
 *.ide
-packages
-*.private
+
