@@ -1,4 +1,6 @@
-﻿namespace SlackAPI.Models
+﻿using System;
+
+namespace SlackAPI.Models
 {
     [Flags]
     public enum SlackScope
