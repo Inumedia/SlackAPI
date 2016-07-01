@@ -2,11 +2,16 @@
 using SlackAPI.WebSocketMessages;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace SlackAPI
 {
     public class SlackSocketClientCollection
     {
+        #region Atributes
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        #endregion
+
         private Dictionary<string, SlackSocketClient> _socketClients;
         public event Action<MessageReceived> OnSent;
 
@@ -39,7 +44,7 @@ namespace SlackAPI
         /// </summary>
         /// <param name="teamId"></param>
         /// <param name="accessToken"></param>
-        public void CreateSlackClientConnect(string teamId, string accessToken)
+        public SlackSocketClient CreateSlackClientConnect(string teamId, string accessToken)
         {
             SlackSocketClient client = new SlackSocketClient(accessToken);
             client.Connect(ClientOnConnect);
@@ -62,6 +67,13 @@ namespace SlackAPI
                     _socketClients.Add(teamId, client);
                 }
             }
+
+            return client;
+        }
+
+        public void ReconnectSlackClient(SlackSocketClient client)
+        {
+            client.Connect(ClientOnConnect);
         }
 
         private void ClientOnConnect(LoginResponse loginResponse, SlackClient socketClient)
@@ -99,9 +111,15 @@ namespace SlackAPI
             SlackSocketClient client;
             if (!_socketClients.TryGetValue(teamId, out client))
             {
+                Log.Debug("Socket client dont exists on the SocketClients dictionary");
                 return;
             }
 
+            client.SendMessage(OnSent, channelId, textMessage, userName);
+        }
+
+        public void SendSlackMessage(SlackSocketClient client, string channelId, string textMessage, string userName = null)
+        {
             client.SendMessage(OnSent, channelId, textMessage, userName);
         }
 
