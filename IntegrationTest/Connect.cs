@@ -37,7 +37,7 @@ namespace IntegrationTest
             var authCode = _config.Slack.AuthCode;
 
             // act
-            var accessTokenResponse = GetAccessToken(clientId, clientSecret, "", authCode);
+            var accessTokenResponse = GetAccessToken(clientId, clientSecret, string.Empty, authCode);
             
             // assert
             Assert.IsNotNull(accessTokenResponse, "accessTokenResponse != null");

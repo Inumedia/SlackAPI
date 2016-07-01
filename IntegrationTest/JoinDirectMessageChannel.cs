@@ -25,7 +25,7 @@ namespace IntegrationTest
             var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
 
             string userName = _config.Slack.DirectMessageUser;
-            string user = client.Users.First(x => x.name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).id;
+            string user = client.Users.First(x => x.Name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).Id;
 
             // when
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);

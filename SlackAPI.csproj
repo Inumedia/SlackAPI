@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\SlackAPI.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +32,10 @@
     <DocumentationFile>bin\Release\SlackAPI.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -62,7 +67,7 @@
     <Compile Include="RPCMessages\ChannelListResponse.cs" />
     <Compile Include="RPCMessages\ChannelMessageHistory.cs" />
     <Compile Include="Models\ContextMessage.cs" />
-    <Compile Include="Models\DirectMessageConversation.cs" />
+    <Compile Include="Models\DirectMessage.cs" />
     <Compile Include="RPCMessages\UserInfoResponse.cs" />
     <Compile Include="RPCMessages\DeletedResponse.cs" />
     <Compile Include="RPCMessages\FindTeamResponse.cs" />
@@ -115,6 +120,7 @@
     <Compile Include="Models\SlackScope.cs" />
     <Compile Include="SlackSocket.cs" />
     <Compile Include="SlackSocketClient.cs" />
+    <Compile Include="SlackSocketCollection.cs" />
     <Compile Include="SlackTaskClient.cs" />
     <Compile Include="Models\Team.cs" />
     <Compile Include="Models\TeamPreferences.cs" />
@@ -132,6 +138,7 @@
     <Compile Include="WebSocketMessages\ChannelRename.cs" />
     <Compile Include="WebSocketMessages\ChannelUnarchive.cs" />
     <Compile Include="WebSocketMessages\DeletedMessage.cs" />
+    <Compile Include="WebSocketMessages\FilePublic.cs" />
     <Compile Include="WebSocketMessages\FileShareMessage.cs" />
     <Compile Include="WebSocketMessages\GroupArchive.cs" />
     <Compile Include="WebSocketMessages\GroupClose.cs" />
@@ -140,6 +147,8 @@
     <Compile Include="WebSocketMessages\GroupOpen.cs" />
     <Compile Include="WebSocketMessages\GroupRename.cs" />
     <Compile Include="WebSocketMessages\GroupUnarchive.cs" />
+    <Compile Include="WebSocketMessages\FileShared.cs" />
+    <Compile Include="WebSocketMessages\ReconnectUrl.cs" />
     <Compile Include="WebSocketMessages\Hello.cs" />
     <Compile Include="WebSocketMessages\MessageReceived.cs" />
     <Compile Include="WebSocketMessages\NewMessage.cs" />

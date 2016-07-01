@@ -69,13 +69,13 @@ namespace SlackAPI
         protected virtual void Connected(LoginResponse loginDetails)
         {
             MySelf = loginDetails.self;
-            MyData = loginDetails.users.First((c) => c.id == MySelf.id);
+            MyData = loginDetails.users.First((c) => c.Id == MySelf.id);
             MyTeam = loginDetails.team;
 
-            Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
+            Users = new List<User>(loginDetails.users.Where((c) => !c.Deleted));
             Channels = new List<Channel>(loginDetails.channels);
             Groups = new List<Channel>(loginDetails.groups);
-            DirectMessages = new List<DirectMessage>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.UserId) && c.Id != MySelf.id));
+            DirectMessages = new List<DirectMessage>(loginDetails.ims.Where((c) => Users.Exists((a) => a.Id == c.UserId) && c.Id != MySelf.id));
             starredChannels =
                     Groups.Where((c) => c.IsStarred).Select((c) => c.Id)
                 .Union(
@@ -85,7 +85,7 @@ namespace SlackAPI
                 ).ToList();
 
             UserLookup = new Dictionary<string, User>();
-            foreach (User u in Users) UserLookup.Add(u.id, u);
+            foreach (User u in Users) UserLookup.Add(u.Id, u);
 
             ChannelLookup = new Dictionary<string, Channel>();
             foreach (Channel c in Channels) ChannelLookup.Add(c.Id, c);

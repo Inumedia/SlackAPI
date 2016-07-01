@@ -13,6 +13,10 @@ namespace SlackAPI.Models
 		public int svn_rev;
 		public int min_svn_rev;
 		public Team team;
+
+        /// <summary>
+        /// The Websocket URLs provided by rtm.start are single-use and are only valid for 30 seconds, so make sure to connect quickly.
+        /// </summary>
 		public string url;
 		public User[] users;
 	}

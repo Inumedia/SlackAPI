@@ -1,6 +1,5 @@
 ﻿using System.Net.WebSockets;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using SlackAPI.WebSocketMessages;
 using SlackAPI.Models;
@@ -21,6 +20,11 @@ namespace SlackAPI
         public event Action<ReactionAdded, SlackSocketClient> OnReactionAdded;
         public event Action<Pong, SlackSocketClient> OnPongReceived;
         public event Action<SlackSocketClient> OnConnectionClosed;
+
+        /// <summary>
+        /// When the Receiving Thread/task from the socket have a error and finish
+        /// </summary>
+        public event Action<Exception, SlackSocketClient> ErrorLoopSocket;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -63,6 +67,12 @@ namespace SlackAPI
         {
             underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
             underlyingSocket.ConnectionClosed += UnderlyingSocketConnectionClosed;
+            underlyingSocket.ErrorLoopSocket += UnderlyingSocketErrorLoopSocket;
+        }
+
+        private void UnderlyingSocketErrorLoopSocket(Exception ex)
+        {
+            if (ErrorLoopSocket != null) ErrorLoopSocket(ex, this);
         }
 
         /// <summary>
@@ -86,11 +96,6 @@ namespace SlackAPI
         public void ErrorHandlingMessage(Action<Exception> callback)
         {
             if (callback != null) underlyingSocket.ErrorHandlingMessage += callback;
-        }
-
-        public void ErrorLoopSocket(Action<Exception> callback)
-        {
-            if (callback != null) underlyingSocket.ErrorLoopSocket += callback;
         }
 
         public void BindCallback<K>(Action<K> callback)
@@ -156,12 +161,12 @@ namespace SlackAPI
 
         public void HandlePresence(PresenceChange change)
         {
-            UserLookup[change.user].presence = change.presence.ToString().ToLower();
+            UserLookup[change.user].Presence = change.presence.ToString().ToLower();
         }
 
         public void HandleUserChange(UserChange change)
         {
-            UserLookup[change.user.id] = change.user;
+            UserLookup[change.user.Id] = change.user;
 
             if (OnUserChange != null)
                 OnUserChange(change, this);
@@ -169,7 +174,7 @@ namespace SlackAPI
 
         public void HandleTeamJoin(TeamJoin newuser)
         {
-            UserLookup.Add(newuser.user.id, newuser.user);
+            UserLookup.Add(newuser.user.Id, newuser.user);
         }
 
         public void HandleChannelCreated(ChannelCreated created)
@@ -268,6 +273,21 @@ namespace SlackAPI
         {
             if (OnChannelMarked != null)
                 OnChannelMarked(m, this);
+        }
+
+        public void ReconnectUrl(ReconnectUrl m)
+        {
+
+        }
+
+        public void FilePublic(FilePublic m)
+        {
+
+        }
+
+        public void FileShared(FileShared m)
+        {
+
         }
 
         public void CloseSocket()

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using SlackAPI.Models;
 
 namespace SlackAPI
@@ -14,7 +13,7 @@ namespace SlackAPI
     /// <summary>
     /// SlackClient is intended to solely handle RPC (HTTP-based) functionality. Does not handle WebSocket connectivity.
     /// 
-    /// For WebSocket connectivity, refer to <see cref="SlackAPI.SlackSocketClient"/>
+    /// For WebSocket connectivity, refer to <see cref="SlackSocketClient"/>
     /// </summary>
     public class SlackClient
     {
@@ -77,13 +76,13 @@ namespace SlackAPI
         protected virtual void Connected(LoginResponse loginDetails)
         {
             MySelf = loginDetails.self;
-            MyData = loginDetails.users.First((c) => c.id == MySelf.id);
+            MyData = loginDetails.users.First((c) => c.Id == MySelf.id);
             MyTeam = loginDetails.team;
 
-            Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
+            Users = new List<User>(loginDetails.users.Where((c) => !c.Deleted));
             Channels = new List<Channel>(loginDetails.channels);
             Groups = new List<Channel>(loginDetails.groups);
-            DirectMessages = new List<DirectMessage>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.UserId) && c.Id != MySelf.id));
+            DirectMessages = new List<DirectMessage>(loginDetails.ims.Where((c) => Users.Exists((a) => a.Id == c.UserId) && c.Id != MySelf.id));
             starredChannels =
                     Groups.Where((c) => c.IsStarred).Select((c) => c.Id)
                 .Union(
@@ -96,7 +95,7 @@ namespace SlackAPI
             UserLookup = new Dictionary<string, User>();
             foreach (User u in Users)
             {
-                UserLookup.Add(u.id, u);
+                UserLookup.Add(u.Id, u);
             }
 
             ChannelLookup = new Dictionary<string, Channel>();
@@ -118,12 +117,13 @@ namespace SlackAPI
             {
                 if(UserLookup.ContainsKey(im.UserId))
                 {
-                    im.Name = UserLookup[im.UserId].name;
+                    im.Name = UserLookup[im.UserId].Name;
                 }
                 
                 DirectMessageLookup.Add(im.Id, im);
                 SlackChannelLookup.Add(im.Id, im);
             }
+
         }
 
         internal static Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
