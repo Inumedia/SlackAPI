@@ -10,6 +10,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
+#if NETSTANDARD1_6
+using Microsoft.Extensions.DependencyModel;
+#endif
+
 namespace SlackAPI
 {
     public class SlackSocket
@@ -37,27 +41,35 @@ namespace SlackAPI
         static SlackSocket()
         {
             routing = new Dictionary<string, Dictionary<string, Type>>();
-            foreach (Assembly assy in AppDomain.CurrentDomain.GetAssemblies())
+#if NET45
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
+#elif NETSTANDARD1_6
+            var assemblies = DependencyContext.Default.GetDefaultAssemblyNames().Select(Assembly.Load);
+#else
+            #error Platform not supported
+#endif
+            foreach (Assembly assy in assemblies)
             {
-                if (!assy.GlobalAssemblyCache)
-                    foreach (Type t in assy.GetTypes())
-                        foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+                foreach (Type t in assy.GetTypes())
+                {
+                    foreach (SlackSocketRouting route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
+                    {
+                        if (!routing.ContainsKey(route.Type))
+                            routing.Add(route.Type, new Dictionary<string, Type>()
                         {
-                            if (!routing.ContainsKey(route.Type))
-                                routing.Add(route.Type, new Dictionary<string, Type>()
-                            {
-                                {route.SubType ?? "null", t}
-                            });
-                            else
-                                if (!routing[route.Type].ContainsKey(route.SubType ?? "null"))
-                                    routing[route.Type].Add(route.SubType ?? "null", t);
-                                else
-                                    throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
-                        }
+                            {route.SubType ?? "null", t}
+                        });
+                        else
+                            if (!routing[route.Type].ContainsKey(route.SubType ?? "null"))
+                            routing[route.Type].Add(route.SubType ?? "null", t);
+                        else
+                            throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
+                    }
+                }
             }
         }
 
-		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
+        public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
         {
             BuildRoutes(routingTo);
             socket = new ClientWebSocket();
@@ -78,17 +90,17 @@ namespace SlackAPI
 
             Type routingToType = routingTo.GetType();
             Type slackMessage = typeof(SlackSocketMessage);
-            foreach (MethodInfo m in routingTo.GetType().GetMethods(BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Public))
+            foreach (MethodInfo m in routingTo.GetType().GetTypeInfo().GetMethods(BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Public))
             {
                 ParameterInfo[] parameters = m.GetParameters();
                 if (parameters.Length != 1) continue;
-                if (parameters[0].ParameterType.IsSubclassOf(slackMessage))
+                if (parameters[0].ParameterType.GetTypeInfo().IsSubclassOf(slackMessage))
                 {
                     Type t = parameters[0].ParameterType;
-                    foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+                    foreach (SlackSocketRouting route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
                     {
                         Type genericAction = typeof(Action<>).MakeGenericType(parameters[0].ParameterType);
-                        Delegate d = Delegate.CreateDelegate(genericAction, routingTo, m, false);
+                        Delegate d = m.CreateDelegate(genericAction, routingTo);
                         if (d == null)
                         {
                             System.Diagnostics.Debug.WriteLine(string.Format("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name));
@@ -125,7 +137,7 @@ namespace SlackAPI
             //socket.Send(JsonConvert.SerializeObject(message));
 
 			if (string.IsNullOrEmpty(message.type)){
-                IEnumerable<SlackSocketRouting> routes = message.GetType().GetCustomAttributes<SlackSocketRouting>();
+                IEnumerable<SlackSocketRouting> routes = message.GetType().GetTypeInfo().GetCustomAttributes<SlackSocketRouting>();
 
                 SlackSocketRouting route = null;
                 foreach (SlackSocketRouting r in routes)
@@ -142,14 +154,14 @@ namespace SlackAPI
 
 			sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             if (Interlocked.CompareExchange(ref currentlySending, 1, 0) == 0)
-                ThreadPool.QueueUserWorkItem(HandleSending);
+                Task.Factory.StartNew(HandleSending);
         }
 
         public void BindCallback<K>(Action<K> callback)
         {
             Type t = typeof(K);
 
-            foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+            foreach (SlackSocketRouting route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
             {
                 if (!routes.ContainsKey(route.Type))
                     routes.Add(route.Type, new Dictionary<string, Delegate>());
@@ -163,7 +175,7 @@ namespace SlackAPI
         public void UnbindCallback<K>(Action<K> callback)
         {
             Type t = typeof(K);
-            foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+            foreach (SlackSocketRouting route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
             {
                 Delegate d = routes.ContainsKey(route.Type) ? (routes.ContainsKey(route.SubType ?? "null") ? routes[route.Type][route.SubType ?? "null"] : null) : null;
                 if (d != null)
@@ -249,7 +261,7 @@ namespace SlackAPI
                     else
                     {
                         //I believe this method is slower than the former. If I'm wrong we can just use this instead. :D
-                        Type t = routes[message.type][message.subtype ?? "null"].Method.GetParameters()[0].ParameterType;
+                        Type t = routes[message.type][message.subtype ?? "null"].GetMethodInfo().GetParameters()[0].ParameterType;
                         o = data.Deserialize(t);
                     }
                     routes[message.type][message.subtype ?? "null"].DynamicInvoke(o);
@@ -269,7 +281,7 @@ namespace SlackAPI
             }
         }
 
-        void HandleSending(object stateful)
+        void HandleSending()
         {
             string message;
             while (sendingQueue.Pop(out message) && socket.State == WebSocketState.Open && !cts.Token.IsCancellationRequested)

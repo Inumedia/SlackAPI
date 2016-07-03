@@ -43,6 +43,10 @@
       <HintPath>..\packages\Polly.4.3.0\lib\net45\Polly.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SlackAPI, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SlackAPI\bin\Debug\net45\SlackAPI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -68,12 +72,6 @@
     <Compile Include="PostMessage.cs" />
     <Compile Include="JoinDirectMessageChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SlackAPI\SlackAPI.csproj">
-      <Project>{0c0a58a8-174e-4a4c-907b-c3569144d15d}</Project>
-      <Name>SlackAPI</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Configuration\config.default.json" />
