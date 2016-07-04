@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace SlackAPI
@@ -30,18 +29,17 @@ namespace SlackAPI
         public static K Deserialize<K>(this string data)
             where K : class
         {
-            return JsonConvert.DeserializeObject<K>(data, CreateSettings(data));
+            return JsonConvert.DeserializeObject<K>(data, CreateSettings());
         }
 
         public static object Deserialize(this string data, Type type)
         {
-            return JsonConvert.DeserializeObject(data, type, CreateSettings(data));
+            return JsonConvert.DeserializeObject(data, type, CreateSettings());
         }
 
-        private static JsonSerializerSettings CreateSettings(object contextData)
+        private static JsonSerializerSettings CreateSettings()
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.Context = new StreamingContext(StreamingContextStates.Other, contextData);
             settings.Converters = Converters;
 
             return settings;

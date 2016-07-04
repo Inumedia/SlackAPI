@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>SlackAPI</id>
-        <version>1.0.4.1</version>
+        <version>1.0.5.0</version>
         <title>SlackAPI</title>
         <authors>Inumedia</authors>
         <owners>Inumedia</owners>
@@ -14,12 +14,12 @@
         <language>en-US</language>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
-                <dependency id="Newtonsoft.Json" version="7.0.0" />
+                <dependency id="Newtonsoft.Json" version="9.0.1" />
             </group>
         </dependencies>
     </metadata>
     <files>
-        <file src="lib\net45\SlackAPI.dll" target="lib\net45\SlackAPI.dll" />
-        <file src="lib\net45\SlackAPI.pdb" target="lib\net45\SlackAPI.pdb" />
+        <file src="SlackAPI\bin\Release\net45\SlackAPI.dll" target="lib\net45\SlackAPI.dll" />
+        <file src="SlackAPI\bin\Release\net45\SlackAPI.pdb" target="lib\net45\SlackAPI.pdb" />
     </files>
 </package>

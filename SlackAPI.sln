@@ -1,13 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI", "SlackAPI.csproj", "{0C0A58A8-174E-4A4C-907B-C3569144D15D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{C254F6FF-81D4-46DF-AA21-3D1A6456253B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{80450DB7-6A58-491E-8568-D5B7E0051169} = {80450DB7-6A58-491E-8568-D5B7E0051169}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackApi.Console", "SlackApi.Console\SlackApi.Console.csproj", "{19140E48-E1A9-421D-86DB-5AF18EECFEF2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{80450DB7-6A58-491E-8568-D5B7E0051169} = {80450DB7-6A58-491E-8568-D5B7E0051169}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{9FC74E78-2D91-407E-B4C8-7C89D6CECB5B}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,16 +19,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{9FC74E78-2
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SlackAPI", "SlackAPI\SlackAPI.xproj", "{80450DB7-6A58-491E-8568-D5B7E0051169}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0C0A58A8-174E-4A4C-907B-C3569144D15D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C0A58A8-174E-4A4C-907B-C3569144D15D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0C0A58A8-174E-4A4C-907B-C3569144D15D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0C0A58A8-174E-4A4C-907B-C3569144D15D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C254F6FF-81D4-46DF-AA21-3D1A6456253B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C254F6FF-81D4-46DF-AA21-3D1A6456253B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C254F6FF-81D4-46DF-AA21-3D1A6456253B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +35,10 @@ Global
 		{19140E48-E1A9-421D-86DB-5AF18EECFEF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19140E48-E1A9-421D-86DB-5AF18EECFEF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19140E48-E1A9-421D-86DB-5AF18EECFEF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80450DB7-6A58-491E-8568-D5B7E0051169}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80450DB7-6A58-491E-8568-D5B7E0051169}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80450DB7-6A58-491E-8568-D5B7E0051169}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80450DB7-6A58-491E-8568-D5B7E0051169}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
