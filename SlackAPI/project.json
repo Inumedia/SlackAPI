@@ -25,7 +25,10 @@
       "dependencies": {
         "NETStandard.Library":"1.6.0",
         "System.Net.Requests": "4.0.11",
-        "System.Net.WebSockets.Client": "4.0.0",
+        // Use a beta version of WebSockets package because ClientWebSocket is not
+        // implemented in .Net Core 1.0 for Unix/MacOS (planned for 1.1)
+        // https://github.com/dotnet/corefx/issues/2486
+        "System.Net.WebSockets.Client": "4.0.1-beta-24303-02",
         "Microsoft.Extensions.DependencyModel": "1.0.0"
       }
     }
