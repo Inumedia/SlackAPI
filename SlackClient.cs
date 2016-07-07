@@ -597,6 +597,21 @@ namespace SlackAPI
             APIRequestWithToken(callback, param);
         }
 
+        /// <summary>
+        /// This method posts a message to a public channel, private channel, or direct message/IM channel.
+        /// https://api.slack.com/methods/chat.postMessage
+        /// </summary>
+        /// <param name="callback"></param>
+        /// <param name="channelId">Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See below for more details.</param>
+        /// <param name="text">Text of the message to send. See below for an explanation of formatting. This field is usually required, unless you're providing only attachments instead.</param>
+        /// <param name="botName">Set your bot's user name. Must be used in conjunction with as_user set to false, otherwise ignored.</param>
+        /// <param name="parse">Change how messages are treated.Defaults to none.</param>
+        /// <param name="linkNames">Find and link channel names and usernames.</param>
+        /// <param name="attachments">Structured message attachments.</param>
+        /// <param name="unfurl_links">Pass true to enable unfurling of primarily text-based content.</param>
+        /// <param name="icon_url">URL to an image to use as the icon for this message.Must be used in conjunction with as_user set to false, otherwise ignored.</param>
+        /// <param name="icon_emoji">Emoji to use as the icon for this message. Overrides icon_url. Must be used in conjunction with as_user set to false, otherwise ignored. </param>
+        /// <param name="as_user">Pass true to post the message as the authed user, instead of as a bot. Defaults to false. </param>
         public void PostMessage(
             Action<PostMessageResponse> callback,
             string channelId,

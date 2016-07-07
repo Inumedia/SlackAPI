@@ -94,7 +94,11 @@ namespace SlackAPI
                     {
                         if (pair.Value == client)
                         {
-                            OnRemoveSocketClient(pair.Key, loginResponse);
+                            if (OnRemoveSocketClient != null)
+                            {
+                                OnRemoveSocketClient(pair.Key, loginResponse);
+                            }
+
                             lock (_socketClients)
                             {
                                 _socketClients.Remove(pair.Key);
