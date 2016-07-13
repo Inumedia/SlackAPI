@@ -76,10 +76,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Configuration\config.default.json" />
     <None Include="Configuration\config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration\config.default.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Choose>

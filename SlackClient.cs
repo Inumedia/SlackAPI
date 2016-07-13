@@ -95,6 +95,7 @@ namespace SlackAPI
             foreach (User u in Users) UserLookup.Add(u.id, u);
 
             ChannelLookup = new Dictionary<string, Channel>();
+            ConversationLookup = new Dictionary<string, Conversation>();
             foreach (Channel c in Channels)
             {
                 ChannelLookup.Add(c.id, c);

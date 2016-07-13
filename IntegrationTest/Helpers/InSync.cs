@@ -8,10 +8,12 @@ namespace IntegrationTest.Helpers
     public class InSync : IDisposable
     {
         private readonly EventWaitHandle wait;
+        private readonly string AttemptingToDo;
 
-        public InSync()
+        public InSync(string attemptingToDo = "something")
         {
             wait = new EventWaitHandle(false, EventResetMode.ManualReset);
+            this.AttemptingToDo = attemptingToDo;
         }
 
         public void Proceed()
@@ -26,7 +28,7 @@ namespace IntegrationTest.Helpers
                 .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
                 .Execute(() =>
                 {
-                    Assert.IsTrue(wait.WaitOne(), "Took too long to do the THING");
+                    Assert.IsTrue(wait.WaitOne(), $"Took too long to do '{AttemptingToDo}'");
                 });
         }
     }
