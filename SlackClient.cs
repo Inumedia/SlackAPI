@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,6 +50,7 @@ namespace SlackAPI
         public Dictionary<string, Channel> ChannelLookup;
         public Dictionary<string, Channel> GroupLookup;
         public Dictionary<string, DirectMessageConversation> DirectMessageLookup;
+        public Dictionary<string, Conversation> ConversationLookup;
 
         //public event Action<ReceivingMessage> OnUserTyping;
         //public event Action<ReceivingMessage> OnMessageReceived;
@@ -94,13 +95,25 @@ namespace SlackAPI
             foreach (User u in Users) UserLookup.Add(u.id, u);
 
             ChannelLookup = new Dictionary<string, Channel>();
-            foreach (Channel c in Channels) ChannelLookup.Add(c.id, c);
+            foreach (Channel c in Channels)
+            {
+                ChannelLookup.Add(c.id, c);
+                ConversationLookup.Add(c.id, c);
+            }
 
             GroupLookup = new Dictionary<string, Channel>();
-            foreach (Channel g in Groups) GroupLookup.Add(g.id, g);
+            foreach (Channel g in Groups)
+            {
+                GroupLookup.Add(g.id, g);
+                ConversationLookup.Add(g.id, g);
+            }
 
             DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
-            foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
+            foreach (DirectMessageConversation im in DirectMessages)
+            {
+                DirectMessageLookup.Add(im.id, im);
+                ConversationLookup.Add(im.id, im);
+            }
         }
 
         internal static Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
