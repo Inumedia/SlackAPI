@@ -18,6 +18,7 @@ namespace SlackAPI
         public string text;
         public bool is_starred;
         public string permalink;
+        public Reaction[] reactions;
         //Wibblr? Not really sure what this applies to.  :<
     }
 }

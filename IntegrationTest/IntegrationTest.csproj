@@ -43,10 +43,6 @@
       <HintPath>..\packages\Polly.4.3.0\lib\net45\Polly.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SlackAPI, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\SlackAPI\bin\Debug\net45\SlackAPI.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -75,9 +71,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Configuration\config.default.json" />
+    <ProjectReference Include="..\SlackAPI\SlackAPI.xproj">
+      <Project>{80450db7-6a58-491e-8568-d5b7e0051169}</Project>
+      <Name>SlackAPI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SlackAPI\SlackAPI.xproj">
+      <Project>{80450db7-6a58-491e-8568-d5b7e0051169}</Project>
+      <Name>SlackAPI</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Configuration\config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration\config.default.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Choose>

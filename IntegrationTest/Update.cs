@@ -65,5 +65,19 @@ namespace IntegrationTest
             }
             return messageId;
         }
+
+        [TestMethod()]
+        public void UpdatePresence()
+        {
+            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            using (var sync = new InSync())
+            {
+                client.EmitPresence((presence) =>
+                {
+                    presence.AssertOk();
+                    sync.Proceed();
+                }, Presence.away);
+            }
+        }
     }
 }

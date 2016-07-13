@@ -1,15 +1,21 @@
 {
   "name": "SlackAPI",
   "title": "SlackAPI",
-  "summary": "The MIT License (MIT)",
   "description": "A Slack wrapper for direct interaction with their APIs.",
   "copyright": "Inumedia - Copyright ©  2014",
-  "licenseUrl": "http://choosealicense.com/licenses/mit/",
   "authors": ["Inumedia"],
-  "owners": ["Inumedia"],
   "language": "en-US",
-  "requireLicenseAcceptance": true,
   "version": "1.0.5-*",
+
+  "packOptions": {
+    "licenseUrl": "http://choosealicense.com/licenses/mit/",
+    "owners": [ "Inumedia <inumedia@inumedia.net>" ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Inumedia/SlackAPI"
+    },
+    "requireLicenseAcceptance": true
+  },
 
   "dependencies": {
     "Newtonsoft.Json": "9.0.1"
