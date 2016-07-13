@@ -3,7 +3,10 @@ using System;
 
 namespace SlackAPI.Models
 {
-    public class SlackChannel
+    /// <summary>
+    /// Base class from all slack conversations
+    /// </summary>
+    public class Conversation
     {
         /// <summary>
         /// Is the ID of the channel, private group or DM channel.

@@ -218,6 +218,6 @@ pip-log.txt
 .mr.developer.cfg
 *.chk
 *.ide
-
 packages
 *.private
+.vs/config/applicationhost.config

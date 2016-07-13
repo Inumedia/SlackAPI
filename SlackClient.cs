@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -47,7 +47,7 @@ namespace SlackAPI
 
         public Dictionary<string, User> UserLookup;
 
-        public Dictionary<string, SlackChannel> SlackChannelLookup;
+        public Dictionary<string, Conversation> ConversationLookup;
         public Dictionary<string, Channel> ChannelLookup;
         public Dictionary<string, Channel> GroupLookup;
         public Dictionary<string, DirectMessage> DirectMessageLookup;
@@ -67,7 +67,7 @@ namespace SlackAPI
             EmitLogin((loginDetails) =>
             {
                 if (loginDetails.Ok)
-                    Connected(loginDetails);
+					Connected(loginDetails);
                 if (onConnected != null)
                     onConnected(loginDetails, this);
             });
@@ -91,7 +91,7 @@ namespace SlackAPI
                     Channels.Where((c) => c.IsStarred).Select((c) => c.Id)
                 ).ToList();
 
-            SlackChannelLookup = new Dictionary<string, SlackChannel>();
+            ConversationLookup = new Dictionary<string, Conversation>();
             UserLookup = new Dictionary<string, User>();
             foreach (User u in Users)
             {
@@ -102,14 +102,14 @@ namespace SlackAPI
             foreach (Channel c in Channels)
             {
                 ChannelLookup.Add(c.Id, c);
-                SlackChannelLookup.Add(c.Id, c);
+                ConversationLookup.Add(c.Id, c);
             }
 
             GroupLookup = new Dictionary<string, Channel>();
             foreach (Channel g in Groups)
             {
                 GroupLookup.Add(g.Id, g);
-                SlackChannelLookup.Add(g.Id, g);
+                ConversationLookup.Add(g.Id, g);
             }
 
             DirectMessageLookup = new Dictionary<string, DirectMessage>();
@@ -118,10 +118,10 @@ namespace SlackAPI
                 if (UserLookup.ContainsKey(im.UserId))
                 {
                     im.Name = UserLookup[im.UserId].Name;
-                }
+        }
 
                 DirectMessageLookup.Add(im.Id, im);
-                SlackChannelLookup.Add(im.Id, im);
+                ConversationLookup.Add(im.Id, im);
             }
 
         }
@@ -129,17 +129,18 @@ namespace SlackAPI
         internal static Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
         {
             string parameters = getParameters
-                .Select(new Func<Tuple<string, string>, string>(a =>
+                .Where(x => x.Item2 != null)
+                .Select(a => 
+                {
+                    try
                     {
-                        try
-                        {
-                            return string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2));
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException(string.Format("Failed when processing '{0}'.", a), ex);
-                        }
-                    }))
+                        return string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException(string.Format("Failed when processing '{0}'.", a), ex);
+                    }
+                })
                 .Aggregate((a, b) =>
                 {
                     if (string.IsNullOrEmpty(a))
@@ -202,7 +203,7 @@ namespace SlackAPI
 
         public static void AuthSignin(Action<AuthSigninResponse> callback, string userId, string teamId, string password)
         {
-            APIRequest(callback, new Tuple<string, string>[] {
+            APIRequest(callback, new Tuple<string, string>[] { 
                 new Tuple<string,string>("user", userId),
                 new Tuple<string,string>("team", teamId),
                 new Tuple<string,string>("password", password)
@@ -220,9 +221,9 @@ namespace SlackAPI
         }
         public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name)
         {
-            APIRequestWithToken(callback, new Tuple<string, string>("name", name));
-        }
-        public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
+			APIRequestWithToken(callback, new Tuple<string, string>("name", name));
+		}
+		public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
@@ -253,7 +254,7 @@ namespace SlackAPI
             if (!types.HasFlag(FileTypes.all))
             {
                 FileTypes[] values = (FileTypes[])Enum.GetValues(typeof(FileTypes));
-
+                
                 StringBuilder building = new StringBuilder();
                 bool first = true;
                 for (int i = 0; i < values.Length; ++i)
@@ -286,7 +287,7 @@ namespace SlackAPI
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("channel", channel));
-
+            
             if (latest.HasValue)
                 parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
             if (oldest.HasValue)
@@ -325,7 +326,7 @@ namespace SlackAPI
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("file", fileId));
-
+            
             if (count.HasValue)
                 parameters.Add(new Tuple<string, string>("count", count.Value.ToString()));
 
@@ -499,7 +500,7 @@ namespace SlackAPI
         public void GetStars(Action<StarListResponse> callback, string userId = null, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
+            
             if (!string.IsNullOrEmpty(userId))
                 parameters.Add(new Tuple<string, string>("user", userId));
 
@@ -748,8 +749,8 @@ namespace SlackAPI
 
             return GetSlackUri("https://slack.com/oauth/authorize", new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
                 new Tuple<string, string>("redirect_uri", redirectUri),
-                new Tuple<string, string>("state", state),
-                new Tuple<string, string>("scope", theScopes),
+                new Tuple<string, string>("state", state), 
+                new Tuple<string, string>("scope", theScopes), 
                 new Tuple<string, string>("team", team)});
         }
 

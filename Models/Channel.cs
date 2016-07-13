@@ -6,7 +6,7 @@ namespace SlackAPI.Models
     /// <summary>
     /// https://api.slack.com/types/channel
     /// </summary>
-    public class Channel : SlackChannel
+    public class Channel : Conversation
     {
         [JsonProperty(PropertyName = "is_channel")]
         public bool IsChannel { get; set; }

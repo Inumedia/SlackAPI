@@ -1,6 +1,6 @@
 ﻿namespace SlackAPI.Models
 {
-    [RequestPath("presense.set")]
+    [RequestPath("users.setPresence")]
     public class PresenceResponse : Response
     {
     }

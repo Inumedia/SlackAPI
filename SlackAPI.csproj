@@ -54,7 +54,7 @@
     <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\Reaction.cs" />
     <Compile Include="Models\ReactionAddedResponse.cs" />
-    <Compile Include="Models\SlackChannel.cs" />
+    <Compile Include="Models\Conversation.cs" />
     <Compile Include="Models\SlackChannelType.cs" />
     <Compile Include="RequestStateForTask.cs" />
     <Compile Include="RPCMessages\AccessTokenResponse.cs" />

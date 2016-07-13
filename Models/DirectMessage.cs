@@ -6,7 +6,7 @@ namespace SlackAPI.Models
     /// <summary>
     /// https://api.slack.com/types/im
     /// </summary>
-    public class DirectMessage : SlackChannel
+    public class DirectMessage : Conversation
     {
         /// <summary>
         /// The user property is the ID of the user speaking
