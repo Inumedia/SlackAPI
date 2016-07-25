@@ -17,11 +17,37 @@
         public string image_url;
         public string thumb_url;
         public string[] mrkdwn_in;
+        public AttachmentAction[] actions;
     }
 
     public class Field{
         public string title;
         public string value;
         public bool @short;
+    }
+
+    //See: https://api.slack.com/docs/message-buttons#action_fields
+    public class AttachmentAction
+    {
+        public AttachmentAction(string name, string text)
+        {
+            this.name = name;
+            this.text = text;
+        }
+        public string name { get; }
+        public string text { get; }
+        public string style;
+        public string type = "button";
+        public string value;
+        public ActionConfirm confirm;
+    }
+
+    //see: https://api.slack.com/docs/message-buttons#confirmation_fields
+    public class ActionConfirm
+    {
+        public string title;
+        public string text;
+        public string ok_text;
+        public string dismiss_text;
     }
 }

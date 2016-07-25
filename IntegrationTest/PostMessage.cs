@@ -70,5 +70,30 @@ namespace IntegrationTest
             // then
             Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
         }
+
+        [TestMethod]
+        public void AttachmentsWithActions()
+        {
+            // given
+            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            PostMessageResponse actual = null;
+
+            // when
+            using (var sync = new InSync())
+            {
+                client.PostMessage(
+                    response =>
+                    {
+                        actual = response;
+                        sync.Proceed();
+                    },
+                    _config.Slack.TestChannel,
+                    string.Empty,
+                    attachments: SlackMother.SomeAttachmentsWithActions);
+            }
+
+            // then
+            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
+        }
     }
 }
