@@ -1,0 +1,8 @@
+version: 1.0.{build}
+
+build:
+  project: SlackAPI.sln
+  verbosity: minimal
+
+before_build:
+  - nuget restore
