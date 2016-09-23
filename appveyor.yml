@@ -6,3 +6,4 @@ build:
 
 before_build:
   - nuget restore
+  - copy .\IntegrationTest\Configuration\config.default.json .\IntegrationTest\Configuration\config.json
