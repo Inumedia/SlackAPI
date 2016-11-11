@@ -5,7 +5,8 @@ platform: Any CPU
 
 pull_requests:
   do_not_increment_build_number: true
-  skip_branch_with_pr: true
+
+skip_branch_with_pr: true
 
 assembly_info:
   patch: true
