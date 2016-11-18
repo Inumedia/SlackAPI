@@ -1,10 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SlackAPI;
 using System;
-using System.Threading;
 using IntegrationTest.Configuration;
 using IntegrationTest.Helpers;
-using Polly;
 using SlackAPI.WebSocketMessages;
 
 namespace IntegrationTest
@@ -47,20 +45,17 @@ namespace IntegrationTest
 
         private AccessTokenResponse GetAccessToken(string clientId, string clientSecret, string redirectUri, string authCode)
         {
-            var waiter = new EventWaitHandle(false, EventResetMode.ManualReset);
             AccessTokenResponse accessTokenResponse = null;
 
-            SlackClient.GetAccessToken(response =>
+            using (var sync = new InSync(nameof(SlackClient.GetAccessToken)))
             {
-                accessTokenResponse = response;
-                waiter.Set(); 
-                
-            }, clientId, clientSecret, redirectUri, authCode);
+                SlackClient.GetAccessToken(response =>
+                {
+                    accessTokenResponse = response;
+                    sync.Proceed();
 
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() => { Assert.IsTrue(waiter.WaitOne(), "Still waiting for things to happen..."); });
+                }, clientId, clientSecret, redirectUri, authCode);
+            }
 
             return accessTokenResponse;
         }
@@ -92,22 +87,16 @@ namespace IntegrationTest
 
         private static DateTime PostMessage(SlackSocketClient client, string channel)
         {
-            var waiter = new EventWaitHandle(false, EventResetMode.ManualReset);
             MessageReceived sendMessageResponse = null;
 
-            client.SendMessage(response =>
+            using (var sync = new InSync(nameof(SlackSocketClient.SendMessage)))
             {
-                sendMessageResponse = response;
-                waiter.Set();
-            }, channel, TestText);
-
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
+                client.SendMessage(response =>
                 {
-                    Assert.IsTrue(waiter.WaitOne(), "Still waiting for things to happen...");
-                });
+                    sendMessageResponse = response;
+                    sync.Proceed();
+                }, channel, TestText);
+            }
 
             Assert.IsNotNull(sendMessageResponse, "sendMessageResponse != null");
             Assert.AreEqual(TestText, sendMessageResponse.text, "Got invalid returned text, something's not right here...");
@@ -118,21 +107,15 @@ namespace IntegrationTest
         private static DeletedResponse DeleteMessage(SlackSocketClient client, string channel, DateTime messageTimestamp)
         {
             DeletedResponse deletedResponse = null;
-            var waiter = new EventWaitHandle(false, EventResetMode.ManualReset);
 
-            client.DeleteMessage(response =>
+            using (var sync = new InSync(nameof(SlackClient.DeleteMessage)))
             {
-                deletedResponse = response;
-                waiter.Set();
-            }, channel, messageTimestamp);
-
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
+                client.DeleteMessage(response =>
                 {
-                    Assert.IsTrue(waiter.WaitOne(), "Still waiting for things to happen...");
-                });
+                    deletedResponse = response;
+                    sync.Proceed();
+                }, channel, messageTimestamp);
+            }
 
             return deletedResponse;
         }
