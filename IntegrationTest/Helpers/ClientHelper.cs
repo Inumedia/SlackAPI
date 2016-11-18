@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Polly;
 using SlackAPI;
 
 namespace IntegrationTest.Helpers
@@ -10,33 +8,24 @@ namespace IntegrationTest.Helpers
     {
         public static SlackSocketClient GetClient(string authToken)
         {
-            var wait = new EventWaitHandle(false, EventResetMode.ManualReset);
+            SlackSocketClient client;
 
-            var client = new SlackSocketClient(authToken);
-            client.Connect(x =>
+            using (var syncClient = new InSync($"{nameof(SlackClient.Connect)} - Connected callback"))
+            using (var syncClientSocket = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected callback"))
             {
-                Console.WriteLine("RTM Start");
-            }, () =>
-            {
-                Console.WriteLine("Connected");
-                wait.Set();
-            });
-
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
+                client = new SlackSocketClient(authToken);
+                client.Connect(x =>
                 {
-                    Assert.IsTrue(wait.WaitOne(), "Still waiting for things to happen...");
-                });
-
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
+                    Console.WriteLine("Connected");
+                    syncClient.Proceed();
+                }, () =>
                 {
-                    Assert.IsTrue(client.IsConnected, "Doh, still isn't connected");
+                    Console.WriteLine("Socket Connected");
+                    syncClientSocket.Proceed();
                 });
+            }
+
+            Assert.IsTrue(client.IsConnected, "Doh, still isn't connected");
 
             return client;
         }

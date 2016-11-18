@@ -2,34 +2,30 @@ namespace IntegrationTest.Helpers
 {
     using System;
     using System.Threading;
+    using System.Runtime.CompilerServices;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Polly;
 
     public class InSync : IDisposable
     {
-        private readonly EventWaitHandle wait;
-        private readonly string AttemptingToDo;
+        private readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(5);
 
-        public InSync(string attemptingToDo = "something")
+        private readonly ManualResetEventSlim waiter;
+        private readonly string message;
+
+        public InSync([CallerMemberName] string message = null)
         {
-            wait = new EventWaitHandle(false, EventResetMode.ManualReset);
-            this.AttemptingToDo = attemptingToDo;
+            this.message = message;
+            this.waiter = new ManualResetEventSlim();
         }
 
         public void Proceed()
         {
-            wait.Set();
+            this.waiter.Set();
         }
 
         public void Dispose()
         {
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
-                {
-                    Assert.IsTrue(wait.WaitOne(), $"Took too long to do '{AttemptingToDo}'");
-                });
+            Assert.IsTrue(this.waiter.Wait(this.WaitTimeout), $"Took too long to do '{this.message}'");
         }
     }
 }

@@ -26,7 +26,7 @@ namespace IntegrationTest
             UpdateResponse actual = null;
 
             // when
-            using (var sync = new InSync())
+            using (var sync = new InSync(nameof(SlackClient.Update)))
             {
                 client.Update(
                     response =>
@@ -50,7 +50,7 @@ namespace IntegrationTest
         private string PostedMessage(SlackSocketClient client)
         {
             string messageId = null;
-            using (var sync = new InSync())
+            using (var sync = new InSync(nameof(SlackClient.PostMessage)))
             {
                 client.PostMessage(
                     response =>
@@ -70,7 +70,7 @@ namespace IntegrationTest
         public void UpdatePresence()
         {
             var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
-            using (var sync = new InSync())
+            using (var sync = new InSync(nameof(SlackClient.EmitPresence)))
             {
                 client.EmitPresence((presence) =>
                 {

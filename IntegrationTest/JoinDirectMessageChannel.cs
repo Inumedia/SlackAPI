@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using IntegrationTest.Configuration;
 using IntegrationTest.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Polly;
+using SlackAPI;
 
 namespace IntegrationTest
 {
@@ -23,27 +22,24 @@ namespace IntegrationTest
         {
             // given
             var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            JoinDirectMessageChannelResponse actual = null;
 
             string userName = _config.Slack.DirectMessageUser;
             string user = client.Users.First(x => x.name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).id;
 
             // when
-            EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
-            client.JoinDirectMessageChannel(response =>
+            using (var sync = new InSync(nameof(SlackClient.JoinDirectMessageChannel)))
             {
-                Assert.IsTrue(response.ok, "Error while joining user channel");
-                Assert.IsTrue(!string.IsNullOrEmpty(response.channel.id), "We expected a channel id to be returned");
-                wait.Set();
-            }, user);
+                client.JoinDirectMessageChannel(response =>
+                {
+                    actual = response;
+                    sync.Proceed();;
+                }, user);
+            }
 
             // then
-            Policy
-                .Handle<AssertFailedException>()
-                .WaitAndRetry(15, x => TimeSpan.FromSeconds(0.2), (exception, span) => Console.WriteLine("Retrying in {0} seconds", span.TotalSeconds))
-                .Execute(() =>
-                {
-                    Assert.IsTrue(wait.WaitOne(), "Took too long to do the THING");
-                });
+            Assert.IsTrue(actual.ok, "Error while joining user channel");
+            Assert.IsTrue(!string.IsNullOrEmpty(actual.channel.id), "We expected a channel id to be returned");
         }
     }
 }

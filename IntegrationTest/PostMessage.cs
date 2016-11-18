@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using IntegrationTest.Configuration;
+﻿using IntegrationTest.Configuration;
 using IntegrationTest.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Polly;
 
 namespace IntegrationTest
 {
@@ -28,7 +24,7 @@ namespace IntegrationTest
             PostMessageResponse actual = null;
 
             // when
-            using (var sync = new InSync())
+            using (var sync = new InSync(nameof(SlackClient.PostMessage)))
             {
                 client.PostMessage(
                     response =>
@@ -54,7 +50,7 @@ namespace IntegrationTest
             PostMessageResponse actual = null;
 
             // when
-            using (var sync = new InSync())
+            using (var sync = new InSync(nameof(SlackClient.PostMessage)))
             {
                 client.PostMessage(
                     response =>
