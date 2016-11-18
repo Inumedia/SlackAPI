@@ -27,7 +27,7 @@ namespace IntegrationTest
             Assert.IsTrue(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void TestGetAccessToken()
         {
             // assemble

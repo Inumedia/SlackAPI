@@ -1,0 +1,52 @@
+version: 1.0.4.{build}
+
+configuration: Release
+platform: Any CPU
+
+pull_requests:
+  do_not_increment_build_number: true
+
+skip_branch_with_pr: true
+
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+
+before_build:
+- ps: >-
+    $config = @"
+
+    {
+      "slack": {
+        "userAuthToken": "$env:userAuthToken",
+        "botAuthToken": "$env:botAuthToken",
+        "testChannel": "$env:testChannel",
+        "directMessageUser": "$env:directMessageUser",
+        "authCode": "$env:authCode",
+        "clientId": "$env:clientId",
+        "clientSecret": "$env:clientSecret"
+      }
+    }
+
+    "@
+
+    $config | Set-Content IntegrationTest\Configuration\config.json
+- nuget restore
+
+build:
+  project: SlackAPI.sln
+  verbosity: minimal
+
+after_build:
+- nuget pack SlackAPI.nuspec -Version %APPVEYOR_BUILD_VERSION%
+
+test:
+  assemblies:
+    - IntegrationTest\bin\Release\IntegrationTest.dll
+
+artifacts:
+- path: SlackAPI*.nupkg
+  name: SlackAPI Nuget package
