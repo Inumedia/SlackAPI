@@ -35,6 +35,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MSTestHacks, Version=2.3.20.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSTestHacks.2.3.20\lib\net45\MSTestHacks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -60,6 +64,7 @@
     <Compile Include="Helpers\ClientHelper.cs" />
     <Compile Include="Helpers\InSync.cs" />
     <Compile Include="Helpers\SlackMother.cs" />
+    <Compile Include="Timestamp.cs" />
     <Compile Include="Update.cs" />
     <Compile Include="PostMessage.cs" />
     <Compile Include="JoinDirectMessageChannel.cs" />
@@ -72,6 +77,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Configuration\config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

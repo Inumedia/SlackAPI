@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-    class JavascriptDateTimeConverter : Newtonsoft.Json.JsonConverter
+    internal class JavascriptDateTimeConverter : Newtonsoft.Json.JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
