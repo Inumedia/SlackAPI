@@ -22,6 +22,19 @@ Want committer access? Feel like I'm too lazy to keep up with Slack's ever chang
 
 Create some pull requests, give me a reason to give you access.
 
+# Howto build the solution
+###### (aka where is the config.json file?)
+The project **IntegrationTest** requires a valid `config.json` file for tests. You have two options to build the solution:
+- Unload IntegrationTest project and you're able to build SlackAPI solution.
+- Create your own config.json file to be able to run tests and validate your changes.
+  - Copy/paste `config.default.json` to `config.json`
+  - Update `config.json` file with your settings
+    - *userAuthToken* : Visit https://api.slack.com/docs/oauth-test-tokens to generate a token for your user
+    - *botAuthToken* : Visit https://my.slack.com/services/new/bot to create a bot for your Slack team and retrieve associated token
+    - *testChannel* : A channel ID (user associated to *userAuthToken* must be member of the channel)
+    - *directMessageUser* : A Slack member username
+    - *clientId*/*clientSecret*/*authCode* : Not used
+
 # Creating NuGet package
 
 Example:
