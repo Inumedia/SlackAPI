@@ -1,4 +1,6 @@
-﻿namespace SlackAPI.WebSocketMessages
+﻿using SlackAPI.Models;
+
+namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("group_rename")]
     public class GroupRename : SlackSocketMessage

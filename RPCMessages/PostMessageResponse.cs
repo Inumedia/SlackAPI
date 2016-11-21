@@ -1,4 +1,4 @@
-﻿namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     [RequestPath("chat.postMessage")]
     public class PostMessageResponse : Response

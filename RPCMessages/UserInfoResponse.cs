@@ -1,4 +1,4 @@
-﻿namespace SlackAPI.RPCMessages
+﻿namespace SlackAPI.Models
 {
     [RequestPath("users.info")]
     public class UserInfoResponse : Response

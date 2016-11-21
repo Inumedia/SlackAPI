@@ -25,14 +25,14 @@ namespace IntegrationTest
             var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
 
             string userName = _config.Slack.DirectMessageUser;
-            string user = client.Users.First(x => x.name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).id;
+            string user = client.Users.First(x => x.Name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).Id;
 
             // when
             EventWaitHandle wait = new EventWaitHandle(false, EventResetMode.ManualReset);
             client.JoinDirectMessageChannel(response =>
             {
-                Assert.IsTrue(response.ok, "Error while joining user channel");
-                Assert.IsTrue(!string.IsNullOrEmpty(response.channel.id), "We expected a channel id to be returned");
+                Assert.IsTrue(response.Ok, "Error while joining user channel");
+                Assert.IsTrue(!string.IsNullOrEmpty(response.channel.Id), "We expected a channel id to be returned");
                 wait.Set();
             }, user);
 

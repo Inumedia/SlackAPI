@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SlackAPI
+﻿namespace SlackAPI.Models
 {
     [RequestPath("oauth.access")]
     public class AccessTokenResponse : Response
@@ -12,6 +6,7 @@ namespace SlackAPI
         public string access_token;
         public string scope;
         public string team_name;
+        public string team_id;
         public Bot bot;
     }
 }

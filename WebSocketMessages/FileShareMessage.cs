@@ -1,4 +1,6 @@
-﻿namespace SlackAPI.WebSocketMessages
+﻿using SlackAPI.Models;
+
+namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("message", "file_share")]
     public class FileShareMessage : NewMessage

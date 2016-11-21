@@ -9,11 +9,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using SlackAPI.Models;
 
 namespace SlackAPI
 {
     public class SlackSocket
     {
+        #region Atributes
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        #endregion
+
         LockFreeQueue<string> sendingQueue;
         int currentlySending;
         int closedEmitted;
@@ -29,6 +34,7 @@ namespace SlackAPI
         public event Action<WebSocketException> ErrorReceiving;
         public event Action<Exception> ErrorReceivingDesiralization;
         public event Action<Exception> ErrorHandlingMessage;
+        public event Action<Exception> ErrorLoopSocket;
         public event Action ConnectionClosed;
 
         //This would be done for hinting but I don't think we really need this.
@@ -36,28 +42,63 @@ namespace SlackAPI
         static Dictionary<string, Dictionary<string, Type>> routing;
         static SlackSocket()
         {
-            routing = new Dictionary<string, Dictionary<string, Type>>();
-            foreach (Assembly assy in AppDomain.CurrentDomain.GetAssemblies())
+            try
             {
-                if (!assy.GlobalAssemblyCache)
-                    foreach (Type t in assy.GetTypes())
-                        foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+                routing = new Dictionary<string, Dictionary<string, Type>>();
+                foreach (Assembly assy in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    if (!assy.GlobalAssemblyCache)
+                    {
+                        foreach (Type t in assy.GetTypes())
                         {
-                            if (!routing.ContainsKey(route.Type))
-                                routing.Add(route.Type, new Dictionary<string, Type>()
+                            foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+                            {
+                                if (!routing.ContainsKey(route.Type))
+                                {
+                                    routing.Add(route.Type, new Dictionary<string, Type>()
                             {
                                 {route.SubType ?? "null", t}
                             });
-                            else
-                                if (!routing[route.Type].ContainsKey(route.SubType ?? "null"))
-                                    routing[route.Type].Add(route.SubType ?? "null", t);
+                                }
                                 else
-                                    throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
+                                {
+                                    if (!routing[route.Type].ContainsKey(route.SubType ?? "null"))
+                                        routing[route.Type].Add(route.SubType ?? "null", t);
+                                    else
+                                        throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
+                                }
+                            }
                         }
+                    }
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (Exception exSub in ex.LoaderExceptions)
+                {
+                    sb.AppendLine(exSub.Message);
+                    FileNotFoundException exFileNotFound = exSub as FileNotFoundException;
+                    if (exFileNotFound != null)
+                    {
+                        if (!string.IsNullOrEmpty(exFileNotFound.FusionLog))
+                        {
+                            sb.AppendLine("Fusion Log:");
+                            sb.AppendLine(exFileNotFound.FusionLog);
+                        }
+                    }
+                    sb.AppendLine();
+                }
+                Log.Debug($"SlackSocket static constructor{sb.ToString()}");
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("SlackSocket static constructor", ex);
+                throw ex;
             }
         }
 
-		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
+        public SlackSocket(LoginResponse loginDetails, object routingTo, Action onSocketConnected = null)
         {
             BuildRoutes(routingTo);
             socket = new ClientWebSocket();
@@ -66,42 +107,53 @@ namespace SlackAPI
             currentId = 1;
 
             cts = new CancellationTokenSource();
+
             socket.ConnectAsync(new Uri(string.Format("{0}?svn_rev={1}&login_with_boot_data-0-{2}&on_login-0-{2}&connect-1-{2}", loginDetails.url, loginDetails.svn_rev, DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds)), cts.Token).Wait();
-            if(onConnected != null)
-                onConnected();
+
+            if (onSocketConnected != null)
+                onSocketConnected();
             SetupReceiving();
         }
 
         void BuildRoutes(object routingTo)
         {
-            routes = new Dictionary<string, Dictionary<string, Delegate>>();
-
-            Type routingToType = routingTo.GetType();
-            Type slackMessage = typeof(SlackSocketMessage);
-            foreach (MethodInfo m in routingTo.GetType().GetMethods(BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Public))
+            try
             {
-                ParameterInfo[] parameters = m.GetParameters();
-                if (parameters.Length != 1) continue;
-                if (parameters[0].ParameterType.IsSubclassOf(slackMessage))
+                routes = new Dictionary<string, Dictionary<string, Delegate>>();
+
+                Type routingToType = routingTo.GetType();
+                Type slackMessage = typeof(SlackSocketMessage);
+                foreach (MethodInfo m in routingTo.GetType().GetMethods(BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Public))
                 {
-                    Type t = parameters[0].ParameterType;
-                    foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+                    ParameterInfo[] parameters = m.GetParameters();
+                    if (parameters.Length != 1) continue;
+                    if (parameters[0].ParameterType.IsSubclassOf(slackMessage))
                     {
-                        Type genericAction = typeof(Action<>).MakeGenericType(parameters[0].ParameterType);
-                        Delegate d = Delegate.CreateDelegate(genericAction, routingTo, m, false);
-                        if (d == null)
+                        Type t = parameters[0].ParameterType;
+                        foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
                         {
-                            System.Diagnostics.Debug.WriteLine(string.Format("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name));
-                            continue;
+                            Type genericAction = typeof(Action<>).MakeGenericType(parameters[0].ParameterType);
+                            Delegate d = Delegate.CreateDelegate(genericAction, routingTo, m, false);
+                            if (d == null)
+                            {
+                                Log.DebugFormat("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name);
+                                System.Diagnostics.Debug.WriteLine(string.Format("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name));
+                                continue;
+                            }
+                            if (!routes.ContainsKey(route.Type))
+                                routes.Add(route.Type, new Dictionary<string, Delegate>());
+                            if (!routes[route.Type].ContainsKey(route.SubType ?? "null"))
+                                routes[route.Type].Add(route.SubType ?? "null", d);
+                            else
+                                routes[route.Type][route.SubType ?? "null"] = Delegate.Combine(routes[route.Type][route.SubType ?? "null"], d);
                         }
-                        if (!routes.ContainsKey(route.Type))
-                            routes.Add(route.Type, new Dictionary<string, Delegate>());
-                        if (!routes[route.Type].ContainsKey(route.SubType ?? "null"))
-                            routes[route.Type].Add(route.SubType ?? "null", d);
-                        else
-                            routes[route.Type][route.SubType ?? "null"] = Delegate.Combine(routes[route.Type][route.SubType ?? "null"], d);
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("SlackSocket SlackSocket BuildRoutes", ex);
+                throw ex;
             }
         }
 
@@ -124,7 +176,8 @@ namespace SlackAPI
                 message.id = Interlocked.Increment(ref currentId);
             //socket.Send(JsonConvert.SerializeObject(message));
 
-			if (string.IsNullOrEmpty(message.type)){
+            if (string.IsNullOrEmpty(message.type))
+            {
                 IEnumerable<SlackSocketRouting> routes = message.GetType().GetCustomAttributes<SlackSocketRouting>();
 
                 SlackSocketRouting route = null;
@@ -140,7 +193,7 @@ namespace SlackAPI
                 }
             }
 
-			sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             if (Interlocked.CompareExchange(ref currentlySending, 1, 0) == 0)
                 ThreadPool.QueueUserWorkItem(HandleSending);
         }
@@ -179,57 +232,76 @@ namespace SlackAPI
             Task.Factory.StartNew(
                 async () =>
                 {
-                    List<byte[]> buffers = new List<byte[]>();
-                    byte[] bytes = new byte[1024];
-                    buffers.Add(bytes);
-                    ArraySegment<byte> buffer = new ArraySegment<byte>(bytes);
-                    while (socket.State == WebSocketState.Open)
+                    try
                     {
-                        WebSocketReceiveResult result = null;
-                        try
+                        List<byte[]> buffers = new List<byte[]>();
+                        byte[] bytes = new byte[1024];
+                        buffers.Add(bytes);
+                        ArraySegment<byte> buffer = new ArraySegment<byte>(bytes);
+                        while (socket.State == WebSocketState.Open)
                         {
-                            result = await socket.ReceiveAsync(buffer, cts.Token);
-                        }
-                        catch (WebSocketException wex)
-                        {
-                            if (ErrorReceiving != null)
-                                ErrorReceiving(wex);
-                            Close();
-                            break;
-                        }
+                            WebSocketReceiveResult result = null;
+                            try
+                            {
+                                result = await socket.ReceiveAsync(buffer, cts.Token);
+                            }
+                            catch (WebSocketException wex)
+                            {
+                                if (ErrorReceiving != null)
+                                    ErrorReceiving(wex);
+                                Log.Debug("SetupReceiving ErrorReceiving", wex);
+                                Close();
+                                break;
+                            }
 
-                        if (!result.EndOfMessage && buffer.Count == buffer.Array.Length)
-                        {
-                            bytes = new byte[1024];
-                            buffers.Add(bytes);
-                            buffer = new ArraySegment<byte>(bytes);
-                            continue;
-                        }
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                                Close();
+                                break;
+                            }
 
-                        string data = string.Join("", buffers.Select((c) => Encoding.UTF8.GetString(c).TrimEnd('\0')));
-                        //Console.WriteLine("SlackSocket data = " + data);
-                        SlackSocketMessage message = null;
-                        try
-                        {
-                            message = data.Deserialize<SlackSocketMessage>();
-                        }
-                        catch (JsonException jsonExcep)
-                        {
-                            if (ErrorReceivingDesiralization != null)
-                                ErrorReceivingDesiralization(jsonExcep);
-                            continue;
-                        }
+                            if (!result.EndOfMessage && buffer.Count == buffer.Array.Length)
+                            {
+                                bytes = new byte[1024];
+                                buffers.Add(bytes);
+                                buffer = new ArraySegment<byte>(bytes);
+                                continue;
+                            }
 
-                        if (message == null)
-                            continue;
-                        else
-                        {
-                            HandleMessage(message, data);
-                            buffers = new List<byte[]>();
-                            bytes = new byte[1024];
-                            buffers.Add(bytes);
-                            buffer = new ArraySegment<byte>(bytes);
+                            string data = string.Join(string.Empty, buffers.Select((c) => Encoding.UTF8.GetString(c).TrimEnd('\0')));
+                            SlackSocketMessage message = null;
+                            try
+                            {
+                                message = data.Deserialize<SlackSocketMessage>();
+                            }
+                            catch (JsonException jsonExcep)
+                            {
+                                if (ErrorReceivingDesiralization != null)
+                                    ErrorReceivingDesiralization(jsonExcep);
+                                Log.Debug("SetupReceiving ErrorReceivingDesiralization", jsonExcep);
+                                continue;
+                            }
+
+                            if (message != null)
+                            {
+                                HandleMessage(message, data);
+                                buffers = new List<byte[]>();
+                                bytes = new byte[1024];
+                                buffers.Add(bytes);
+                                buffer = new ArraySegment<byte>(bytes);
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ErrorLoopSocket != null)
+                            ErrorLoopSocket(ex);
+                        Log.Debug("SetupReceiving ErrorLoopSocket", ex);
+                    }
+                    finally
+                    {
+                        Close();
                     }
                 }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
@@ -238,7 +310,7 @@ namespace SlackAPI
         {
             if (callbacks.ContainsKey(message.reply_to))
                 callbacks[message.reply_to](data);
-            else if (routes.ContainsKey(message.type) && routes[message.type].ContainsKey(message.subtype ?? "null"))
+            else if (message.type != null && routes.ContainsKey(message.type) && routes[message.type].ContainsKey(message.subtype ?? "null"))
             {
                 try
                 {
@@ -258,11 +330,13 @@ namespace SlackAPI
                 {
                     if (ErrorHandlingMessage != null)
                         ErrorHandlingMessage(e);
+                    Log.Debug(e);
                     throw e;
                 }
             }
             else
             {
+                Log.DebugFormat("No valid route for {0} - {1} with this data: {2}", message.type, message.subtype ?? "null", data);
                 System.Diagnostics.Debug.WriteLine(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
                 if (ErrorHandlingMessage != null)
                     ErrorHandlingMessage(new InvalidDataException(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null")));
@@ -292,20 +366,24 @@ namespace SlackAPI
             currentlySending = 0;
         }
 
-		public void Close()
-		{
+        public void Close()
+        {
             try
             {
-                this.socket.Abort();
+                socket.Abort();
             }
             catch (Exception ex)
             {
-
+                Log.Debug(ex);
+            }
+            finally
+            {
+                socket.Dispose();
             }
 
             if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
                 ConnectionClosed();
-		}
+        }
     }
 
     public class SlackSocketMessage
@@ -331,8 +409,8 @@ namespace SlackAPI
         public string SubType;
         public SlackSocketRouting(string type, string subtype = null)
         {
-            this.Type = type;
-            this.SubType = subtype;
+            Type = type;
+            SubType = subtype;
         }
     }
 }

@@ -6,15 +6,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
-using SlackAPI.RPCMessages;
+using SlackAPI.Models;
 
 namespace SlackAPI
 {
     /// <summary>
     /// SlackClient is intended to solely handle RPC (HTTP-based) functionality. Does not handle WebSocket connectivity.
     /// 
-    /// For WebSocket connectivity, refer to <see cref="SlackAPI.SlackSocketClient"/>
+    /// For WebSocket connectivity, refer to <see cref="SlackSocketClient"/>
     /// </summary>
     public class SlackClient
     {
@@ -44,13 +43,14 @@ namespace SlackAPI
         public List<User> Users;
         public List<Channel> Channels;
         public List<Channel> Groups;
-        public List<DirectMessageConversation> DirectMessages;
+        public List<DirectMessage> DirectMessages;
 
         public Dictionary<string, User> UserLookup;
+
+        public Dictionary<string, Conversation> ConversationLookup;
         public Dictionary<string, Channel> ChannelLookup;
         public Dictionary<string, Channel> GroupLookup;
-        public Dictionary<string, DirectMessageConversation> DirectMessageLookup;
-        public Dictionary<string, Conversation> ConversationLookup;
+        public Dictionary<string, DirectMessage> DirectMessageLookup;
 
         //public event Action<ReceivingMessage> OnUserTyping;
         //public event Action<ReceivingMessage> OnMessageReceived;
@@ -62,76 +62,85 @@ namespace SlackAPI
             APIToken = token;
         }
 
-		public virtual void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
+        public virtual void Connect(Action<LoginResponse, SlackClient> onConnected = null, Action onSocketConnected = null)
         {
             EmitLogin((loginDetails) =>
             {
-				if(loginDetails.ok)
+                if (loginDetails.Ok)
 					Connected(loginDetails);
                 if (onConnected != null)
-                    onConnected(loginDetails);
+                    onConnected(loginDetails, this);
             });
         }
 
         protected virtual void Connected(LoginResponse loginDetails)
         {
             MySelf = loginDetails.self;
-            MyData = loginDetails.users.First((c) => c.id == MySelf.id);
+            MyData = loginDetails.users.First((c) => c.Id == MySelf.id);
             MyTeam = loginDetails.team;
 
-            Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
+            Users = new List<User>(loginDetails.users.Where((c) => !c.Deleted));
             Channels = new List<Channel>(loginDetails.channels);
             Groups = new List<Channel>(loginDetails.groups);
-            DirectMessages = new List<DirectMessageConversation>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.user) && c.id != MySelf.id));
+            DirectMessages = new List<DirectMessage>(loginDetails.ims.Where((c) => Users.Exists((a) => a.Id == c.UserId) && c.Id != MySelf.id));
             starredChannels =
-                    Groups.Where((c) => c.is_starred).Select((c) => c.id)
+                    Groups.Where((c) => c.IsStarred).Select((c) => c.Id)
                 .Union(
-                    DirectMessages.Where((c) => c.is_starred).Select((c) => c.user)
+                    DirectMessages.Where((c) => c.IsStarred).Select((c) => c.UserId)
                 ).Union(
-                    Channels.Where((c) => c.is_starred).Select((c) => c.id)
+                    Channels.Where((c) => c.IsStarred).Select((c) => c.Id)
                 ).ToList();
 
+            ConversationLookup = new Dictionary<string, Conversation>();
             UserLookup = new Dictionary<string, User>();
-            foreach (User u in Users) UserLookup.Add(u.id, u);
+            foreach (User u in Users)
+            {
+                UserLookup.Add(u.Id, u);
+            }
 
             ChannelLookup = new Dictionary<string, Channel>();
-            ConversationLookup = new Dictionary<string, Conversation>();
             foreach (Channel c in Channels)
             {
-                ChannelLookup.Add(c.id, c);
-                ConversationLookup.Add(c.id, c);
+                ChannelLookup.Add(c.Id, c);
+                ConversationLookup.Add(c.Id, c);
             }
 
             GroupLookup = new Dictionary<string, Channel>();
             foreach (Channel g in Groups)
             {
-                GroupLookup.Add(g.id, g);
-                ConversationLookup.Add(g.id, g);
+                GroupLookup.Add(g.Id, g);
+                ConversationLookup.Add(g.Id, g);
             }
 
-            DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
-            foreach (DirectMessageConversation im in DirectMessages)
+            DirectMessageLookup = new Dictionary<string, DirectMessage>();
+            foreach (DirectMessage im in DirectMessages)
             {
-                DirectMessageLookup.Add(im.id, im);
-                ConversationLookup.Add(im.id, im);
+                if (UserLookup.ContainsKey(im.UserId))
+                {
+                    im.Name = UserLookup[im.UserId].Name;
+        }
+
+                DirectMessageLookup.Add(im.Id, im);
+                ConversationLookup.Add(im.Id, im);
             }
+
         }
 
         internal static Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
         {
             string parameters = getParameters
                 .Where(x => x.Item2 != null)
-                .Select(new Func<Tuple<string, string>, string>(a => 
+                .Select(a => 
+                {
+                    try
                     {
-                        try
-                        {
-                            return string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2));
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException(string.Format("Failed when processing '{0}'.", a), ex);
-                        }
-                    }))
+                        return string.Format("{0}={1}", Uri.EscapeDataString(a.Item1), Uri.EscapeDataString(a.Item2));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException(string.Format("Failed when processing '{0}'.", a), ex);
+                    }
+                })
                 .Aggregate((a, b) =>
                 {
                     if (string.IsNullOrEmpty(a))
@@ -162,10 +171,10 @@ namespace SlackAPI
         public static void APIGetRequest<K>(Action<K> callback, params Tuple<string, string>[] getParameters)
             where K : Response
         {
-            APIRequest<K>(callback, getParameters, new Tuple<string, string>[0]);
+            APIRequest(callback, getParameters, new Tuple<string, string>[0]);
         }
 
-        public void APIRequestWithToken<K>(Action<K> callback, params Tuple<string,string>[] getParameters)
+        public void APIRequestWithToken<K>(Action<K> callback, params Tuple<string, string>[] getParameters)
             where K : Response
         {
             Tuple<string, string>[] tokenArray = new Tuple<string, string>[]{
@@ -210,7 +219,8 @@ namespace SlackAPI
         {
             APIRequestWithToken(callback);
         }
-		public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name) {
+        public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name)
+        {
 			APIRequestWithToken(callback, new Tuple<string, string>("name", name));
 		}
 		public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
@@ -233,7 +243,7 @@ namespace SlackAPI
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             if (!string.IsNullOrEmpty(userId))
-                parameters.Add(new Tuple<string,string>("user", userId));
+                parameters.Add(new Tuple<string, string>("user", userId));
 
             if (from.HasValue)
                 parameters.Add(new Tuple<string, string>("ts_from", from.Value.ToProperTimeStamp()));
@@ -275,32 +285,32 @@ namespace SlackAPI
         void GetHistory<K>(Action<K> historyCallback, string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null)
             where K : MessageHistory
         {
-            List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("channel", channel));
             
-            if(latest.HasValue)
+            if (latest.HasValue)
                 parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
-            if(oldest.HasValue)
+            if (oldest.HasValue)
                 parameters.Add(new Tuple<string, string>("oldest", oldest.Value.ToProperTimeStamp()));
-            if(count.HasValue)
-                parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
+            if (count.HasValue)
+                parameters.Add(new Tuple<string, string>("count", count.Value.ToString()));
 
             APIRequestWithToken(historyCallback, parameters.ToArray());
         }
 
         public void GetChannelHistory(Action<ChannelMessageHistory> callback, Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            GetHistory(callback, channelInfo.id, latest, oldest, count);
+            GetHistory(callback, channelInfo.Id, latest, oldest, count);
         }
 
-        public void GetDirectMessageHistory(Action<MessageHistory> callback, DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public void GetDirectMessageHistory(Action<MessageHistory> callback, DirectMessage conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            GetHistory(callback, conversationInfo.id, latest, oldest, count);
+            GetHistory(callback, conversationInfo.Id, latest, oldest, count);
         }
 
         public void GetGroupHistory(Action<GroupMessageHistory> callback, Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
         {
-            GetHistory(callback, groupInfo.id, latest, oldest, count);
+            GetHistory(callback, groupInfo.Id, latest, oldest, count);
         }
 
         public void MarkChannel(Action<MarkResponse> callback, string channelId, DateTime ts)
@@ -313,12 +323,12 @@ namespace SlackAPI
 
         public void GetFileInfo(Action<FileInfoResponse> callback, string fileId, int? page = null, int? count = null)
         {
-            List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
-            parameters.Add(new Tuple<string,string>("file", fileId));
+            parameters.Add(new Tuple<string, string>("file", fileId));
             
-            if(count.HasValue)
-                parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
+            if (count.HasValue)
+                parameters.Add(new Tuple<string, string>("count", count.Value.ToString()));
 
             if (page.HasValue)
                 parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
@@ -487,17 +497,18 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
-        public void GetStars(Action<StarListResponse> callback, string userId = null, int? count = null, int? page = null){
-            List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
+        public void GetStars(Action<StarListResponse> callback, string userId = null, int? count = null, int? page = null)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             
-            if(!string.IsNullOrEmpty(userId))
-                parameters.Add(new Tuple<string,string>("user", userId));
+            if (!string.IsNullOrEmpty(userId))
+                parameters.Add(new Tuple<string, string>("user", userId));
 
-            if(count.HasValue)
-                parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
+            if (count.HasValue)
+                parameters.Add(new Tuple<string, string>("count", count.Value.ToString()));
 
-            if(page.HasValue)
-                parameters.Add(new Tuple<string,string>("page", page.Value.ToString()));
+            if (page.HasValue)
+                parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
@@ -587,6 +598,21 @@ namespace SlackAPI
             APIRequestWithToken(callback, param);
         }
 
+        /// <summary>
+        /// This method posts a message to a public channel, private channel, or direct message/IM channel.
+        /// https://api.slack.com/methods/chat.postMessage
+        /// </summary>
+        /// <param name="callback"></param>
+        /// <param name="channelId">Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See below for more details.</param>
+        /// <param name="text">Text of the message to send. See below for an explanation of formatting. This field is usually required, unless you're providing only attachments instead.</param>
+        /// <param name="botName">Set your bot's user name. Must be used in conjunction with as_user set to false, otherwise ignored.</param>
+        /// <param name="parse">Change how messages are treated.Defaults to none.</param>
+        /// <param name="linkNames">Find and link channel names and usernames.</param>
+        /// <param name="attachments">Structured message attachments.</param>
+        /// <param name="unfurl_links">Pass true to enable unfurling of primarily text-based content.</param>
+        /// <param name="icon_url">URL to an image to use as the icon for this message.Must be used in conjunction with as_user set to false, otherwise ignored.</param>
+        /// <param name="icon_emoji">Emoji to use as the icon for this message. Overrides icon_url. Must be used in conjunction with as_user set to false, otherwise ignored. </param>
+        /// <param name="as_user">Pass true to post the message as the authed user, instead of as a bot. Defaults to false. </param>
         public void PostMessage(
             Action<PostMessageResponse> callback,
             string channelId,
@@ -600,13 +626,13 @@ namespace SlackAPI
             string icon_emoji = null,
             bool as_user = false)
         {
-            List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
-            parameters.Add(new Tuple<string,string>("channel", channelId));
-            parameters.Add(new Tuple<string,string>("text", text));
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("text", text));
 
-            if(!string.IsNullOrEmpty(botName))
-                parameters.Add(new Tuple<string,string>("username", botName));
+            if (!string.IsNullOrEmpty(botName))
+                parameters.Add(new Tuple<string, string>("username", botName));
 
             if (!string.IsNullOrEmpty(parse))
                 parameters.Add(new Tuple<string, string>("parse", parse));
@@ -674,7 +700,7 @@ namespace SlackAPI
 
             parameters.Add(string.Format("{0}={1}", "channels", string.Join(",", channelIds)));
 
-            using(HttpClient client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             using (MultipartFormDataContent form = new MultipartFormDataContent())
             {
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
@@ -691,25 +717,25 @@ namespace SlackAPI
                 builder.Append("identify");
             if ((int)(scope & SlackScope.Read) != 0)
             {
-                if(builder.Length > 0)
+                if (builder.Length > 0)
                     builder.Append(",");
                 builder.Append("read");
             }
             if ((int)(scope & SlackScope.Post) != 0)
             {
-                if(builder.Length > 0)
+                if (builder.Length > 0)
                     builder.Append(",");
                 builder.Append("post");
             }
             if ((int)(scope & SlackScope.Client) != 0)
             {
-                if(builder.Length > 0)
+                if (builder.Length > 0)
                     builder.Append(",");
                 builder.Append("client");
             }
             if ((int)(scope & SlackScope.Admin) != 0)
             {
-                if(builder.Length > 0)
+                if (builder.Length > 0)
                     builder.Append(",");
                 builder.Append("admin");
             }
@@ -730,9 +756,9 @@ namespace SlackAPI
 
         public static void GetAccessToken(Action<AccessTokenResponse> callback, string clientId, string clientSecret, string redirectUri, string code)
         {
-            APIRequest<AccessTokenResponse>(callback, new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
+            APIRequest(callback, new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
                 new Tuple<string, string>("client_secret", clientSecret), new Tuple<string, string>("code", code),
-                new Tuple<string, string>("redirect_uri", redirectUri) }, new Tuple<string, string>[] {});
+                new Tuple<string, string>("redirect_uri", redirectUri) }, new Tuple<string, string>[] { });
         }
 
         public static void RegisterConverter(JsonConverter converter)
