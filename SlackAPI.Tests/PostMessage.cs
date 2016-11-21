@@ -1,10 +1,9 @@
 ﻿using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace SlackAPI.Tests
 {
-    [TestClass]
     public class PostMessage
     {
         private readonly Config _config;
@@ -14,7 +13,7 @@ namespace SlackAPI.Tests
             _config = Config.GetConfig();
         }
 
-        [TestMethod]
+        [Fact]
         public void SimpleMessageDelivery()
         {
             // given
@@ -35,12 +34,12 @@ namespace SlackAPI.Tests
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
-            Assert.AreEqual(actual.message.text, "Hi there!");
-            Assert.AreEqual(actual.message.type, "message");
+            Assert.True(actual.ok, "Error while posting message to channel. ");
+            Assert.Equal(actual.message.text, "Hi there!");
+            Assert.Equal(actual.message.type, "message");
         }
 
-        [TestMethod]
+        [Fact]
         public void Attachments()
         {
             // given
@@ -62,10 +61,10 @@ namespace SlackAPI.Tests
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
+            Assert.True(actual.ok, "Error while posting message to channel. ");
         }
 
-        [TestMethod]
+        [Fact]
         public void AttachmentsWithActions()
         {
             // given
@@ -87,7 +86,7 @@ namespace SlackAPI.Tests
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
+            Assert.True(actual.ok, "Error while posting message to channel. ");
         }
     }
 }

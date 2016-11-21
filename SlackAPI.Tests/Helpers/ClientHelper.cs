@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace SlackAPI.Tests.Helpers
 {
@@ -24,7 +24,7 @@ namespace SlackAPI.Tests.Helpers
                 });
             }
 
-            Assert.IsTrue(client.IsConnected, "Doh, still isn't connected");
+            Assert.True(client.IsConnected, "Doh, still isn't connected");
 
             return client;
         }

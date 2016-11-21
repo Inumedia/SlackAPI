@@ -1,10 +1,9 @@
 ﻿using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace SlackAPI.Tests
 {
-    [TestClass]
     public class Update 
     {
         private readonly Config _config;
@@ -14,7 +13,7 @@ namespace SlackAPI.Tests
             _config = Config.GetConfig();
         }
 
-        [TestMethod]
+        [Fact]
         public void SimpleUpdate()
         {
             // given
@@ -39,9 +38,9 @@ namespace SlackAPI.Tests
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while posting message to channel. ");
-            Assert.AreEqual(actual.message.text, "[changed]");
-            Assert.AreEqual(actual.message.type, "message");
+            Assert.True(actual.ok, "Error while posting message to channel. ");
+            Assert.Equal(actual.message.text, "[changed]");
+            Assert.Equal(actual.message.type, "message");
         }
 
         private string PostedMessage(SlackSocketClient client)
@@ -53,7 +52,7 @@ namespace SlackAPI.Tests
                     response =>
                     {
                         messageId = response.ts;
-                        Assert.IsTrue(response.ok, "Error while posting message to channel. ");
+                        Assert.True(response.ok, "Error while posting message to channel. ");
                         sync.Proceed();
                     },
                     _config.Slack.TestChannel,
@@ -63,7 +62,7 @@ namespace SlackAPI.Tests
             return messageId;
         }
 
-        [TestMethod()]
+        [Fact]
         public void UpdatePresence()
         {
             var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);

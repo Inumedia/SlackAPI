@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Runtime.CompilerServices;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace SlackAPI.Tests.Helpers
 {
@@ -25,7 +25,7 @@ namespace SlackAPI.Tests.Helpers
 
         public void Dispose()
         {
-            Assert.IsTrue(this.waiter.Wait(this.WaitTimeout), $"Took too long to do '{this.message}'");
+            Assert.True(this.waiter.Wait(this.WaitTimeout), $"Took too long to do '{this.message}'");
         }
     }
 }

@@ -2,11 +2,10 @@
 using System.Linq;
 using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace SlackAPI.Tests
 {
-    [TestClass]
     public class JoinDirectMessageChannel
     {
         private readonly Config _config;
@@ -16,7 +15,7 @@ namespace SlackAPI.Tests
             _config = Config.GetConfig();
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldJoinDirectMessageChannel()
         {
             // given
@@ -37,8 +36,8 @@ namespace SlackAPI.Tests
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while joining user channel");
-            Assert.IsTrue(!string.IsNullOrEmpty(actual.channel.id), "We expected a channel id to be returned");
+            Assert.True(actual.ok, "Error while joining user channel");
+            Assert.NotEmpty(actual.channel.id);
         }
     }
 }

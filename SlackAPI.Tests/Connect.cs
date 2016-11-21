@@ -1,12 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
 using SlackAPI.WebSocketMessages;
+using Xunit;
 
 namespace SlackAPI.Tests
 {
-    [TestClass]
     public class Connect
     {
         const string TestText = "Test :D";
@@ -17,14 +16,14 @@ namespace SlackAPI.Tests
             _config = Config.GetConfig();
         }
 
-        [TestMethod]
+        [Fact]
         public void TestConnectAsUser()
         {
             var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
-            Assert.IsTrue(client.IsConnected, "Invalid, doesn't think it's connected.");
+            Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
-        [TestMethod, Ignore]
+        [Fact(Skip = "Unable to get a working test with data we have in config.json")]
         public void TestGetAccessToken()
         {
             // assemble
@@ -36,10 +35,10 @@ namespace SlackAPI.Tests
             var accessTokenResponse = GetAccessToken(clientId, clientSecret, "", authCode);
             
             // assert
-            Assert.IsNotNull(accessTokenResponse, "accessTokenResponse != null");
-            Assert.IsNotNull(accessTokenResponse.bot, "bot != null");
-            Assert.IsNotNull(accessTokenResponse.bot.bot_user_id, "bot.user_id != null");
-            Assert.IsNotNull(accessTokenResponse.bot.bot_access_token, "bot.bot_access_token != null");
+            Assert.NotNull(accessTokenResponse);
+            Assert.NotNull(accessTokenResponse.bot);
+            Assert.NotNull(accessTokenResponse.bot.bot_user_id);
+            Assert.NotNull(accessTokenResponse.bot.bot_access_token);
         }
 
         private AccessTokenResponse GetAccessToken(string clientId, string clientSecret, string redirectUri, string authCode)
@@ -59,14 +58,14 @@ namespace SlackAPI.Tests
             return accessTokenResponse;
         }
 
-        [TestMethod]
+        [Fact]
         public void TestConnectAsBot()
         {
             var client = ClientHelper.GetClient(_config.Slack.BotAuthToken);
-            Assert.IsTrue(client.IsConnected, "Invalid, doesn't think it's connected.");
+            Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestConnectPostAndDelete()
         {
             // given
@@ -78,10 +77,10 @@ namespace SlackAPI.Tests
             DeletedResponse deletedResponse = DeleteMessage(client, channel, messageTimestamp);
 
             // then
-            Assert.IsNotNull(deletedResponse, "No response was found");
-            Assert.IsTrue(deletedResponse.ok, "Message not deleted!");
-            Assert.AreEqual(channel, deletedResponse.channel, "Got invalid channel? Something's not right here...");
-            Assert.AreEqual(messageTimestamp, deletedResponse.ts, "Got invalid time stamp? Something's not right here...");
+            Assert.NotNull(deletedResponse);
+            Assert.True(deletedResponse.ok);
+            Assert.Equal(channel, deletedResponse.channel);
+            Assert.Equal(messageTimestamp, deletedResponse.ts);
         }
 
         private static DateTime PostMessage(SlackSocketClient client, string channel)
@@ -97,8 +96,8 @@ namespace SlackAPI.Tests
                 }, channel, TestText);
             }
 
-            Assert.IsNotNull(sendMessageResponse, "sendMessageResponse != null");
-            Assert.AreEqual(TestText, sendMessageResponse.text, "Got invalid returned text, something's not right here...");
+            Assert.NotNull(sendMessageResponse);
+            Assert.Equal(TestText, sendMessageResponse.text);
 
             return sendMessageResponse.ts;
         }

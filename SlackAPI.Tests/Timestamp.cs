@@ -1,35 +1,22 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MSTestHacks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using Xunit;
 
 namespace SlackAPI.Tests
 {
-    [TestClass]
-    public class Timestamp : TestBase
+    public class Timestamp
     {
-
-        private IEnumerable<string> TestTimeStamps
-        {
-            get
-            {
-                yield return "12345.000000";
-                yield return "12345.900000";
-                yield return "12345.123456";
-                yield return "12345.123450";
-                yield return "12345.12345";
-                yield return "12345";
-            }
-        }
-
-        [TestMethod]
-        [DataSource("SlackAPI.Tests.Timestamp.TestTimeStamps")]
-        public void TestTimestampConversion()
+        [Theory]
+        [InlineData("12345.000000")]
+        [InlineData("12345.900000")]
+        [InlineData("12345.123456")]
+        [InlineData("12345.123450")]
+        [InlineData("12345.12345")]
+        [InlineData("12345")]
+        public void TestTimestampConversion(string originalTimestamp)
         {
             // Arrange
-            var originalTimestamp = this.TestContext.GetRuntimeDataSourceObject<string>();
             JavascriptDateTimeConverter converter = new JavascriptDateTimeConverter();
             var jsonReader = new JsonTextReader(new StringReader($"\"{originalTimestamp}\""));
             jsonReader.Read();
@@ -39,8 +26,8 @@ namespace SlackAPI.Tests
             var newTimestamp = timestampDateTime.ToProperTimeStamp();
 
             // Assert
-            Assert.AreEqual(double.Parse(originalTimestamp), double.Parse(originalTimestamp));
-            Assert.AreEqual(6, newTimestamp.Substring(newTimestamp.IndexOf(".") + 1).Length);
+            Assert.Equal(double.Parse(originalTimestamp), double.Parse(originalTimestamp));
+            Assert.Equal(6, newTimestamp.Substring(newTimestamp.IndexOf(".") + 1).Length);
         }
     }
 }
