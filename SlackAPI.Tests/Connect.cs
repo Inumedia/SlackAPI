@@ -6,20 +6,21 @@ using Xunit;
 
 namespace SlackAPI.Tests
 {
+    [Collection("Integration tests")]
     public class Connect
     {
         const string TestText = "Test :D";
-        private readonly Config _config;
+        private readonly IntegrationFixture fixture;
 
-        public Connect()
+        public Connect(IntegrationFixture fixture)
         {
-            _config = Config.GetConfig();
+            this.fixture = fixture;
         }
 
         [Fact]
         public void TestConnectAsUser()
         {
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
@@ -27,9 +28,9 @@ namespace SlackAPI.Tests
         public void TestGetAccessToken()
         {
             // assemble
-            var clientId = _config.Slack.ClientId;
-            var clientSecret = _config.Slack.ClientSecret;
-            var authCode = _config.Slack.AuthCode;
+            var clientId = this.fixture.Config.ClientId;
+            var clientSecret = this.fixture.Config.ClientSecret;
+            var authCode = this.fixture.Config.AuthCode;
 
             // act
             var accessTokenResponse = GetAccessToken(clientId, clientSecret, "", authCode);
@@ -61,7 +62,7 @@ namespace SlackAPI.Tests
         [Fact]
         public void TestConnectAsBot()
         {
-            var client = ClientHelper.GetClient(_config.Slack.BotAuthToken);
+            var client = this.fixture.BotClient;
             Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
@@ -69,8 +70,8 @@ namespace SlackAPI.Tests
         public void TestConnectPostAndDelete()
         {
             // given
-            SlackSocketClient client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
-            string channel = _config.Slack.TestChannel;
+            SlackSocketClient client = this.fixture.UserClient;
+            string channel = this.fixture.Config.TestChannel;
 
             // when
             DateTime messageTimestamp = PostMessage(client, channel);

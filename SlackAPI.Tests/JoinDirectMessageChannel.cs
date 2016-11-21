@@ -6,23 +6,24 @@ using Xunit;
 
 namespace SlackAPI.Tests
 {
+    [Collection("Integration tests")]
     public class JoinDirectMessageChannel
     {
-        private readonly Config _config;
+        private readonly IntegrationFixture fixture;
 
-        public JoinDirectMessageChannel()
+        public JoinDirectMessageChannel(IntegrationFixture fixture)
         {
-            _config = Config.GetConfig();
+            this.fixture = fixture;
         }
 
         [Fact]
         public void ShouldJoinDirectMessageChannel()
         {
             // given
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             JoinDirectMessageChannelResponse actual = null;
 
-            string userName = _config.Slack.DirectMessageUser;
+            string userName = this.fixture.Config.DirectMessageUser;
             string user = client.Users.First(x => x.name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).id;
 
             // when

@@ -5,6 +5,7 @@ using Xunit;
 
 namespace SlackAPI.Tests
 {
+    [Collection("Unit tests")]
     public class Timestamp
     {
         [Theory]

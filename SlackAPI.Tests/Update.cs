@@ -4,20 +4,21 @@ using Xunit;
 
 namespace SlackAPI.Tests
 {
+    [Collection("Integration tests")]
     public class Update 
     {
-        private readonly Config _config;
+        private readonly IntegrationFixture fixture;
 
-        public Update()
+        public Update(IntegrationFixture fixture)
         {
-            _config = Config.GetConfig();
+            this.fixture = fixture;
         }
 
         [Fact]
         public void SimpleUpdate()
         {
             // given
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             var messageId = PostedMessage(client);
             UpdateResponse actual = null;
 
@@ -31,7 +32,7 @@ namespace SlackAPI.Tests
                         sync.Proceed();
                     },
                     messageId,
-                    _config.Slack.TestChannel,
+                    this.fixture.Config.TestChannel,
                     "[changed]",
                     attachments: SlackMother.SomeAttachments,
                     as_user: true);
@@ -55,7 +56,7 @@ namespace SlackAPI.Tests
                         Assert.True(response.ok, "Error while posting message to channel. ");
                         sync.Proceed();
                     },
-                    _config.Slack.TestChannel,
+                    this.fixture.Config.TestChannel,
                     "Hi there!",
                     as_user: true);
             }
@@ -65,7 +66,7 @@ namespace SlackAPI.Tests
         [Fact]
         public void UpdatePresence()
         {
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             using (var sync = new InSync(nameof(SlackClient.EmitPresence)))
             {
                 client.EmitPresence((presence) =>

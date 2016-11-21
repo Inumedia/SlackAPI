@@ -7,7 +7,7 @@ namespace SlackAPI.Tests.Helpers
 {
     public class InSync : IDisposable
     {
-        private readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(5);
+        private readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(15);
 
         private readonly ManualResetEventSlim waiter;
         private readonly string message;

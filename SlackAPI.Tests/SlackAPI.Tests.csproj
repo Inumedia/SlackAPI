@@ -55,10 +55,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\Config.cs" />
+    <Compile Include="Configuration\IntegrationCollection.cs" />
+    <Compile Include="Configuration\IntegrationFixture.cs" />
     <Compile Include="Configuration\SlackConfig.cs" />
     <Compile Include="Connect.cs" />
-    <Compile Include="Helpers\ClientHelper.cs" />
     <Compile Include="Helpers\InSync.cs" />
     <Compile Include="Helpers\SlackMother.cs" />
     <Compile Include="Timestamp.cs" />

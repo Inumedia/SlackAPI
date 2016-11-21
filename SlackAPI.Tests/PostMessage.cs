@@ -4,20 +4,21 @@ using Xunit;
 
 namespace SlackAPI.Tests
 {
+    [Collection("Integration tests")]
     public class PostMessage
     {
-        private readonly Config _config;
+        private readonly IntegrationFixture fixture;
 
-        public PostMessage()
+        public PostMessage(IntegrationFixture fixture)
         {
-            _config = Config.GetConfig();
+            this.fixture = fixture;
         }
 
         [Fact]
         public void SimpleMessageDelivery()
         {
             // given
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             PostMessageResponse actual = null;
 
             // when
@@ -29,7 +30,7 @@ namespace SlackAPI.Tests
                         actual = response;
                         sync.Proceed();
                     },
-                    _config.Slack.TestChannel,
+                    this.fixture.Config.TestChannel,
                     "Hi there!");
             }
 
@@ -43,7 +44,7 @@ namespace SlackAPI.Tests
         public void Attachments()
         {
             // given
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             PostMessageResponse actual = null;
 
             // when
@@ -55,7 +56,7 @@ namespace SlackAPI.Tests
                         actual = response;
                         sync.Proceed();
                     },
-                    _config.Slack.TestChannel,
+                    this.fixture.Config.TestChannel,
                     string.Empty,
                     attachments: SlackMother.SomeAttachments);
             }
@@ -68,7 +69,7 @@ namespace SlackAPI.Tests
         public void AttachmentsWithActions()
         {
             // given
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             PostMessageResponse actual = null;
 
             // when
@@ -80,7 +81,7 @@ namespace SlackAPI.Tests
                         actual = response;
                         sync.Proceed();
                     },
-                    _config.Slack.TestChannel,
+                    this.fixture.Config.TestChannel,
                     string.Empty,
                     attachments: SlackMother.SomeAttachmentsWithActions);
             }
