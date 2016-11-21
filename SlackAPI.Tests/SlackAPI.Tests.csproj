@@ -6,8 +6,8 @@
     <ProjectGuid>{C254F6FF-81D4-46DF-AA21-3D1A6456253B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IntegrationTest</RootNamespace>
-    <AssemblyName>IntegrationTest</AssemblyName>
+    <RootNamespace>SlackAPI.Tests</RootNamespace>
+    <AssemblyName>SlackAPI.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

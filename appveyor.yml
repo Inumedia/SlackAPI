@@ -33,7 +33,7 @@ before_build:
 
     "@
 
-    $config | Set-Content IntegrationTest\Configuration\config.json
+    $config | Set-Content SlackAPI.Tests\Configuration\config.json
 - nuget restore
 
 build:
@@ -45,7 +45,7 @@ after_build:
 
 test:
   assemblies:
-    - IntegrationTest\bin\Release\IntegrationTest.dll
+    - SlackAPI.Tests\bin\Release\SlackAPI.Tests.dll
 
 artifacts:
 - path: SlackAPI*.nupkg
