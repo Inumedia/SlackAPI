@@ -1,11 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SlackAPI;
 using System;
-using IntegrationTest.Configuration;
-using IntegrationTest.Helpers;
+using SlackAPI.Tests.Configuration;
+using SlackAPI.Tests.Helpers;
 using SlackAPI.WebSocketMessages;
 
-namespace IntegrationTest
+namespace SlackAPI.Tests
 {
     [TestClass]
     public class Connect

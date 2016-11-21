@@ -1,4 +1,4 @@
-﻿namespace IntegrationTest.Configuration
+﻿namespace SlackAPI.Tests.Configuration
 {
     public class SlackConfig
     {

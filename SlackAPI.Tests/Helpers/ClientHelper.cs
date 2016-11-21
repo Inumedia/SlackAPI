@@ -1,8 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SlackAPI;
 
-namespace IntegrationTest.Helpers
+namespace SlackAPI.Tests.Helpers
 {
     public static class ClientHelper
     {

@@ -1,10 +1,10 @@
-namespace IntegrationTest.Helpers
-{
-    using System;
-    using System.Threading;
-    using System.Runtime.CompilerServices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Threading;
+using System.Runtime.CompilerServices;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+namespace SlackAPI.Tests.Helpers
+{
     public class InSync : IDisposable
     {
         private readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(5);

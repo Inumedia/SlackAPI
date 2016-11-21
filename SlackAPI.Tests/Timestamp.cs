@@ -1,12 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MSTestHacks;
 using Newtonsoft.Json;
-using SlackAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace IntegrationTest
+namespace SlackAPI.Tests
 {
     [TestClass]
     public class Timestamp : TestBase
@@ -26,7 +25,7 @@ namespace IntegrationTest
         }
 
         [TestMethod]
-        [DataSource("IntegrationTest.Timestamp.TestTimeStamps")]
+        [DataSource("SlackAPI.Tests.Timestamp.TestTimeStamps")]
         public void TestTimestampConversion()
         {
             // Arrange

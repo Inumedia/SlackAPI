@@ -2,8 +2,10 @@
 using System.IO;
 using Newtonsoft.Json;
 
-namespace IntegrationTest.Configuration
+namespace SlackAPI.Tests.Configuration
 {
+    using File = System.IO.File;
+
     public class Config
     {
         public SlackConfig Slack { get; set; }

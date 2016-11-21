@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using IntegrationTest.Configuration;
-using IntegrationTest.Helpers;
+using SlackAPI.Tests.Configuration;
+using SlackAPI.Tests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SlackAPI;
 
-namespace IntegrationTest
+namespace SlackAPI.Tests
 {
     [TestClass]
     public class JoinDirectMessageChannel

@@ -1,12 +1,9 @@
-﻿using System.Linq;
-using IntegrationTest.Configuration;
-using IntegrationTest.Helpers;
+﻿using SlackAPI.Tests.Configuration;
+using SlackAPI.Tests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace IntegrationTest
+namespace SlackAPI.Tests
 {
-    using SlackAPI;
-
     [TestClass]
     public class Update 
     {
