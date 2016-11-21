@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SlackAPI;
 
@@ -6,7 +7,21 @@ namespace IntegrationTest.Helpers
 {
     public static class ClientHelper
     {
+        private static Dictionary<string, SlackSocketClient> clientsCache = new Dictionary<string, SlackSocketClient>();
+
         public static SlackSocketClient GetClient(string authToken)
+        {
+            SlackSocketClient client;
+            if (clientsCache.TryGetValue(authToken, out client) == false)
+            {
+                client = CreateClient(authToken);
+                clientsCache.Add(authToken, client);
+            }
+
+            return client;
+        }
+
+        private static SlackSocketClient CreateClient(string authToken)
         {
             SlackSocketClient client;
 
