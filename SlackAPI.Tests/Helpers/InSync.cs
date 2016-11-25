@@ -1,13 +1,13 @@
-namespace IntegrationTest.Helpers
-{
-    using System;
-    using System.Threading;
-    using System.Runtime.CompilerServices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Threading;
+using System.Runtime.CompilerServices;
+using Xunit;
 
+namespace SlackAPI.Tests.Helpers
+{
     public class InSync : IDisposable
     {
-        private readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(5);
+        private readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(15);
 
         private readonly ManualResetEventSlim waiter;
         private readonly string message;
@@ -25,7 +25,7 @@ namespace IntegrationTest.Helpers
 
         public void Dispose()
         {
-            Assert.IsTrue(this.waiter.Wait(this.WaitTimeout), $"Took too long to do '{this.message}'");
+            Assert.True(this.waiter.Wait(this.WaitTimeout), $"Took too long to do '{this.message}'");
         }
     }
 }

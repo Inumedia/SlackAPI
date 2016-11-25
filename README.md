@@ -24,8 +24,8 @@ Create some pull requests, give me a reason to give you access.
 
 # Howto build the solution
 ###### (aka where is the config.json file?)
-The project **IntegrationTest** requires a valid `config.json` file for tests. You have two options to build the solution:
-- Unload IntegrationTest project and you're able to build SlackAPI solution.
+The project **SlackAPI.Tests** requires a valid `config.json` file for tests. You have two options to build the solution:
+- Unload SlackAPI.Tests project and you're able to build SlackAPI solution.
 - Create your own config.json file to be able to run tests and validate your changes.
   - Copy/paste `config.default.json` to `config.json`
   - Update `config.json` file with your settings

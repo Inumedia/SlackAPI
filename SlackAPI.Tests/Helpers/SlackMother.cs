@@ -1,7 +1,5 @@
-﻿namespace IntegrationTest.Helpers
+﻿namespace SlackAPI.Tests.Helpers
 {
-    using SlackAPI;
-
     public class SlackMother
     {
         public static Attachment[] SomeAttachments => new[]

@@ -1,30 +1,29 @@
 ﻿using System;
 using System.Linq;
-using IntegrationTest.Configuration;
-using IntegrationTest.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SlackAPI;
+using SlackAPI.Tests.Configuration;
+using SlackAPI.Tests.Helpers;
+using Xunit;
 
-namespace IntegrationTest
+namespace SlackAPI.Tests
 {
-    [TestClass]
+    [Collection("Integration tests")]
     public class JoinDirectMessageChannel
     {
-        private readonly Config _config;
+        private readonly IntegrationFixture fixture;
 
-        public JoinDirectMessageChannel()
+        public JoinDirectMessageChannel(IntegrationFixture fixture)
         {
-            _config = Config.GetConfig();
+            this.fixture = fixture;
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldJoinDirectMessageChannel()
         {
             // given
-            var client = ClientHelper.GetClient(_config.Slack.UserAuthToken);
+            var client = this.fixture.UserClient;
             JoinDirectMessageChannelResponse actual = null;
 
-            string userName = _config.Slack.DirectMessageUser;
+            string userName = this.fixture.Config.DirectMessageUser;
             string user = client.Users.First(x => x.name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).id;
 
             // when
@@ -38,8 +37,8 @@ namespace IntegrationTest
             }
 
             // then
-            Assert.IsTrue(actual.ok, "Error while joining user channel");
-            Assert.IsTrue(!string.IsNullOrEmpty(actual.channel.id), "We expected a channel id to be returned");
+            Assert.True(actual.ok, "Error while joining user channel");
+            Assert.NotEmpty(actual.channel.id);
         }
     }
 }

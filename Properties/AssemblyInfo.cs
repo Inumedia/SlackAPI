@@ -35,4 +35,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.4.1")]
 [assembly: AssemblyFileVersion("1.0.4.1")]
 
-[assembly: InternalsVisibleTo("IntegrationTest")]
+[assembly: InternalsVisibleTo("SlackAPI.Tests")]
