@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI", "SlackAPI.csproj", "{0C0A58A8-174E-4A4C-907B-C3569144D15D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI", "SlackAPI\SlackAPI.csproj", "{0C0A58A8-174E-4A4C-907B-C3569144D15D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI.Tests", "SlackAPI.Tests\SlackAPI.Tests.csproj", "{C254F6FF-81D4-46DF-AA21-3D1A6456253B}"
 EndProject

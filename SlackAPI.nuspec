@@ -19,7 +19,7 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\Release\SlackAPI.dll" target="lib\net45\SlackAPI.dll" />
-        <file src="bin\Release\SlackAPI.pdb" target="lib\net45\SlackAPI.pdb" />
+        <file src="SlackAPI\bin\Release\SlackAPI.dll" target="lib\net45\SlackAPI.dll" />
+        <file src="SlackAPI\bin\Release\SlackAPI.pdb" target="lib\net45\SlackAPI.pdb" />
     </files>
 </package>
