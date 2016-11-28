@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI", "SlackAPI\SlackA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI.Tests", "SlackAPI.Tests\SlackAPI.Tests.csproj", "{C254F6FF-81D4-46DF-AA21-3D1A6456253B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackApi.Console", "SlackApi.Console\SlackApi.Console.csproj", "{19140E48-E1A9-421D-86DB-5AF18EECFEF2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI.Console", "SlackAPI.Console\SlackAPI.Console.csproj", "{19140E48-E1A9-421D-86DB-5AF18EECFEF2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{9FC74E78-2D91-407E-B4C8-7C89D6CECB5B}"
 	ProjectSection(SolutionItems) = preProject

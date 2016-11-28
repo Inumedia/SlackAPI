@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace SlackApi
+namespace SlackAPI
 {
     class Program
     {
@@ -42,7 +42,7 @@ namespace SlackApi
                 if (index != -1)
                     asString = asString.Substring(index + 1);
 
-                // parse... 
+                // parse...
                 var qs = HttpUtility.ParseQueryString(asString);
                 var code = qs["code"];
                 var newState = qs["state"];
@@ -53,7 +53,7 @@ namespace SlackApi
 
                 // then get the token...
                 Console.WriteLine("Requesting access token...");
-                SlackClient.GetAccessToken((response) => 
+                SlackClient.GetAccessToken((response) =>
                     {
                         var accessToken = response.access_token;
                         Console.WriteLine("Got access token '{0}'...", accessToken);
