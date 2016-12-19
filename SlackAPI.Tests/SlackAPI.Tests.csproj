@@ -72,7 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SlackAPI.csproj">
+    <ProjectReference Include="..\SlackAPI\SlackAPI.csproj">
       <Project>{0c0a58a8-174e-4a4c-907b-c3569144d15d}</Project>
       <Name>SlackAPI</Name>
     </ProjectReference>

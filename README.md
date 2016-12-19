@@ -39,4 +39,4 @@ The project **SlackAPI.Tests** requires a valid `config.json` file for tests. Yo
 
 Example:
 
-```nuget pack SlackAPI.csproj -version 1.2.3```
+```nuget pack SlackAPI.nuspec -version 1.2.3```
