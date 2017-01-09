@@ -3,6 +3,7 @@
     //See: https://api.slack.com/docs/attachments
     public class Attachment
     {
+        public string callback_id;
         public string fallback;
         public string color;
         public string pretext;
