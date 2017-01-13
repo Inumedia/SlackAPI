@@ -40,24 +40,37 @@ namespace SlackAPI
             foreach (Assembly assy in AppDomain.CurrentDomain.GetAssemblies())
             {
                 if (!assy.GlobalAssemblyCache)
-                    foreach (Type t in assy.GetTypes())
-                        foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
-                        {
-                            if (!routing.ContainsKey(route.Type))
-                                routing.Add(route.Type, new Dictionary<string, Type>()
+                {
+                    Type[] types = null;
+                    try //maybe we can't load this assembly? If not, it probably doesn't have SlackSocketRoutes.
+                    {
+                        types = assy.GetTypes();
+                    }
+                    catch { }
+                    finally { types = null; }
+
+                    if (types != null)
+                    {
+                        foreach (Type t in types)
+                            foreach (SlackSocketRouting route in t.GetCustomAttributes<SlackSocketRouting>())
+                            {
+                                if (!routing.ContainsKey(route.Type))
+                                    routing.Add(route.Type, new Dictionary<string, Type>()
                             {
                                 {route.SubType ?? "null", t}
                             });
-                            else
-                                if (!routing[route.Type].ContainsKey(route.SubType ?? "null"))
+                                else
+                                    if (!routing[route.Type].ContainsKey(route.SubType ?? "null"))
                                     routing[route.Type].Add(route.SubType ?? "null", t);
                                 else
                                     throw new InvalidProgramException("Cannot have two socket message types with the same type and subtype!");
-                        }
+                            }
+                    }
+                }
             }
         }
 
-		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
+	public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
         {
             BuildRoutes(routingTo);
             socket = new ClientWebSocket();
