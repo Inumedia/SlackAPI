@@ -11,6 +11,7 @@ namespace SlackAPI.WebSocketMessages
         public string text;
         public string team;
         public DateTime ts;
+        public DateTime thread_ts;
 
         public NewMessage()
         {
