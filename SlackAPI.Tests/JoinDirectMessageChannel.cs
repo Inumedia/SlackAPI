@@ -24,7 +24,7 @@ namespace SlackAPI.Tests
             JoinDirectMessageChannelResponse actual = null;
 
             string userName = this.fixture.Config.DirectMessageUser;
-            string user = client.Users.First(x => x.name.Equals(userName, StringComparison.InvariantCultureIgnoreCase)).id;
+            string user = client.Users.First(x => x.name.Equals(userName, StringComparison.OrdinalIgnoreCase)).id;
 
             // when
             using (var sync = new InSync(nameof(SlackClient.JoinDirectMessageChannel)))

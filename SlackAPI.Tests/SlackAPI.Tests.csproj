@@ -59,6 +59,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyVersion.cs">
+      <Link>Properties\GlobalAssemblyVersion.cs</Link>
+    </Compile>
     <Compile Include="Configuration\IntegrationCollection.cs" />
     <Compile Include="Configuration\IntegrationFixture.cs" />
     <Compile Include="Configuration\SlackConfig.cs" />
