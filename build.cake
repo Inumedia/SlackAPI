@@ -9,7 +9,7 @@ var testProject = File("./SlackAPI.Tests/SlackApi.Tests.NetCore.csproj");
 var projects = new[] { mainProject, testProject };
 var artifactsDirectory = Directory("./artifacts");
 var revision = AppVeyor.IsRunningOnAppVeyor ? AppVeyor.Environment.Build.Number : 0;
-var version = AppVeyor.IsRunningOnAppVeyor ? new Version(AppVeyor.Environment.Build.Version).ToString(3) : "1.0.0";
+var version = AppVeyor.IsRunningOnAppVeyor ? new Version(AppVeyor.Environment.Build.Version.Split('-')[0]).ToString(3) : "1.0.0";
 var globalAssemblyInfo = File("./GlobalAssemblyVersion.cs");
 
 var generatedVersion = "";
@@ -106,7 +106,8 @@ Task("Test")
         testProject,
         new DotNetCoreTestSettings
         {
-            Configuration = configuration
+            Configuration = configuration,
+            Verbose = true
         }
     );
 });
