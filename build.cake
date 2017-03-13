@@ -107,7 +107,6 @@ Task("Test")
         new DotNetCoreTestSettings
         {
             Configuration = configuration,
-            Verbose = true
         }
     );
 });
