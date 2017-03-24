@@ -311,12 +311,12 @@ namespace SlackAPI
             {
                 this.socket.Abort();
             }
-            catch (Exception ex)
-            {
+		    catch (Exception)
+		    {
+		        // ignored
+		    }
 
-            }
-
-            if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
+		    if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
                 ConnectionClosed();
 		}
     }

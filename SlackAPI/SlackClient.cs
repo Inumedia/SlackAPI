@@ -13,13 +13,12 @@ namespace SlackAPI
 {
     /// <summary>
     /// SlackClient is intended to solely handle RPC (HTTP-based) functionality. Does not handle WebSocket connectivity.
-    /// 
+    ///
     /// For WebSocket connectivity, refer to <see cref="SlackAPI.SlackSocketClient"/>
     /// </summary>
     public class SlackClient
     {
         readonly string APIToken;
-        bool authWorks = false;
 
         const string APIBaseLocation = "https://slack.com/api/";
         const int Timeout = 5000;
@@ -121,7 +120,7 @@ namespace SlackAPI
         {
             string parameters = getParameters
                 .Where(x => x.Item2 != null)
-                .Select(new Func<Tuple<string, string>, string>(a => 
+                .Select(new Func<Tuple<string, string>, string>(a =>
                     {
                         try
                         {
@@ -194,7 +193,7 @@ namespace SlackAPI
 
         public static void AuthSignin(Action<AuthSigninResponse> callback, string userId, string teamId, string password)
         {
-            APIRequest(callback, new Tuple<string, string>[] { 
+            APIRequest(callback, new Tuple<string, string>[] {
                 new Tuple<string,string>("user", userId),
                 new Tuple<string,string>("team", teamId),
                 new Tuple<string,string>("password", password)
@@ -244,7 +243,7 @@ namespace SlackAPI
             if (!types.HasFlag(FileTypes.all))
             {
                 FileTypes[] values = (FileTypes[])Enum.GetValues(typeof(FileTypes));
-                
+
                 StringBuilder building = new StringBuilder();
                 bool first = true;
                 for (int i = 0; i < values.Length; ++i)
@@ -277,7 +276,7 @@ namespace SlackAPI
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
             parameters.Add(new Tuple<string, string>("channel", channel));
-            
+
             if(latest.HasValue)
                 parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
             if(oldest.HasValue)
@@ -316,7 +315,7 @@ namespace SlackAPI
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
             parameters.Add(new Tuple<string,string>("file", fileId));
-            
+
             if(count.HasValue)
                 parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
 
@@ -489,7 +488,7 @@ namespace SlackAPI
 
         public void GetStars(Action<StarListResponse> callback, string userId = null, int? count = null, int? page = null){
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
-            
+
             if(!string.IsNullOrEmpty(userId))
                 parameters.Add(new Tuple<string,string>("user", userId));
 
@@ -540,7 +539,7 @@ namespace SlackAPI
             APIRequestWithToken(callback, new Tuple<string, string>("user", user));
         }
 
-        #endregion  
+        #endregion
 
         public void EmitLogin(Action<LoginResponse> callback, string agent = "Inumedia.SlackAPI")
         {
@@ -633,7 +632,7 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("icon_emoji", icon_emoji));
 
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
-		
+
             if (!string.IsNullOrEmpty(thread_ts))
                 parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
 
@@ -732,8 +731,8 @@ namespace SlackAPI
 
             return GetSlackUri("https://slack.com/oauth/authorize", new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
                 new Tuple<string, string>("redirect_uri", redirectUri),
-                new Tuple<string, string>("state", state), 
-                new Tuple<string, string>("scope", theScopes), 
+                new Tuple<string, string>("state", state),
+                new Tuple<string, string>("scope", theScopes),
                 new Tuple<string, string>("team", team)});
         }
 
