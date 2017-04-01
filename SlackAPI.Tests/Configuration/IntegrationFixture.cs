@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 using SlackAPI.Tests.Helpers;
 using Xunit;
@@ -29,7 +30,9 @@ namespace SlackAPI.Tests.Configuration
 
         private SlackConfig GetConfig()
         {
-            string fileName = Path.Combine(Environment.CurrentDirectory, @"configuration\config.json");
+            var currentAssembly = this.GetType().GetTypeInfo().Assembly.Location;
+            var assemblyDirectory = Path.GetDirectoryName(currentAssembly);
+            string fileName = Path.Combine(assemblyDirectory, @"configuration\config.json");
             string json = System.IO.File.ReadAllText(fileName);
 
             var jsonObject = new {slack = (SlackConfig)null };
