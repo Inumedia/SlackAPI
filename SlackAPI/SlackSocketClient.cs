@@ -171,7 +171,7 @@ namespace SlackAPI
 
         public void HandleGroupLeft(GroupLeft left)
         {
-            GroupLookup.Remove(left.channel.id);
+            GroupLookup.Remove(left.channel);
         }
 
         public void HandleGroupOpen(GroupOpen open)

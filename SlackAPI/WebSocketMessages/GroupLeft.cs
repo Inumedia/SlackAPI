@@ -3,7 +3,7 @@
     [SlackSocketRouting("group_left")]
     public class GroupLeft : SlackSocketMessage
     {
-        public Channel channel;
+        public string channel;
     }
 }
 
