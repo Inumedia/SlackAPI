@@ -21,6 +21,7 @@ namespace SlackAPI
 
         public RequestState(HttpWebRequest requestData, Tuple<string, string>[] postParameters, Action<K> toCallback)
         {
+            if (requestData == null) throw new ArgumentNullException("requestData can not be null");
             request = requestData;
             Post = postParameters;
             callback = toCallback;
@@ -73,14 +74,17 @@ namespace SlackAPI
             }
             catch (WebException we)
             {
+                // If we don't get a response, let the exception bubble up as we can't do anything
+                if (we.Response == null) throw we;
+                
                 //Anything that doesn't return error 200 throws an exception.  Sucks.  :l
                 response = (HttpWebResponse)we.Response;
                 //TODO: Handle timeouts, etc?
             }
 
             K responseObj;
-
-            using(Stream responseReading = response.GetResponseStream())
+            
+            using (Stream responseReading = response.GetResponseStream())
             using (StreamReader reader = new StreamReader(responseReading))
             {
                 string responseData = reader.ReadToEnd();
