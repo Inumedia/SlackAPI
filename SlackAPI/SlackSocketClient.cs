@@ -174,6 +174,7 @@ namespace SlackAPI
             GroupLookup.Remove(left.channel);
         }
 
+
         public void HandleGroupOpen(GroupOpen open)
         {
             GroupLookup[open.channel].is_open = true;
