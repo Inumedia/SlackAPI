@@ -73,6 +73,7 @@
     <Compile Include="PostMessage.cs" />
     <Compile Include="JoinDirectMessageChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Users.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlackAPI\SlackAPI.csproj">
