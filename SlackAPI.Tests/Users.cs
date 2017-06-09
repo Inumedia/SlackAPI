@@ -30,6 +30,15 @@ namespace SlackAPI.Tests
 
             Assert.True(actual.ok, "Error while fetching user list.");
             Assert.True(actual.members.Any());
+
+            var someMember = actual.members.First();
+            Assert.NotNull(someMember.id);
+            Assert.NotNull(someMember.color);
+            Assert.NotNull(someMember.real_name);
+            Assert.NotNull(someMember.name);
+            Assert.NotNull(someMember.team_id);
+            Assert.NotNull(someMember.tz);
+            Assert.NotNull(someMember.tz_label);
         }
     }
 }
