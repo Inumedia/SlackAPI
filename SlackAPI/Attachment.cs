@@ -19,6 +19,9 @@
         public string thumb_url;
         public string[] mrkdwn_in;
         public AttachmentAction[] actions;
+
+        public string footer;
+        public string footer_icon;
     }
 
     public class Field{
