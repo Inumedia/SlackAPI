@@ -75,12 +75,21 @@ namespace SlackAPI
             catch (WebException we)
             {
                 // If we don't get a response, let the exception bubble up as we can't do anything
-                if (we.Response == null) throw we;
+                if (we.Response == null)
+                {
+                    var defaultResponse = default(K);
+                    defaultResponse.ok = false;
+                    defaultResponse.error = we.ToString();
+                    if (callback != null)
+                        callback(defaultResponse);
+                    return;
+                }
                 
                 //Anything that doesn't return error 200 throws an exception.  Sucks.  :l
                 response = (HttpWebResponse)we.Response;
                 //TODO: Handle timeouts, etc?
             }
+            
 
             K responseObj;
             
