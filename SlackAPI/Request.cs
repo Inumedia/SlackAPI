@@ -9,6 +9,8 @@ using System.Threading;
 
 namespace SlackAPI
 {
+    
+
     class RequestState<K>
         where K : Response
     {
@@ -69,7 +71,7 @@ namespace SlackAPI
         {
             try
             {
-                response = (HttpWebResponse)request.EndGetResponse(result);
+                response = (HttpWebResponse)request?.EndGetResponse(result);
                 Success = true;
             }
             catch (WebException we)
@@ -77,11 +79,8 @@ namespace SlackAPI
                 // If we don't get a response, let the exception bubble up as we can't do anything
                 if (we.Response == null)
                 {
-                    var defaultResponse = default(K);
-                    defaultResponse.ok = false;
-                    defaultResponse.error = we.ToString();
-                    if (callback != null)
-                        callback(defaultResponse);
+                    var defaultResponse = CreateDefaultResponseForError(we);
+                    callback?.Invoke((K)defaultResponse);
                     return;
                 }
                 
@@ -89,19 +88,49 @@ namespace SlackAPI
                 response = (HttpWebResponse)we.Response;
                 //TODO: Handle timeouts, etc?
             }
-            
-
-            K responseObj;
-            
-            using (Stream responseReading = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(responseReading))
+            catch (Exception e)
             {
-                string responseData = reader.ReadToEnd();
-                responseObj = responseData.Deserialize<K>();
+                var defaultResponse = CreateDefaultResponseForError(e);
+                callback?.Invoke((K)defaultResponse);
+                return;
             }
 
-            if(callback != null)
-                callback(responseObj);
+            K responseObj;
+            if (response == null)
+            {
+                responseObj = (K)CreateDefaultResponseForError(new Exception("Empty response"));
+                callback?.Invoke(responseObj);
+                return;
+            }
+
+            try
+            {
+                using (Stream responseReading = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(responseReading))
+                {
+                    string responseData = reader.ReadToEnd();
+                    responseObj = responseData.Deserialize<K>();
+                }
+            }
+            catch (Exception e)
+            {
+                responseObj = (K)CreateDefaultResponseForError(e);
+            }
+
+            callback?.Invoke(responseObj);
+        }
+
+        private Response CreateDefaultResponseForError(Exception e)
+        {
+            var defaultResponse = new DefaultResponse();
+            defaultResponse.ok = false;
+            defaultResponse.error = e.ToString();
+            return defaultResponse;
+        }
+
+        class DefaultResponse: Response
+        {
+
         }
     }
 
