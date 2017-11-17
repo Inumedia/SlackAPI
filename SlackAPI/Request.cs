@@ -80,7 +80,7 @@ namespace SlackAPI
                 if (we.Response == null)
                 {
                     var defaultResponse = CreateDefaultResponseForError(we);
-                    callback?.Invoke((K)defaultResponse);
+                    callback?.Invoke(defaultResponse);
                     return;
                 }
                 
@@ -91,14 +91,14 @@ namespace SlackAPI
             catch (Exception e)
             {
                 var defaultResponse = CreateDefaultResponseForError(e);
-                callback?.Invoke((K)defaultResponse);
+                callback?.Invoke(defaultResponse);
                 return;
             }
 
             K responseObj;
             if (response == null)
             {
-                responseObj = (K)CreateDefaultResponseForError(new Exception("Empty response"));
+                responseObj = CreateDefaultResponseForError(new Exception("Empty response"));
                 callback?.Invoke(responseObj);
                 return;
             }
@@ -114,23 +114,18 @@ namespace SlackAPI
             }
             catch (Exception e)
             {
-                responseObj = (K)CreateDefaultResponseForError(e);
+                responseObj = CreateDefaultResponseForError(e);
             }
 
             callback?.Invoke(responseObj);
         }
 
-        private Response CreateDefaultResponseForError(Exception e)
+        private K CreateDefaultResponseForError(Exception e)
         {
-            var defaultResponse = new DefaultResponse();
+            var defaultResponse = (K)Activator.CreateInstance<K>();
             defaultResponse.ok = false;
             defaultResponse.error = e.ToString();
             return defaultResponse;
-        }
-
-        class DefaultResponse: Response
-        {
-
         }
     }
 
