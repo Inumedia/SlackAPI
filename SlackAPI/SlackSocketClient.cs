@@ -11,6 +11,9 @@ namespace SlackAPI
         SlackSocket underlyingSocket;
 
         public event Action<NewMessage> OnMessageReceived;
+        public event Action<UpdatedMessage> OnMessageUpdated;
+        public event Action<MemberJoined> OnMemberJoined;
+        public event Action<GroupMemberJoined> OnGroupMemberJoined;
         public event Action<ReactionAdded> OnReactionAdded;
         public event Action<Pong> OnPongReceived;
 
@@ -171,7 +174,7 @@ namespace SlackAPI
 
         public void HandleGroupLeft(GroupLeft left)
         {
-            GroupLookup.Remove(left.channel);
+            GroupLookup.Remove(left.channel.id);
         }
 
         public void HandleGroupOpen(GroupOpen open)
@@ -215,6 +218,25 @@ namespace SlackAPI
         {
             if (OnMessageReceived != null)
                 OnMessageReceived(m);
+        }
+
+        public void MessageUpdated(UpdatedMessage m)
+        {
+            if (OnMessageUpdated != null)
+                OnMessageUpdated(m);
+        }
+
+        public void MemberJoined(MemberJoined m)
+        {
+            if (OnMemberJoined != null)
+                OnMemberJoined(m);
+        }
+
+
+        public void GroupMemberJoin(GroupMemberJoined m)
+        {
+            if (OnGroupMemberJoined != null)
+                OnGroupMemberJoined(m);
         }
 
         public void PresenceChange(PresenceChange p)
