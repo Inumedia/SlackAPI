@@ -13,6 +13,8 @@ namespace SlackAPI
         public string real_name;
         public string email;
         public string skype;
+        public string status_emoji;
+        public string status_text;
         public string phone;
         public string image_24;
         public string image_32;
