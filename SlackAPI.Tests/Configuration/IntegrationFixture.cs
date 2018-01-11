@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using SlackAPI.Tests.Helpers;
+using System;
 using System.IO;
 using System.Reflection;
-using Newtonsoft.Json;
-using SlackAPI.Tests.Helpers;
 using Xunit;
 
 namespace SlackAPI.Tests.Configuration
@@ -35,7 +35,7 @@ namespace SlackAPI.Tests.Configuration
             string fileName = Path.Combine(assemblyDirectory, @"configuration\config.json");
             string json = System.IO.File.ReadAllText(fileName);
 
-            var jsonObject = new {slack = (SlackConfig)null };
+            var jsonObject = new { slack = (SlackConfig)null };
             return JsonConvert.DeserializeAnonymousType(json, jsonObject).slack;
         }
 

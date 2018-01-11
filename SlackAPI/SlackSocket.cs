@@ -1,14 +1,14 @@
-﻿using System.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SlackAPI.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 
 #if NETSTANDARD1_6
 using Microsoft.Extensions.DependencyModel;
@@ -42,7 +42,7 @@ namespace SlackAPI
         {
             routing = new Dictionary<string, Dictionary<string, Type>>();
 #if NET45
-             var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
 #elif NETSTANDARD1_6
              var assemblies = DependencyContext.Default.GetDefaultAssemblyNames().Select(Assembly.Load);
 #elif NETSTANDARD1_3
@@ -90,7 +90,7 @@ namespace SlackAPI
             }
         }
 
-		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
+        public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
         {
             BuildRoutes(routingTo);
             socket = new ClientWebSocket();
@@ -100,7 +100,7 @@ namespace SlackAPI
 
             cts = new CancellationTokenSource();
             socket.ConnectAsync(new Uri(string.Format("{0}?svn_rev={1}&login_with_boot_data-0-{2}&on_login-0-{2}&connect-1-{2}", loginDetails.url, loginDetails.svn_rev, DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds)), cts.Token).Wait();
-            if(onConnected != null)
+            if (onConnected != null)
                 onConnected();
             SetupReceiving();
         }
@@ -157,7 +157,8 @@ namespace SlackAPI
                 message.id = Interlocked.Increment(ref currentId);
             //socket.Send(JsonConvert.SerializeObject(message));
 
-			if (string.IsNullOrEmpty(message.type)){
+            if (string.IsNullOrEmpty(message.type))
+            {
                 IEnumerable<SlackSocketRouting> routes = message.GetType().GetTypeInfo().GetCustomAttributes<SlackSocketRouting>();
 
                 SlackSocketRouting route = null;
@@ -173,7 +174,7 @@ namespace SlackAPI
                 }
             }
 
-			sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             if (Interlocked.CompareExchange(ref currentlySending, 1, 0) == 0)
                 Task.Factory.StartNew(HandleSending);
         }
@@ -325,8 +326,8 @@ namespace SlackAPI
             currentlySending = 0;
         }
 
-		public void Close()
-		{
+        public void Close()
+        {
             try
             {
                 this.socket.Abort();
@@ -338,7 +339,7 @@ namespace SlackAPI
 
             if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
                 ConnectionClosed();
-		}
+        }
     }
 
     public class SlackSocketMessage

@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 
 namespace SlackAPI
 {
@@ -55,7 +52,7 @@ namespace SlackAPI
                         {
                             if (!first)
                                 writer.Write(',');
-                            
+
                             writer.Write(string.Format("{0}={1}", Uri.EscapeDataString(postEntry.Item1), Uri.EscapeDataString(postEntry.Item2)));
 
                             first = false;
@@ -76,14 +73,14 @@ namespace SlackAPI
             {
                 // If we don't get a response, let the exception bubble up as we can't do anything
                 if (we.Response == null) throw we;
-                
+
                 //Anything that doesn't return error 200 throws an exception.  Sucks.  :l
                 response = (HttpWebResponse)we.Response;
                 //TODO: Handle timeouts, etc?
             }
 
             K responseObj;
-            
+
             using (Stream responseReading = response.GetResponseStream())
             using (StreamReader reader = new StreamReader(responseReading))
             {
@@ -91,12 +88,12 @@ namespace SlackAPI
                 responseObj = responseData.Deserialize<K>();
             }
 
-            if(callback != null)
+            if (callback != null)
                 callback(responseObj);
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class, Inherited=false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class RequestPath : Attribute
     {
         //See notes in Slack:APIRequest<K>

@@ -1,8 +1,7 @@
-﻿using System.Net.WebSockets;
+﻿using SlackAPI.WebSocketMessages;
 using System;
-using System.Diagnostics;
+using System.Net.WebSockets;
 using System.Threading;
-using SlackAPI.WebSocketMessages;
 
 namespace SlackAPI
 {
@@ -24,7 +23,7 @@ namespace SlackAPI
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
         public event Action OnHello;
-		internal LoginResponse loginDetails;
+        internal LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
             : base(token)
@@ -32,23 +31,25 @@ namespace SlackAPI
 
         }
 
-		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
-		{
-			base.Connect((s) => {
-				ConnectSocket(onSocketConnected);
-				onConnected(s);
-			});
-		}
+        public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
+        {
+            base.Connect((s) =>
+            {
+                ConnectSocket(onSocketConnected);
+                onConnected(s);
+            });
+        }
 
         protected override void Connected(LoginResponse loginDetails)
-		{
-			this.loginDetails = loginDetails;
-			base.Connected(loginDetails);
-		}
+        {
+            this.loginDetails = loginDetails;
+            base.Connected(loginDetails);
+        }
 
-		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
-		}
+        public void ConnectSocket(Action onSocketConnected)
+        {
+            underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
+        }
 
         public void ErrorReceiving<K>(Action<WebSocketException> callback)
         {
@@ -92,9 +93,12 @@ namespace SlackAPI
                 userName = MySelf.id;
             }
 
-            if (onSent != null) {
-                underlyingSocket.Send( new Message() {channel = channelId, text = textData, user = userName, type = "message"}, onSent);
-            } else {
+            if (onSent != null)
+            {
+                underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = userName, type = "message" }, onSent);
+            }
+            else
+            {
                 underlyingSocket.Send(new Message() { channel = channelId, text = textData, user = userName, type = "message" });
             }
         }
@@ -113,7 +117,7 @@ namespace SlackAPI
         public void HandleReactionAdded(ReactionAdded reactionAdded)
         {
             if (OnReactionAdded != null)
-                OnReactionAdded(reactionAdded);            
+                OnReactionAdded(reactionAdded);
         }
 
         public void HandleHello(Hello hello)
@@ -227,9 +231,9 @@ namespace SlackAPI
 
         }
 
-		public void CloseSocket()
-		{
-			underlyingSocket.Close();
-		}
+        public void CloseSocket()
+        {
+            underlyingSocket.Close();
+        }
     }
 }

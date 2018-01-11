@@ -5,7 +5,7 @@ using Xunit;
 namespace SlackAPI.Tests
 {
     [Collection("Integration tests")]
-    public class Update 
+    public class Update
     {
         private readonly IntegrationFixture fixture;
 

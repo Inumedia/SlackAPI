@@ -28,4 +28,3 @@ namespace SlackAPI.WebSocketMessages
         public string ts;
     }
 }
-

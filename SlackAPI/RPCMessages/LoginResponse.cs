@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-	[RequestPath("rtm.start")]
+    [RequestPath("rtm.start")]
 	public class LoginResponse : Response
 	{
 		public Bot[] bots;

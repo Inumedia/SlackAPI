@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI
+﻿namespace SlackAPI
 {
     [RequestPath("auth.signin")]
     public class AuthSigninResponse : Response

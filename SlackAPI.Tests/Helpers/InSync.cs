@@ -1,6 +1,6 @@
 using System;
-using System.Threading;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Xunit;
 
 namespace SlackAPI.Tests.Helpers

@@ -34,7 +34,7 @@ namespace SlackAPI.Tests
 
             // act
             var accessTokenResponse = GetAccessToken(clientId, clientSecret, "", authCode);
-            
+
             // assert
             Assert.NotNull(accessTokenResponse);
             Assert.NotNull(accessTokenResponse.bot);
