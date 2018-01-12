@@ -17,7 +17,7 @@ before_build:
       "slack": {
         "userAuthToken": "$env:userAuthToken",
         "botAuthToken": "$env:botAuthToken",
-        "testChannel": "$env:testChannel",
+        "testChannelId": "$env:testChannel",
         "directMessageUser": "$env:directMessageUser",
         "authCode": "$env:authCode",
         "clientId": "$env:clientId",

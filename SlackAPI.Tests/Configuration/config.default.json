@@ -2,10 +2,10 @@
   "slack": {
     "userAuthToken": "token-tokentoken-tokentoken-tokentoken-token",
     "botAuthToken": "bottoken-bottoken-bottoken-bottoken",
-    "testChannel": "SuperSecretChannel",
-    "directMessageUser":  "someUserId",
-	"authCode": "some-super-secret-code-from-Slack-specially-created-for-you-=)",
-	"clientId": "your-special-id",
-	"clientSecret": "such-special-secret-key"
+    "testChannelId": "someChannelId",
+    "directMessageUser": "someUserId",
+    "authCode": "some-super-secret-code-from-Slack-specially-created-for-you-=)",
+    "clientId": "your-special-id",
+    "clientSecret": "such-special-secret-key"
   }
 }

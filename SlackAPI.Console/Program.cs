@@ -10,9 +10,9 @@ namespace SlackAPI
         {
             try
             {
-                var clientId = "PUT CLIENT ID FROM SLACK APPLICATION REGISTATION HERE";
-                var clientSecret = "PUT CLIENT SECRET FROM SLACK APPLICATION REGISTATION HERE";
-                var redirectUri = "PUT REDIRECT FROM SLACK APPLICATION REGISTATION HERE";
+                var clientId = "58195700114.297428006771"; // PUT CLIENT ID FROM SLACK APPLICATION REGISTATION HERE";
+                var clientSecret = "70e8cbec2fa97cf376d526954a86b289"; // PUT CLIENT SECRET FROM SLACK APPLICATION REGISTATION HERE";
+                var redirectUri = "http://localhost"; // PUT REDIRECT FROM SLACK APPLICATION REGISTATION HERE";
 
                 Console.WriteLine("------------------------------------------------------------------");
                 Console.WriteLine("This app will open your web browser pointing at an authentication");
@@ -26,7 +26,7 @@ namespace SlackAPI
 
                 // start...
                 var state = Guid.NewGuid().ToString();
-                var uri = SlackClient.GetAuthorizeUri(clientId, SlackScope.Identify | SlackScope.Read | SlackScope.Post, redirectUri, state, "socialsaleslounge");
+                var uri = SlackClient.GetAuthorizeUri(clientId, SlackScope.Identify | SlackScope.Read | SlackScope.Post | SlackScope.Client, redirectUri, state, "socialsaleslounge");
                 Console.WriteLine("Directing to: " + uri);
                 Process.Start(uri.ToString());
 

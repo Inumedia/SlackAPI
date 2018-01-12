@@ -1,5 +1,6 @@
 ﻿using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
+using System;
 using Xunit;
 
 namespace SlackAPI.Tests
@@ -32,7 +33,7 @@ namespace SlackAPI.Tests
                         sync.Proceed();
                     },
                     messageId,
-                    this.fixture.Config.TestChannel,
+                    this.fixture.Config.TestChannelId,
                     "[changed]",
                     attachments: SlackMother.SomeAttachments,
                     as_user: true);
@@ -56,7 +57,7 @@ namespace SlackAPI.Tests
                         Assert.True(response.ok, "Error while posting message to channel. ");
                         sync.Proceed();
                     },
-                    this.fixture.Config.TestChannel,
+                    this.fixture.Config.TestChannelId,
                     "Hi there!",
                     as_user: true);
             }

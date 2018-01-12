@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI.WebSocketMessages
+﻿namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("typing")]
     [SlackSocketRouting("user_typing")]

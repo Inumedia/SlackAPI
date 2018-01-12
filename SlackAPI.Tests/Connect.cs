@@ -24,6 +24,13 @@ namespace SlackAPI.Tests
             Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
+        [Fact]
+        public void TestConnectAsUserWithPresence()
+        {
+            var client = this.fixture.UserClientWithPresence;
+            Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
+        }
+
         [Fact(Skip = "Unable to get a working test with data we have in config.json")]
         public void TestGetAccessToken()
         {
@@ -71,7 +78,7 @@ namespace SlackAPI.Tests
         {
             // given
             SlackSocketClient client = this.fixture.UserClient;
-            string channel = this.fixture.Config.TestChannel;
+            string channel = this.fixture.Config.TestChannelId;
 
             // when
             DateTime messageTimestamp = PostMessage(client, channel);

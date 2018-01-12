@@ -114,7 +114,7 @@
     <Compile Include="OwnedStampedMessage.cs" />
     <Compile Include="RPCMessages\PostMessageResponse.cs" />
     <Compile Include="Preferences.cs" />
-    <Compile Include="RPCMessages\PresenseResponse.cs" />
+    <Compile Include="RPCMessages\PresenceResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="Response.cs" />
@@ -173,6 +173,7 @@
     <Compile Include="WebSocketMessages\NewMessage.cs" />
     <Compile Include="WebSocketMessages\Ping.cs" />
     <Compile Include="WebSocketMessages\Pong.cs" />
+    <Compile Include="WebSocketMessages\PresenceSub.cs" />
     <Compile Include="WebSocketMessages\PresenceChange.cs" />
     <Compile Include="WebSocketMessages\ReactionAdded.cs" />
     <Compile Include="WebSocketMessages\SubteamSelfAdded.cs" />

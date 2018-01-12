@@ -43,9 +43,9 @@ namespace SlackAPI
             if (result.AsyncState != this)
                 throw new InvalidOperationException("This shouldn't be happening! D:");
 
-            using (Stream requestStream = request.EndGetRequestStream(result))
+            using (var requestStream = request.EndGetRequestStream(result))
                 if (Post.Length > 0)
-                    using (StreamWriter writer = new StreamWriter(requestStream))
+                    using (var writer = new StreamWriter(requestStream))
                     {
                         bool first = true;
                         foreach (Tuple<string, string> postEntry in Post)
@@ -81,8 +81,8 @@ namespace SlackAPI
 
             K responseObj;
 
-            using (Stream responseReading = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(responseReading))
+            using (var responseReading = response.GetResponseStream())
+            using (var reader = new StreamReader(responseReading))
             {
                 string responseData = reader.ReadToEnd();
                 responseObj = responseData.Deserialize<K>();
@@ -109,13 +109,13 @@ namespace SlackAPI
 
         public static RequestPath GetRequestPath<K>()
         {
-            Type t = typeof(K);
+            var t = typeof(K);
             if (paths.ContainsKey(t))
                 return paths[t];
 
-            TypeInfo info = t.GetTypeInfo();
+            var info = t.GetTypeInfo();
 
-            RequestPath path = info.GetCustomAttribute<RequestPath>();
+            var path = info.GetCustomAttribute<RequestPath>();
             if (path == null) throw new InvalidOperationException(string.Format("No valid request path for {0}", t.Name));
 
             paths.Add(t, path);

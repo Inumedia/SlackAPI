@@ -14,6 +14,7 @@ namespace SlackAPI.Tests
         {
             this.fixture = fixture;
         }
+
         [Fact]
         public void UserList()
         {

@@ -12,8 +12,8 @@ namespace SlackAPI
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
         {
-            decimal value = decimal.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture);
-            DateTime res = new DateTime(621355968000000000 + (long)(value * 10000000m)).ToLocalTime();
+            var value = decimal.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture);
+            var res = new DateTime(621355968000000000 + (long)(value * 10000000m)).ToLocalTime();
             System.Diagnostics.Debug.Assert(
                 Decimal.Equals(
                     Decimal.Parse(res.ToProperTimeStamp()),

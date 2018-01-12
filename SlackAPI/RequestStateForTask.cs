@@ -48,9 +48,9 @@ namespace SlackAPI
 
             K responseObj;
 
-            using (Stream responseReading = response.GetResponseStream())
+            using (var responseReading = response.GetResponseStream())
             {
-                using (StreamReader reader = new StreamReader(responseReading))
+                using (var reader = new StreamReader(responseReading))
                 {
                     string responseData = reader.ReadToEnd();
                     responseObj = responseData.Deserialize<K>();
@@ -64,14 +64,14 @@ namespace SlackAPI
         {
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
-            using (Stream requestStream = await request.GetRequestStreamAsync())
+            using (var requestStream = await request.GetRequestStreamAsync())
             {
                 if (Post.Length > 0)
                 {
-                    using (StreamWriter writer = new StreamWriter(requestStream))
+                    using (var writer = new StreamWriter(requestStream))
                     {
-                        bool first = true;
-                        foreach (Tuple<string, string> postEntry in Post)
+                        var first = true;
+                        foreach (var postEntry in Post)
                         {
                             if (!first)
                                 writer.Write('&');
