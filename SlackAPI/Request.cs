@@ -9,6 +9,8 @@ using System.Threading;
 
 namespace SlackAPI
 {
+    
+
     class RequestState<K>
         where K : Response
     {
@@ -69,30 +71,61 @@ namespace SlackAPI
         {
             try
             {
-                response = (HttpWebResponse)request.EndGetResponse(result);
+                response = (HttpWebResponse)request?.EndGetResponse(result);
                 Success = true;
             }
             catch (WebException we)
             {
                 // If we don't get a response, let the exception bubble up as we can't do anything
-                if (we.Response == null) throw we;
+                if (we.Response == null)
+                {
+                    var defaultResponse = CreateDefaultResponseForError(we);
+                    callback?.Invoke(defaultResponse);
+                    return;
+                }
                 
                 //Anything that doesn't return error 200 throws an exception.  Sucks.  :l
                 response = (HttpWebResponse)we.Response;
                 //TODO: Handle timeouts, etc?
             }
-
-            K responseObj;
-            
-            using (Stream responseReading = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(responseReading))
+            catch (Exception e)
             {
-                string responseData = reader.ReadToEnd();
-                responseObj = responseData.Deserialize<K>();
+                var defaultResponse = CreateDefaultResponseForError(e);
+                callback?.Invoke(defaultResponse);
+                return;
             }
 
-            if(callback != null)
-                callback(responseObj);
+            K responseObj;
+            if (response == null)
+            {
+                responseObj = CreateDefaultResponseForError(new Exception("Empty response"));
+                callback?.Invoke(responseObj);
+                return;
+            }
+
+            try
+            {
+                using (Stream responseReading = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(responseReading))
+                {
+                    string responseData = reader.ReadToEnd();
+                    responseObj = responseData.Deserialize<K>();
+                }
+            }
+            catch (Exception e)
+            {
+                responseObj = CreateDefaultResponseForError(e);
+            }
+
+            callback?.Invoke(responseObj);
+        }
+
+        private K CreateDefaultResponseForError(Exception e)
+        {
+            var defaultResponse = (K)Activator.CreateInstance<K>();
+            defaultResponse.ok = false;
+            defaultResponse.error = e.ToString();
+            return defaultResponse;
         }
     }
 
