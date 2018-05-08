@@ -16,6 +16,7 @@ namespace SlackAPI
         readonly string APIToken;
         bool authWorks = false;
 
+        public static Proxy Proxy { get; set; }
         const string APIBaseLocation = "https://slack.com/api/";
         const int Timeout = 5000;
 
@@ -105,6 +106,11 @@ namespace SlackAPI
 
             Uri requestUri = SlackClient.GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(requestUri);
+
+            if (Proxy != null)
+            {
+                request.Proxy = Proxy.ProxySettings;
+            }
 
             //This will handle all of the processing.
             var state = new RequestStateForTask<K>(request, postParameters);
