@@ -41,7 +41,10 @@ namespace SlackAPI
         static SlackSocket()
         {
             routing = new Dictionary<string, Dictionary<string, Type>>();
-#if NET45
+
+#if NETCOREAPP2_0
+             var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
+#elif NET45
              var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
 #elif NETSTANDARD1_6
              var assemblies = DependencyContext.Default.GetDefaultAssemblyNames().Select(Assembly.Load);

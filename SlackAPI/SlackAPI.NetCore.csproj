@@ -7,7 +7,7 @@
     <VersionPrefix>1.0.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Authors>Inumedia</Authors>
-    <TargetFrameworks>net45;netstandard1.6;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net45;netstandard1.6;netstandard1.3</TargetFrameworks>
     <AssemblyName>SlackAPI</AssemblyName>
     <PackageProjectUrl>https://github.com/Inumedia/SlackAPI</PackageProjectUrl>
     <PackageLicenseUrl>http://choosealicense.com/licenses/mit/</PackageLicenseUrl>
@@ -24,6 +24,10 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.1" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
@@ -45,5 +49,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
   </PropertyGroup>
 </Project>
