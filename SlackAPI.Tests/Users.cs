@@ -31,7 +31,8 @@ namespace SlackAPI.Tests
             Assert.True(actual.ok, "Error while fetching user list.");
             Assert.True(actual.members.Any());
 
-            var someMember = actual.members.First();
+            // apparently deleted users do indeed have null values, so if the first user returned is deleted then there are failures.
+            var someMember = actual.members.Where(x => !x.deleted).First();
             Assert.NotNull(someMember.id);
             Assert.NotNull(someMember.color);
             Assert.NotNull(someMember.real_name);
