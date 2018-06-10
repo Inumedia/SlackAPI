@@ -1,4 +1,5 @@
 #addin nuget:?package=Cake.Git
+#addin "MagicChunks"
 #addin "Cake.FileHelpers"
 
 var configuration = Argument("configuration", "Release");
