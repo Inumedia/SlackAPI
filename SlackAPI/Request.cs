@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 
 namespace SlackAPI
 {
@@ -48,16 +45,16 @@ namespace SlackAPI
             if (result.AsyncState != this)
                 throw new InvalidOperationException("This shouldn't be happening! D:");
 
-            using (Stream requestStream = request.EndGetRequestStream(result))
+            using (var requestStream = request.EndGetRequestStream(result))
                 if (Post.Length > 0)
-                    using (StreamWriter writer = new StreamWriter(requestStream))
+                    using (var writer = new StreamWriter(requestStream))
                     {
                         bool first = true;
                         foreach (Tuple<string, string> postEntry in Post)
                         {
                             if (!first)
                                 writer.Write(',');
-                            
+
                             writer.Write(string.Format("{0}={1}", Uri.EscapeDataString(postEntry.Item1), Uri.EscapeDataString(postEntry.Item2)));
 
                             first = false;
@@ -129,7 +126,7 @@ namespace SlackAPI
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class, Inherited=false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class RequestPath : Attribute
     {
         //See notes in Slack:APIRequest<K>
@@ -145,13 +142,13 @@ namespace SlackAPI
 
         public static RequestPath GetRequestPath<K>()
         {
-            Type t = typeof(K);
+            var t = typeof(K);
             if (paths.ContainsKey(t))
                 return paths[t];
 
-            TypeInfo info = t.GetTypeInfo();
+            var info = t.GetTypeInfo();
 
-            RequestPath path = info.GetCustomAttribute<RequestPath>();
+            var path = info.GetCustomAttribute<RequestPath>();
             if (path == null) throw new InvalidOperationException(string.Format("No valid request path for {0}", t.Name));
 
             paths.Add(t, path);

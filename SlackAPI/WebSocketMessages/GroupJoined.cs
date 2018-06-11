@@ -6,4 +6,3 @@
         public Channel channel;
     }
 }
-

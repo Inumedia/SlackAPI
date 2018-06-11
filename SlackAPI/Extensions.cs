@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace SlackAPI
 {
@@ -36,7 +36,7 @@ namespace SlackAPI
 
         private static JsonSerializerSettings CreateSettings()
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
+            var settings = new JsonSerializerSettings();
             settings.Converters = Converters;
 
             return settings;

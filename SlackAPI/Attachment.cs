@@ -14,7 +14,7 @@
         public string title_link;
         public string text;
         public Field[] fields;
-        
+
         public string image_url;
         public string thumb_url;
         public string[] mrkdwn_in;
@@ -24,7 +24,8 @@
         public string footer_icon;
     }
 
-    public class Field{
+    public class Field
+    {
         public string title;
         public string value;
         public bool @short;

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SlackAPI.WebSocketMessages
+﻿namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("reaction_added")]
     public class ReactionAdded : SlackSocketMessage
@@ -28,4 +21,3 @@ namespace SlackAPI.WebSocketMessages
         public string ts;
     }
 }
-

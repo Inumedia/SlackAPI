@@ -1,10 +1,5 @@
-﻿using SlackAPI;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace SlackAPI
@@ -31,7 +26,7 @@ namespace SlackAPI
 
                 // start...
                 var state = Guid.NewGuid().ToString();
-                var uri = SlackClient.GetAuthorizeUri(clientId, SlackScope.Identify | SlackScope.Read | SlackScope.Post, redirectUri, state, "socialsaleslounge");
+                var uri = SlackClient.GetAuthorizeUri(clientId, SlackScope.Identify | SlackScope.Read | SlackScope.Post | SlackScope.Client, redirectUri, state, "socialsaleslounge");
                 Console.WriteLine("Directing to: " + uri);
                 Process.Start(uri.ToString());
 

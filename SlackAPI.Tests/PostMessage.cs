@@ -30,7 +30,7 @@ namespace SlackAPI.Tests
                         actual = response;
                         sync.Proceed();
                     },
-                    this.fixture.Config.TestChannel,
+                    this.fixture.Config.TestChannelId,
                     "Hi there!");
             }
 
@@ -56,7 +56,7 @@ namespace SlackAPI.Tests
                         actual = response;
                         sync.Proceed();
                     },
-                    this.fixture.Config.TestChannel,
+                    this.fixture.Config.TestChannelId,
                     string.Empty,
                     attachments: SlackMother.SomeAttachments);
             }
@@ -81,7 +81,7 @@ namespace SlackAPI.Tests
                         actual = response;
                         sync.Proceed();
                     },
-                    this.fixture.Config.TestChannel,
+                    this.fixture.Config.TestChannelId,
                     string.Empty,
                     attachments: SlackMother.SomeAttachmentsWithActions);
             }

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SlackAPI
 {
@@ -15,12 +12,12 @@ namespace SlackAPI
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
         {
-            List<Bot> bots = new List<Bot>();
+            var bots = new List<Bot>();
             int d = reader.Depth;
 
             while (reader.Read() && reader.Depth > d)
             {
-                Bot current = new Bot();
+                var current = new Bot();
                 int depth = reader.Depth;
 
                 current.name = reader.Value.ToString();

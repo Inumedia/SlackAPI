@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using SlackAPI.Tests.Configuration;
+﻿using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
+using System.Linq;
 using Xunit;
 
 namespace SlackAPI.Tests
@@ -14,6 +14,7 @@ namespace SlackAPI.Tests
         {
             this.fixture = fixture;
         }
+
         [Fact]
         public void UserList()
         {

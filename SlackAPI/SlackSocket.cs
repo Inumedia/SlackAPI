@@ -1,14 +1,14 @@
-﻿using System.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SlackAPI.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 
 #if NETSTANDARD1_6
 using Microsoft.Extensions.DependencyModel;
@@ -42,7 +42,7 @@ namespace SlackAPI
         {
             routing = new Dictionary<string, Dictionary<string, Type>>();
 #if NET45
-             var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
 #elif NETSTANDARD1_6
              var assemblies = DependencyContext.Default.GetDefaultAssemblyNames().Select(Assembly.Load);
 #elif NETSTANDARD1_3
@@ -51,7 +51,7 @@ namespace SlackAPI
 #else
 #error Platform not supported
 #endif
-            foreach (Assembly assembly in assemblies)
+            foreach (var assembly in assemblies)
             {
                 Type[] assemblyTypes;
                 try
@@ -63,9 +63,9 @@ namespace SlackAPI
                     return;
                 }
 
-                foreach (Type type in assemblyTypes)
+                foreach (var type in assemblyTypes)
                 {
-                    foreach (SlackSocketRouting route in type.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
+                    foreach (var route in type.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
                     {
                         if (!routing.ContainsKey(route.Type))
                         {
@@ -90,7 +90,7 @@ namespace SlackAPI
             }
         }
 
-		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
+        public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
         {
             BuildRoutes(routingTo);
             socket = new ClientWebSocket();
@@ -100,7 +100,7 @@ namespace SlackAPI
 
             cts = new CancellationTokenSource();
             socket.ConnectAsync(new Uri(string.Format("{0}?svn_rev={1}&login_with_boot_data-0-{2}&on_login-0-{2}&connect-1-{2}", loginDetails.url, loginDetails.svn_rev, DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds)), cts.Token).Wait();
-            if(onConnected != null)
+            if (onConnected != null)
                 onConnected();
             SetupReceiving();
         }
@@ -109,19 +109,19 @@ namespace SlackAPI
         {
             routes = new Dictionary<string, Dictionary<string, Delegate>>();
 
-            Type routingToType = routingTo.GetType();
-            Type slackMessage = typeof(SlackSocketMessage);
-            foreach (MethodInfo m in routingTo.GetType().GetMethods(BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Public))
+            var routingToType = routingTo.GetType();
+            var slackMessage = typeof(SlackSocketMessage);
+            foreach (var m in routingTo.GetType().GetMethods(BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Public))
             {
-                ParameterInfo[] parameters = m.GetParameters();
+                var parameters = m.GetParameters();
                 if (parameters.Length != 1) continue;
                 if (parameters[0].ParameterType.GetTypeInfo().IsSubclassOf(slackMessage))
                 {
-                    Type t = parameters[0].ParameterType;
-                    foreach (SlackSocketRouting route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
+                    var t = parameters[0].ParameterType;
+                    foreach (var route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
                     {
-                        Type genericAction = typeof(Action<>).MakeGenericType(parameters[0].ParameterType);
-                        Delegate d = m.CreateDelegate(genericAction, routingTo);
+                        var genericAction = typeof(Action<>).MakeGenericType(parameters[0].ParameterType);
+                        var d = m.CreateDelegate(genericAction, routingTo);
                         if (d == null)
                         {
                             System.Diagnostics.Debug.WriteLine(string.Format("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name));
@@ -141,11 +141,11 @@ namespace SlackAPI
         public void Send<K>(SlackSocketMessage message, Action<K> callback)
             where K : SlackSocketMessage
         {
-            int sendingId = Interlocked.Increment(ref currentId);
+            var sendingId = Interlocked.Increment(ref currentId);
             message.id = sendingId;
             callbacks.Add(sendingId, (c) =>
             {
-                K obj = c.Deserialize<K>();
+                var obj = c.Deserialize<K>();
                 callback(obj);
             });
             Send(message);
@@ -157,11 +157,12 @@ namespace SlackAPI
                 message.id = Interlocked.Increment(ref currentId);
             //socket.Send(JsonConvert.SerializeObject(message));
 
-			if (string.IsNullOrEmpty(message.type)){
-                IEnumerable<SlackSocketRouting> routes = message.GetType().GetTypeInfo().GetCustomAttributes<SlackSocketRouting>();
+            if (string.IsNullOrEmpty(message.type))
+            {
+                var routes = message.GetType().GetTypeInfo().GetCustomAttributes<SlackSocketRouting>();
 
                 SlackSocketRouting route = null;
-                foreach (SlackSocketRouting r in routes)
+                foreach (var r in routes)
                 {
                     route = r;
                 }
@@ -173,16 +174,15 @@ namespace SlackAPI
                 }
             }
 
-			sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             if (Interlocked.CompareExchange(ref currentlySending, 1, 0) == 0)
                 Task.Factory.StartNew(HandleSending);
         }
 
         public void BindCallback<K>(Action<K> callback)
         {
-            Type t = typeof(K);
-
-            foreach (SlackSocketRouting route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
+            var t = typeof(K);
+            foreach (var route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
             {
                 if (!routes.ContainsKey(route.Type))
                     routes.Add(route.Type, new Dictionary<string, Delegate>());
@@ -195,13 +195,13 @@ namespace SlackAPI
 
         public void UnbindCallback<K>(Action<K> callback)
         {
-            Type t = typeof(K);
-            foreach (SlackSocketRouting route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
+            var t = typeof(K);
+            foreach (var route in t.GetTypeInfo().GetCustomAttributes<SlackSocketRouting>())
             {
-                Delegate d = routes.ContainsKey(route.Type) ? (routes.ContainsKey(route.SubType ?? "null") ? routes[route.Type][route.SubType ?? "null"] : null) : null;
+                var d = routes.ContainsKey(route.Type) ? (routes.ContainsKey(route.SubType ?? "null") ? routes[route.Type][route.SubType ?? "null"] : null) : null;
                 if (d != null)
                 {
-                    Delegate newd = Delegate.Remove(d, callback);
+                    var newd = Delegate.Remove(d, callback);
                     routes[route.Type][route.SubType ?? "null"] = newd;
                 }
             }
@@ -212,10 +212,10 @@ namespace SlackAPI
             Task.Factory.StartNew(
                 async () =>
                 {
-                    List<byte[]> buffers = new List<byte[]>();
-                    byte[] bytes = new byte[1024];
+                    var buffers = new List<byte[]>();
+                    var bytes = new byte[1024];
                     buffers.Add(bytes);
-                    ArraySegment<byte> buffer = new ArraySegment<byte>(bytes);
+                    var buffer = new ArraySegment<byte>(bytes);
                     while (socket.State == WebSocketState.Open)
                     {
                         WebSocketReceiveResult result = null;
@@ -239,7 +239,7 @@ namespace SlackAPI
                             continue;
                         }
 
-                        string data = string.Join("", buffers.Select((c) => Encoding.UTF8.GetString(c).TrimEnd('\0')));
+                        var data = string.Join("", buffers.Select((c) => Encoding.UTF8.GetString(c).TrimEnd('\0')));
                         //Console.WriteLine("SlackSocket data = " + data);
                         SlackSocketMessage message = null;
                         try
@@ -282,7 +282,7 @@ namespace SlackAPI
                     else
                     {
                         //I believe this method is slower than the former. If I'm wrong we can just use this instead. :D
-                        Type t = routes[message.type][message.subtype ?? "null"].GetMethodInfo().GetParameters()[0].ParameterType;
+                        var t = routes[message.type][message.subtype ?? "null"].GetMethodInfo().GetParameters()[0].ParameterType;
                         o = data.Deserialize(t);
                     }
                     routes[message.type][message.subtype ?? "null"].DynamicInvoke(o);
@@ -307,8 +307,8 @@ namespace SlackAPI
             string message;
             while (sendingQueue.Pop(out message) && socket.State == WebSocketState.Open && !cts.Token.IsCancellationRequested)
             {
-                byte[] sending = Encoding.UTF8.GetBytes(message);
-                ArraySegment<byte> buffer = new ArraySegment<byte>(sending);
+                var sending = Encoding.UTF8.GetBytes(message);
+                var buffer = new ArraySegment<byte>(sending);
                 try
                 {
                     socket.SendAsync(buffer, WebSocketMessageType.Text, true, cts.Token).Wait();
@@ -325,20 +325,19 @@ namespace SlackAPI
             currentlySending = 0;
         }
 
-		public void Close()
-		{
+        public void Close()
+        {
             try
             {
                 this.socket.Abort();
             }
             catch (Exception ex)
             {
-
             }
 
             if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
                 ConnectionClosed();
-		}
+        }
     }
 
     public class SlackSocketMessage

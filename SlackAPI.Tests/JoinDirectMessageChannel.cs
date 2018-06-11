@@ -32,7 +32,7 @@ namespace SlackAPI.Tests
                 client.JoinDirectMessageChannel(response =>
                 {
                     actual = response;
-                    sync.Proceed();;
+                    sync.Proceed(); ;
                 }, user);
             }
 

@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace SlackAPI
+﻿namespace SlackAPI
 {
     public class Bot
     {
-        public string emoji; 
+        public string emoji;
         public string image_24;
         public string image_32;
         public string image_48;

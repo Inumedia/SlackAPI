@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using SlackAPI.Tests.Helpers;
+using System;
 using System.IO;
 using System.Reflection;
-using Newtonsoft.Json;
-using SlackAPI.Tests.Helpers;
 using Xunit;
 
 namespace SlackAPI.Tests.Configuration
@@ -13,6 +13,7 @@ namespace SlackAPI.Tests.Configuration
         {
             this.Config = this.GetConfig();
             this.UserClient = this.GetClient(this.Config.UserAuthToken);
+            this.UserClientWithPresence = this.GetClient(this.Config.UserAuthToken, new[] { new Tuple<string, string>("batch_presence_aware", "true") });
             this.BotClient = this.GetClient(this.Config.BotAuthToken);
         }
 
@@ -20,11 +21,14 @@ namespace SlackAPI.Tests.Configuration
 
         public SlackSocketClient UserClient { get; }
 
+        public SlackSocketClient UserClientWithPresence { get; }
+
         public SlackSocketClient BotClient { get; }
 
         public void Dispose()
         {
             this.UserClient.CloseSocket();
+            this.UserClientWithPresence.CloseSocket();
             this.BotClient.CloseSocket();
         }
 
@@ -35,18 +39,18 @@ namespace SlackAPI.Tests.Configuration
             string fileName = Path.Combine(assemblyDirectory, @"configuration\config.json");
             string json = System.IO.File.ReadAllText(fileName);
 
-            var jsonObject = new {slack = (SlackConfig)null };
+            var jsonObject = new { slack = (SlackConfig)null };
             return JsonConvert.DeserializeAnonymousType(json, jsonObject).slack;
         }
 
-        private SlackSocketClient GetClient(string authToken)
+        private SlackSocketClient GetClient(string authToken, Tuple<string, string>[] loginParameters = null)
         {
             SlackSocketClient client;
 
             using (var syncClient = new InSync($"{nameof(SlackClient.Connect)} - Connected callback"))
             using (var syncClientSocket = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected callback"))
             {
-                client = new SlackSocketClient(authToken);
+                client = new SlackSocketClient(authToken, loginParameters);
                 client.Connect(x =>
                 {
                     Console.WriteLine("Connected");

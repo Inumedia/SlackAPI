@@ -2,8 +2,8 @@
 
 namespace SlackAPI.Tests.Configuration
 {
-  [CollectionDefinition("Integration tests")]
-  public class IntegrationCollection : ICollectionFixture<IntegrationFixture>
-  {
-  }
+    [CollectionDefinition("Integration tests")]
+    public class IntegrationCollection : ICollectionFixture<IntegrationFixture>
+    {
+    }
 }

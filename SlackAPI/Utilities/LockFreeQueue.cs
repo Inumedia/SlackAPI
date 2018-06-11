@@ -37,10 +37,10 @@ namespace SlackAPI.Utilities
         {
             SingleLinkNode oldHead = null;
 
-            SingleLinkNode newNode = new SingleLinkNode();
+            var newNode = new SingleLinkNode();
             newNode.Item = pItem;
 
-            bool newNodeWasAdded = false;
+            var newNodeWasAdded = false;
             while (!newNodeWasAdded)
             {
                 oldHead = mHead.Next;
@@ -57,10 +57,10 @@ namespace SlackAPI.Utilities
             SingleLinkNode oldTail = null;
             SingleLinkNode oldTailNext;
 
-            SingleLinkNode newNode = new SingleLinkNode();
+            var newNode = new SingleLinkNode();
             newNode.Item = pItem;
 
-            bool newNodeWasAdded = false;
+            var newNodeWasAdded = false;
             while (!newNodeWasAdded)
             {
                 oldTail = mTail;
@@ -82,12 +82,12 @@ namespace SlackAPI.Utilities
             pItem = default(T);
             SingleLinkNode oldHead = null;
 
-            bool haveAdvancedHead = false;
+            var haveAdvancedHead = false;
             while (!haveAdvancedHead)
             {
                 oldHead = mHead;
-                SingleLinkNode oldTail = mTail;
-                SingleLinkNode oldHeadNext = oldHead.Next;
+                var oldTail = mTail;
+                var oldHeadNext = oldHead.Next;
 
                 if (oldHead == mHead)
                 {
@@ -124,13 +124,13 @@ namespace SlackAPI.Utilities
                 return false;
             SingleLinkNode oldHead = null;
 
-            bool haveAdvancedHead = false;
+            var haveAdvancedHead = false;
             while (!haveAdvancedHead)
             {
                 oldHead = mHead;
                 if (oldHead != null)
                 {
-                    SingleLinkNode oldHeadNext = oldHead.Next;
+                    var oldHeadNext = oldHead.Next;
                     if (CompareAndExchange(ref mHead, oldHead, oldHeadNext))
                     {
                         pItem = oldHead.Item;

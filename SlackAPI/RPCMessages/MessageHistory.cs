@@ -1,5 +1,4 @@
 ﻿using System;
-using Newtonsoft.Json.Serialization;
 
 namespace SlackAPI
 {

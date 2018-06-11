@@ -4,7 +4,7 @@
 
 # SlackAPI
 
-This is a third party implementation of Slack's API written in C#. This supports their WebAPI aswell as their Real Time Messaging API.
+This is a third party implementation of Slack's API written in C#. This supports their WebAPI as well as their Real Time Messaging API.
 
 # Examples
 
@@ -24,7 +24,7 @@ Want committer access? Feel like I'm too lazy to keep up with Slack's ever chang
 
 Create some pull requests, give me a reason to give you access.
 
-# Howto build the solution
+# How to build the solution
 ###### (aka where is the config.json file?)
 The project **SlackAPI.Tests** requires a valid `config.json` file for tests. You have two options to build the solution:
 - Unload SlackAPI.Tests project and you're able to build SlackAPI solution.
