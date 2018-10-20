@@ -1,21 +1,15 @@
-#addin nuget:?package=Cake.Git
-#addin "MagicChunks"
 #addin "Cake.FileHelpers"
 
 var configuration = Argument("configuration", "Release");
 var target = Argument("target", "Default");
 
-var mainProject = File("./SlackAPI/SlackApi.Netcore.csproj");
-var testProject = File("./SlackAPI.Tests/SlackApi.Tests.NetCore.csproj");
+var mainProject = File("./SlackAPI/SlackApi.csproj");
+var testProject = File("./SlackAPI.Tests/SlackApi.Tests.csproj");
+var testConfig = File("./SlackAPI.Tests/Configuration/config.json");
 var projects = new[] { mainProject, testProject };
 var artifactsDirectory = Directory("./artifacts");
-var revision = AppVeyor.IsRunningOnAppVeyor ? AppVeyor.Environment.Build.Number : 0;
-var version = AppVeyor.IsRunningOnAppVeyor ? new Version(AppVeyor.Environment.Build.Version.Split('-')[0]).ToString(3) : "1.0.0";
-var globalAssemblyInfo = File("./GlobalAssemblyVersion.cs");
-
-var generatedVersion = "";
-var generatedSuffix = "";
-
+var versionSuffix = "local.0";
+var isReleaseBuild = false;
 
 Task("Clean")
     .Does(() =>
@@ -24,65 +18,39 @@ Task("Clean")
 });
 
 
-Task("Restore-Packages")
+Task("Configure")
     .Does(() =>
 {
-    foreach(var project in projects)
+    if (AppVeyor.IsRunningOnAppVeyor)
     {
-        DotNetCoreRestore(project);
-    }
-});
+        isReleaseBuild = AppVeyor.Environment.Repository.Branch == "master"
+                         && AppVeyor.Environment.Repository.Tag.IsTag;
 
-
-Task("Generate-Versionning")
-    .Does(() =>
-{
-    generatedVersion = version + "." + revision;
-    Information("Generated version '{0}'", generatedVersion);
-
-    var branch = (AppVeyor.IsRunningOnAppVeyor ? AppVeyor.Environment.Repository.Branch : GitBranchCurrent(".").FriendlyName).Replace('/', '-');
-    generatedSuffix = (branch == "master" && revision > 0) ? "" : branch.Substring(0, Math.Min(10, branch.Length)) + "-" + revision;
-    Information("Generated suffix '{0}'", generatedSuffix);
-});
-
-
-Task("Patch-GlobalAssemblyVersions")
-    .IsDependentOn("Generate-Versionning")
-    .Does(() =>
-{
-    CreateAssemblyInfo(globalAssemblyInfo, new AssemblyInfoSettings {
-        FileVersion = generatedVersion,
-        InformationalVersion = version + "-" + generatedSuffix,
-        Version = generatedVersion
-        }
-    );
-});
-
-
-Task("Patch-ProjectJson")
-    .IsDependentOn("Generate-Versionning")
-    .Does(() =>
-{
-    TransformConfig(
-        mainProject,
-        mainProject,
-        new TransformationCollection
+        // If the build is a tag on master, generate a clean version (1.0.0-ci.123) 
+        // Otherwise, append part of the SHA (1.0.0-ci.123+sha.abcdefg)
+        versionSuffix = $"ci.{AppVeyor.Environment.Build.Number}";
+        if (!isReleaseBuild)
         {
-            { "Project/PropertyGroup/VersionPrefix", version },
-            { "Project/PropertyGroup/VersionSuffix", generatedSuffix }
+          versionSuffix += $"+sha.{AppVeyor.Environment.Repository.Commit.Id.Substring(0, 7)}";
         }
-    );
+    }
+
+    var versionPrefix = XmlPeek("./Directory.Build.props", "/Project/PropertyGroup/VersionPrefix");
+    var version = string.Join("-", versionPrefix, versionSuffix);
+
+    if (AppVeyor.IsRunningOnAppVeyor)
+    {
+        // Update AppVeyor build version so it will match the build version in assemblies and package
+        AppVeyor.UpdateBuildVersion(version);
+    }
+
+    Information("Using version '{0}'", version);
+    Information("Release type build (skip symbols): {0}", isReleaseBuild);
 });
-
-
-Task("Patch")
-    .IsDependentOn("Patch-GlobalAssemblyVersions")
-    .IsDependentOn("Patch-ProjectJson");
 
 
 Task("Build")
-    .IsDependentOn("Restore-Packages")
-    .IsDependentOn("Patch")
+    .IsDependentOn("Configure")
     .Does(() =>
 {
     foreach(var project in projects)
@@ -91,16 +59,38 @@ Task("Build")
             project,
             new DotNetCoreBuildSettings
             {
-                Configuration = configuration
+                Configuration = configuration,
+                VersionSuffix = versionSuffix
             }
         );
     }
 });
 
+Task("ConfigureTest")
+    .Does(() =>
+{
+    if (AppVeyor.IsRunningOnAppVeyor)
+    {
+        FileWriteText(testConfig, $@"
+        {{
+            ""slack"":
+            {{
+                ""userAuthToken"": ""{EnvironmentVariable("userAuthToken")}"",
+                ""botAuthToken"": ""{EnvironmentVariable("botAuthToken")}"",
+                ""testChannel"": ""{EnvironmentVariable("testChannel")}"",
+                ""directMessageUser"": ""{EnvironmentVariable("directMessageUser")}"",
+                ""authCode"": ""{EnvironmentVariable("authCode")}"",
+                ""clientId"": ""{EnvironmentVariable("clientId")}"",
+                ""clientSecret"": ""{EnvironmentVariable("clientSecret")}""
+            }}
+        }}");
+    }
+});
+
 
 Task("Test")
-    .IsDependentOn("Restore-Packages")
-    .IsDependentOn("Patch")
+    .IsDependentOn("Configure")
+    .IsDependentOn("ConfigureTest")
     .Does(() =>
 {
     // AppVeyor is unable to differentiate tests from multiple frameworks
@@ -110,7 +100,7 @@ Task("Test")
     // - replace assembly name in test report
     // - manualy push test result
 
-    foreach (var framework in new[] { "net452", "netcoreapp1.0"})
+    foreach (var framework in new[] { "net452", "netcoreapp2.1"})
     {
         DotNetCoreTest(
             testProject,
@@ -153,8 +143,9 @@ Task("Pack")
         {
             Configuration = configuration,
             OutputDirectory = artifactsDirectory,
-            VersionSuffix = generatedSuffix,
-            ArgumentCustomization = args => args.Append("--include-symbols")
+            VersionSuffix = versionSuffix,
+            IncludeSymbols = !isReleaseBuild,
+            IncludeSource = !isReleaseBuild
         }
     );
 

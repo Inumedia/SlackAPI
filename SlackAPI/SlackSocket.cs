@@ -10,10 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
-#if NETSTANDARD1_6
-using Microsoft.Extensions.DependencyModel;
-#endif
-
 namespace SlackAPI
 {
     public class SlackSocket
@@ -43,13 +39,8 @@ namespace SlackAPI
             routing = new Dictionary<string, Dictionary<string, Type>>();
 #if NET45
              var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
-#elif NETSTANDARD1_6
-             var assemblies = DependencyContext.Default.GetDefaultAssemblyNames().Select(Assembly.Load);
-#elif NETSTANDARD1_3
-            var assemblies = new[] { typeof(SlackSocket).GetType().GetTypeInfo().Assembly };
-#warning Autodetection not supported
 #else
-#error Platform not supported
+            var assemblies = new[] { typeof(SlackSocket).GetType().GetTypeInfo().Assembly };
 #endif
             foreach (Assembly assembly in assemblies)
             {
