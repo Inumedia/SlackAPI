@@ -10,6 +10,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
+#if NETSTANDARD1_6	
+using Microsoft.Extensions.DependencyModel;	
+#endif
+
 namespace SlackAPI
 {
     public class SlackSocket
@@ -39,8 +43,13 @@ namespace SlackAPI
             routing = new Dictionary<string, Dictionary<string, Type>>();
 #if NET45
              var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GlobalAssemblyCache == false);
-#else
+#elif NETSTANDARD1_6
+             var assemblies = DependencyContext.Default.GetDefaultAssemblyNames().Select(Assembly.Load);
+#elif NETSTANDARD1_3
             var assemblies = new[] { typeof(SlackSocket).GetType().GetTypeInfo().Assembly };
+#warning Routing messages in custom assemblies are not supported with .Net Standard 1.3
+#else
+#error Platform not supported
 #endif
             foreach (Assembly assembly in assemblies)
             {
