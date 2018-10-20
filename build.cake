@@ -8,7 +8,7 @@ var testProject = File("./SlackAPI.Tests/SlackApi.Tests.csproj");
 var testConfig = File("./SlackAPI.Tests/Configuration/config.json");
 var projects = new[] { mainProject, testProject };
 var artifactsDirectory = Directory("./artifacts");
-var versionSuffix = "local.0";
+var versionSuffix = "local0";
 var isReleaseBuild = false;
 
 Task("Clean")
@@ -26,12 +26,12 @@ Task("Configure")
         isReleaseBuild = AppVeyor.Environment.Repository.Branch == "master"
                          && AppVeyor.Environment.Repository.Tag.IsTag;
 
-        // If the build is a tag on master, generate a clean version (1.0.0-ci.123) 
-        // Otherwise, append part of the SHA (1.0.0-ci.123+sha.abcdefg)
-        versionSuffix = $"ci.{AppVeyor.Environment.Build.Number}";
+        // If the build is a tag on master, generate a clean version (1.0.0) following SemVer 1.0.0 rules 
+        // In other cases, append metadata to identify the prerelease (1.0.0-dev123shaabcdefg)
+        versionSuffix = $"";
         if (!isReleaseBuild)
         {
-          versionSuffix += $"+sha.{AppVeyor.Environment.Repository.Commit.Id.Substring(0, 7)}";
+          versionSuffix += $"dev{AppVeyor.Environment.Build.Number}sha{AppVeyor.Environment.Repository.Commit.Id.Substring(0, 8)}";
         }
     }
 

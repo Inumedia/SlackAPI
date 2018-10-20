@@ -1,24 +1,18 @@
 ﻿<Project>
     <PropertyGroup>
         <VersionPrefix>1.0.6</VersionPrefix>
-        <VersionSuffix>local</VersionSuffix>
+        <VersionSuffix>local0</VersionSuffix>
 
         <Description>A Slack wrapper for direct interaction with their APIs.</Description>
         <Copyright>Inumedia - Copyright ©  2018</Copyright>
         <AssemblyProduct>SlackAPI</AssemblyProduct>
         <NeutralLanguage>en-US</NeutralLanguage>
         <Authors>Inumedia</Authors>
-        <AssemblyCompany>Inumedia</AssemblyCompany>
+        <Company>Inumedia</Company>
         <PackageProjectUrl>https://github.com/Inumedia/SlackAPI</PackageProjectUrl>
         <PackageLicenseUrl>http://choosealicense.com/licenses/mit/</PackageLicenseUrl>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/Inumedia/SlackAPI</RepositoryUrl>
-        <!--<GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-        <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-        <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>-->
     </PropertyGroup>
 </Project>

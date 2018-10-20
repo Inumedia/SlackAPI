@@ -5,7 +5,6 @@
     <OutputType>Library</OutputType>
     <DebugType>Full</DebugType>    
     <RootNamespace>SlackAPI.Tests</RootNamespace>
-    <AssemblyTitle>SlackAPI.Tests</AssemblyTitle>
     <AssemblyName>SlackAPI.Tests</AssemblyName>
   </PropertyGroup>
 
