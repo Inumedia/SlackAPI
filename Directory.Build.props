@@ -1,7 +1,8 @@
 ﻿<Project>
     <PropertyGroup>
         <VersionPrefix>1.0.6</VersionPrefix>
-        <VersionSuffix>local0</VersionSuffix>
+        <!-- VersionSuffix is computed in build.cake depending of the type of the build -->
+        <VersionSuffix>dev.0+sha.0</VersionSuffix>
 
         <Description>A Slack wrapper for direct interaction with their APIs.</Description>
         <Copyright>Inumedia - Copyright ©  2018</Copyright>

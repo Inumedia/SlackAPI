@@ -1,14 +1,17 @@
+#tool "nuget:?package=GitVersion.CommandLine"
 #addin "Cake.FileHelpers"
+
+using System.Text.RegularExpressions;
 
 var configuration = Argument("configuration", "Release");
 var target = Argument("target", "Default");
 
-var mainProject = File("./SlackAPI/SlackApi.csproj");
+var project = File("./SlackAPI/SlackApi.csproj");
 var testProject = File("./SlackAPI.Tests/SlackApi.Tests.csproj");
 var testConfig = File("./SlackAPI.Tests/Configuration/config.json");
-var projects = new[] { mainProject, testProject };
+var projects = new[] { project, testProject };
 var artifactsDirectory = Directory("./artifacts");
-var versionSuffix = "local0";
+var versionSuffix = string.Empty;
 var isReleaseBuild = false;
 
 Task("Clean")
@@ -21,18 +24,46 @@ Task("Clean")
 Task("Configure")
     .Does(() =>
 {
+    var buildNumber = 0;
     if (AppVeyor.IsRunningOnAppVeyor)
     {
-        isReleaseBuild = AppVeyor.Environment.Repository.Branch == "master"
-                         && AppVeyor.Environment.Repository.Tag.IsTag;
+        isReleaseBuild = AppVeyor.Environment.Repository.Branch == "master" && AppVeyor.Environment.Repository.Tag.IsTag;
+        buildNumber = AppVeyor.Environment.Build.Number;
+        Information("Build number is '{0}' (CI build)", buildNumber);
+    }
+    else
+    {
+        buildNumber = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+        Information("Build number is '{0}' (local build)", buildNumber);
+    }
 
-        // If the build is a tag on master, generate a clean version (1.0.0) following SemVer 1.0.0 rules 
-        // In other cases, append metadata to identify the prerelease (1.0.0-dev123shaabcdefg)
-        versionSuffix = $"";
-        if (!isReleaseBuild)
-        {
-          versionSuffix += $"dev{AppVeyor.Environment.Build.Number}sha{AppVeyor.Environment.Repository.Commit.Id.Substring(0, 8)}";
-        }
+    // If the build is a tag on master, generate a clean version (1.0.0)
+    // following SemVer 1.0.0 rules. NuGet supports only SemVer 1.0.0
+    // In other cases, generate a prerelease version (1.0.0-branch.123+sha.abcdefg)
+    // following SevVer 2.0.0 rules. MyGet supports SemVer 2.0.0
+    if (isReleaseBuild)
+    {
+        versionSuffix = string.Empty;
+    }
+    else
+    {
+        var gitVersion = GitVersion();
+        var gitBranch = (AppVeyor.IsRunningOnAppVeyor
+            ? AppVeyor.Environment.Repository.Branch
+            : gitVersion.BranchName);
+        gitBranch = Regex.Replace(gitBranch, @"[/\-_]", string.Empty);
+        gitBranch = gitBranch.Substring(0, Math.Min(10, gitBranch.Length));
+
+        Information("Current git branch is '{0}' (normalized)", gitBranch);
+
+        var gitCommitId = (AppVeyor.IsRunningOnAppVeyor
+            ? AppVeyor.Environment.Repository.Commit.Id
+            : gitVersion.Sha)
+            .Substring(0, 8);
+
+        Information("Current git sha is '{0}' (normalized)", gitCommitId);
+
+        versionSuffix = $"{gitBranch}.{buildNumber}+sha.{gitCommitId}";
     }
 
     var versionPrefix = XmlPeek("./Directory.Build.props", "/Project/PropertyGroup/VersionPrefix");
@@ -65,6 +96,7 @@ Task("Build")
         );
     }
 });
+
 
 Task("ConfigureTest")
     .Does(() =>
@@ -123,7 +155,7 @@ Task("Test")
                 testResult,
                 @"slackapi\.tests\.dll",
                 "SlackAPI.Tests." + framework + ".dll",
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                RegexOptions.IgnoreCase);
 
            AppVeyor.UploadTestResults(testResult, AppVeyorTestResultsType.MSTest);
         }
@@ -138,7 +170,7 @@ Task("Pack")
     .Does(() =>
 {
     DotNetCorePack(
-        mainProject,
+        project,
         new DotNetCorePackSettings
         {
             Configuration = configuration,
