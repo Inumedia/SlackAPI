@@ -139,7 +139,6 @@ Task("Test")
             new DotNetCoreTestSettings
             {
                 Configuration = configuration,
-                NoBuild = true,
                 Framework = framework,
                 ArgumentCustomization = args => args.Append("--logger \"trx;LogFileName=result_" + framework + ".trx\""),
                 EnvironmentVariables = new Dictionary<string, string>{
@@ -175,7 +174,6 @@ Task("Package")
         new DotNetCorePackSettings
         {
             Configuration = configuration,
-            NoBuild = true,
             OutputDirectory = artifactsDirectory,
             VersionSuffix = versionSuffix,
             IncludeSymbols = !isReleaseBuild,
