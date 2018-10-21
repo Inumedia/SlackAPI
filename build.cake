@@ -10,7 +10,7 @@ var project = File("./SlackAPI/SlackApi.csproj");
 var testProject = File("./SlackAPI.Tests/SlackApi.Tests.csproj");
 var testConfig = File("./SlackAPI.Tests/Configuration/config.json");
 var projects = new[] { project, testProject };
-var artifactsDirectory = Directory("./artifacts");
+var artifactsDirectory = "./artifacts";
 var versionSuffix = string.Empty;
 var isReleaseBuild = false;
 
@@ -121,8 +121,8 @@ Task("ConfigureTest")
 
 
 Task("Test")
-    .IsDependentOn("Configure")
     .IsDependentOn("ConfigureTest")
+    .IsDependentOn("Build")
     .Does(() =>
 {
     // AppVeyor is unable to differentiate tests from multiple frameworks
@@ -139,6 +139,7 @@ Task("Test")
             new DotNetCoreTestSettings
             {
                 Configuration = configuration,
+                NoBuild = true,
                 Framework = framework,
                 ArgumentCustomization = args => args.Append("--logger \"trx;LogFileName=result_" + framework + ".trx\""),
                 EnvironmentVariables = new Dictionary<string, string>{
@@ -163,7 +164,7 @@ Task("Test")
 });
 
 
-Task("Pack")
+Task("Package")
     .IsDependentOn("Clean")
     .IsDependentOn("Build")
     .IsDependentOn("Test")
@@ -174,6 +175,7 @@ Task("Pack")
         new DotNetCorePackSettings
         {
             Configuration = configuration,
+            NoBuild = true,
             OutputDirectory = artifactsDirectory,
             VersionSuffix = versionSuffix,
             IncludeSymbols = !isReleaseBuild,
@@ -184,8 +186,42 @@ Task("Pack")
 });
 
 
+Task("Publish")
+    .IsDependentOn("Package")
+    .WithCriteria(() => AppVeyor.IsRunningOnAppVeyor, "Publishing is supported only from CI")
+    .Does(() =>
+{
+    // Publish on Nuget if it's a release build or on MyGet for others builds
+    var mapping = new Dictionary<bool, (string token, string provider, string source)>
+    {
+        { true, ("NUGET_APITOKEN", "NuGet", "https://nuget.org/api/v2/package") },
+        { false, ("MYGET_APITOKEN", "MyGet", "https://www.myget.org/F/slackapi/api/v2") },
+    };
+
+    var config = mapping[isReleaseBuild];
+
+    var apiToken = EnvironmentVariable(config.token);
+    if (string.IsNullOrEmpty(apiToken))
+    {
+        Error("{0} environment variable not found. Unable to push package on {1}", config.token, config.provider);
+    }
+    else
+    {
+        var packages = GetFiles(artifactsDirectory + "/**/*.nupkg");
+
+        NuGetPush(packages, new NuGetPushSettings
+        {
+            Source = config.source,
+            ApiKey = apiToken,
+            Verbosity = NuGetVerbosity.Detailed,
+        });
+    }
+});
+
+
 Task("Default")
-    .IsDependentOn("Pack");
+    .IsDependentOn("Package")
+    .IsDependentOn("Publish");
 
 
 RunTarget(target);
