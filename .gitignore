@@ -227,3 +227,4 @@ packages
 # Cake
 tools/
 .vs/
+artifacts/

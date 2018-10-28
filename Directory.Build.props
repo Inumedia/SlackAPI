@@ -1,0 +1,19 @@
+﻿<Project>
+    <PropertyGroup>
+        <VersionPrefix>1.0.6</VersionPrefix>
+        <!-- VersionSuffix is computed in build.cake depending of the type of the build -->
+        <VersionSuffix>dev.0+sha.0</VersionSuffix>
+
+        <Description>A Slack wrapper for direct interaction with their APIs.</Description>
+        <Copyright>Inumedia - Copyright ©  2018</Copyright>
+        <AssemblyProduct>SlackAPI</AssemblyProduct>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <Authors>Inumedia</Authors>
+        <Company>Inumedia</Company>
+        <PackageProjectUrl>https://github.com/Inumedia/SlackAPI</PackageProjectUrl>
+        <PackageLicenseUrl>http://choosealicense.com/licenses/mit/</PackageLicenseUrl>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/Inumedia/SlackAPI</RepositoryUrl>
+    </PropertyGroup>
+</Project>
