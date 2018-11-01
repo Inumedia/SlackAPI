@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SlackAPI.WebSocketMessages
 {
@@ -15,6 +16,7 @@ namespace SlackAPI.WebSocketMessages
         public string username;
         public string bot_id;
         public UserProfile icons;
+        public List<Attachment> attachments;
 
         public NewMessage()
         {
