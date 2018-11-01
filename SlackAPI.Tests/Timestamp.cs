@@ -27,7 +27,7 @@ namespace SlackAPI.Tests
             var newTimestamp = timestampDateTime.ToProperTimeStamp();
 
             // Assert
-            Assert.Equal(double.Parse(originalTimestamp), double.Parse(originalTimestamp));
+            Assert.Equal(double.Parse(originalTimestamp), double.Parse(newTimestamp));
             Assert.Equal(6, newTimestamp.Substring(newTimestamp.IndexOf(".") + 1).Length);
         }
     }
