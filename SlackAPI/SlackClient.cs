@@ -639,6 +639,42 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
+        public void PostEphemeralMessage(
+            Action<PostEphemeralResponse> callback,
+            string channelId,
+            string text,
+            string targetuser,
+            string parse = null,
+            bool linkNames = false,
+            Attachment[] attachments = null,
+            bool as_user = false,
+	    string thread_ts = null)
+        {
+            List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
+
+            parameters.Add(new Tuple<string,string>("channel", channelId));
+            parameters.Add(new Tuple<string,string>("text", text));
+            parameters.Add(new Tuple<string,string>("user", targetuser));
+
+            if (!string.IsNullOrEmpty(parse))
+                parameters.Add(new Tuple<string, string>("parse", parse));
+
+            if (linkNames)
+                parameters.Add(new Tuple<string, string>("link_names", "1"));
+
+            if (attachments != null && attachments.Length > 0)
+                parameters.Add(new Tuple<string, string>("attachments",
+                    JsonConvert.SerializeObject(attachments, Formatting.None,
+                            new JsonSerializerSettings // Shouldn't include a not set property
+                            {
+                                NullValueHandling = NullValueHandling.Ignore
+                            })));
+
+            parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
 
         public void AddReaction(
             Action<ReactionAddedResponse> callback,
