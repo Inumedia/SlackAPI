@@ -16,8 +16,6 @@ namespace SlackAPI
 
         bool HelloReceived;
         public const int PingInterval = 3000;
-        int pinging;
-        Timer pingingThread;
 
         public long PingRoundTripMilliseconds { get; private set; }
         public bool IsReady { get { return HelloReceived; } }
@@ -113,7 +111,7 @@ namespace SlackAPI
         public void HandleReactionAdded(ReactionAdded reactionAdded)
         {
             if (OnReactionAdded != null)
-                OnReactionAdded(reactionAdded);            
+                OnReactionAdded(reactionAdded);
         }
 
         public void HandleHello(Hello hello)

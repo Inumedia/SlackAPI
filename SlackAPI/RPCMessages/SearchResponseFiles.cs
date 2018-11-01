@@ -10,7 +10,6 @@ namespace SlackAPI
     public class SearchResponseFiles : Response
     {
         public string query;
-        SearchResponseMessagesContainer messages;
     }
 
     public class SearchResponseFilesContainer

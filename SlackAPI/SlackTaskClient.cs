@@ -14,7 +14,6 @@ namespace SlackAPI
     public class SlackTaskClient
     {
         readonly string APIToken;
-        bool authWorks = false;
 
         const string APIBaseLocation = "https://slack.com/api/";
         const int Timeout = 5000;
