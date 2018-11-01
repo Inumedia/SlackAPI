@@ -36,8 +36,8 @@ namespace SlackAPI.Tests
 
             // then
             Assert.True(actual.ok, "Error while posting message to channel. ");
-            Assert.Equal(actual.message.text, "Hi there!");
-            Assert.Equal(actual.message.type, "message");
+            Assert.Equal("Hi there!", actual.message.text);
+            Assert.Equal("message", actual.message.type);
         }
 
         [Fact]
