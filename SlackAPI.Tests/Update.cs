@@ -40,8 +40,8 @@ namespace SlackAPI.Tests
 
             // then
             Assert.True(actual.ok, "Error while posting message to channel. ");
-            Assert.Equal(actual.message.text, "[changed]");
-            Assert.Equal(actual.message.type, "message");
+            Assert.Equal("[changed]", actual.message.text);
+            Assert.Equal("message", actual.message.type);
         }
 
         private string PostedMessage(SlackSocketClient client)
