@@ -63,6 +63,15 @@ Task("Configure")
 
         Information("Current git sha is '{0}' (normalized)", gitCommitId);
 
+        var isPullRequest = AppVeyor.IsRunningOnAppVeyor && AppVeyor.Environment.PullRequest.IsPullRequest;
+        if (isPullRequest)
+        {
+            gitBranch = "PR";
+        }
+
+        Information("Is Pull Request: '{0}'", isPullRequest);
+
+
         versionSuffix = $"{gitBranch}.{buildNumber}+sha.{gitCommitId}";
     }
 
@@ -186,7 +195,7 @@ Task("Package")
 
 Task("Publish")
     .IsDependentOn("Package")
-    .WithCriteria(() => AppVeyor.IsRunningOnAppVeyor, "Publishing is supported only from CI")
+    .WithCriteria(() => AppVeyor.IsRunningOnAppVeyor && !AppVeyor.Environment.PullRequest.IsPullRequest, "Publishing is supported only from CI for non PR")
     .Does(() =>
 {
     // Publish on Nuget if it's a release build or on MyGet for others builds
