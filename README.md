@@ -4,7 +4,7 @@
 
 # SlackAPI
 
-This is a third party implementation of Slack's API written in C#. This supports their WebAPI aswell as their Real Time Messaging API.
+This is a third party implementation of Slack's API written in C#. This supports their WebAPI as well as their Real Time Messaging API.
 
 # Examples
 
@@ -24,7 +24,7 @@ Want committer access? Feel like I'm too lazy to keep up with Slack's ever chang
 
 Create some pull requests, give me a reason to give you access.
 
-# Howto build the solution
+# How to build the solution
 ###### (aka where is the config.json file?)
 The project **SlackAPI.Tests** requires a valid `config.json` file for tests. You have two options to build the solution:
 - Unload SlackAPI.Tests project and you're able to build SlackAPI solution.
@@ -39,7 +39,10 @@ The project **SlackAPI.Tests** requires a valid `config.json` file for tests. Yo
 
 # NuGet package
 SlackAPI NuGet package is build with following platforms support:
-- .NET Framework 4.5 (support .NET Framework 4.5 and 4.5.1)
-- .NET Standard 1.6 (support .NET Framework 4.6 and later)
-- .NET Standard 1.3 (support UWP).
+- .NET Framework 4.5
+- .NET Standard 1.3 (UWP support).
   - The version cannot detect SlackSocketRouting attributes in loaded assemblies (used to extend SlackAPI to handle custom messages).
+- .NET Standard 1.6
+- .NET Standard 2.0
+
+[(.NET implementation compatibility table)](https://docs.microsoft.com/en-us/dotnet/standard/net-standard#net-implementation-support)
