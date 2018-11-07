@@ -43,7 +43,7 @@ Task("Configure")
     // following SevVer 2.0.0 rules. MyGet supports SemVer 2.0.0
     if (isReleaseBuild)
     {
-        versionSuffix = string.Empty;
+        versionSuffix = "\"\"";
     }
     else
     {
@@ -76,8 +76,7 @@ Task("Configure")
     }
 
     var versionPrefix = XmlPeek("./Directory.Build.props", "/Project/PropertyGroup/VersionPrefix");
-    var version = string.Join("-", versionPrefix, versionSuffix);
-
+    var version = isReleaseBuild ? $"{versionPrefix}-release.{buildNumber}" : string.Join("-", versionPrefix, versionSuffix);
     if (AppVeyor.IsRunningOnAppVeyor)
     {
         // Update AppVeyor build version so it will match the build version in assemblies and package
@@ -210,7 +209,7 @@ Task("Publish")
     var apiToken = EnvironmentVariable(config.token);
     if (string.IsNullOrEmpty(apiToken))
     {
-        Error("{0} environment variable not found. Unable to push package on {1}", config.token, config.provider);
+        Warning("{0} environment variable not found. Unable to push package on {1}", config.token, config.provider);
     }
     else
     {
