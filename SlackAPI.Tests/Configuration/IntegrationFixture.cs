@@ -9,23 +9,33 @@ namespace SlackAPI.Tests.Configuration
 {
     public class IntegrationFixture : IDisposable
     {
+        private Lazy<SlackSocketClient> userClient;
+        private Lazy<SlackSocketClient> botClient;
+
         public IntegrationFixture()
         {
             this.Config = this.GetConfig();
-            this.UserClient = this.GetClient(this.Config.UserAuthToken);
-            this.BotClient = this.GetClient(this.Config.BotAuthToken);
+            this.userClient = new Lazy<SlackSocketClient>(() => this.GetClient(this.Config.UserAuthToken));
+            this.botClient = new Lazy<SlackSocketClient>(() => this.GetClient(this.Config.BotAuthToken));
         }
 
         public SlackConfig Config { get; }
 
-        public SlackSocketClient UserClient { get; }
+        public SlackSocketClient UserClient => userClient.Value;
 
-        public SlackSocketClient BotClient { get; }
+        public SlackSocketClient BotClient => botClient.Value;
 
         public void Dispose()
         {
-            this.UserClient.CloseSocket();
-            this.BotClient.CloseSocket();
+            if (this.userClient.IsValueCreated)
+            {
+                this.UserClient.CloseSocket();
+            }
+
+            if (this.botClient.IsValueCreated)
+            {
+                this.BotClient.CloseSocket();
+            }
         }
 
         private SlackConfig GetConfig()

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Runtime.CompilerServices;
 using Xunit;
@@ -25,7 +26,7 @@ namespace SlackAPI.Tests.Helpers
 
         public void Dispose()
         {
-            Assert.True(this.waiter.Wait(this.WaitTimeout), $"Took too long to do '{this.message}'");
+            Assert.True(this.waiter.Wait(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : this.WaitTimeout), $"Took too long to do '{this.message}'");
         }
     }
 }
