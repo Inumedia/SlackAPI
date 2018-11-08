@@ -4,8 +4,6 @@ namespace SlackAPI
 {
     public class Team
     {
-        [Newtonsoft.Json.JsonConverter(typeof(JavascriptBotsToArray))]
-        public Bot[] bots;
         public string domain;
         /// <summary>
         /// Supported domains emails can be registered from.

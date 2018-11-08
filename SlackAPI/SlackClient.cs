@@ -41,6 +41,7 @@ namespace SlackAPI
         public List<string> starredChannels;
 
         public List<User> Users;
+        public List<Bot> Bots;
         public List<Channel> Channels;
         public List<Channel> Groups;
         public List<DirectMessageConversation> DirectMessages;
@@ -79,6 +80,7 @@ namespace SlackAPI
             MyTeam = loginDetails.team;
 
             Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
+            Bots = new List<Bot>(loginDetails.bots.Where((c) => !c.deleted));
             Channels = new List<Channel>(loginDetails.channels);
             Groups = new List<Channel>(loginDetails.groups);
             DirectMessages = new List<DirectMessageConversation>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.user) && c.id != MySelf.id));
