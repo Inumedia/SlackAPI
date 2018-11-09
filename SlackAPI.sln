@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlackAPI", "SlackAPI\SlackA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlackAPI.Tests", "SlackAPI.Tests\SlackAPI.Tests.csproj", "{DEFA9559-0F8F-4C38-9644-67A080EDC46D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPI.Console", "SlackAPI.Console\SlackAPI.Console.csproj", "{19140E48-E1A9-421D-86DB-5AF18EECFEF2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,12 +21,11 @@ Global
 		{DEFA9559-0F8F-4C38-9644-67A080EDC46D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DEFA9559-0F8F-4C38-9644-67A080EDC46D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DEFA9559-0F8F-4C38-9644-67A080EDC46D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{19140E48-E1A9-421D-86DB-5AF18EECFEF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{19140E48-E1A9-421D-86DB-5AF18EECFEF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{19140E48-E1A9-421D-86DB-5AF18EECFEF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{19140E48-E1A9-421D-86DB-5AF18EECFEF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {367D3666-0DC5-4B8A-832F-57279BE4DCB0}
 	EndGlobalSection
 EndGlobal

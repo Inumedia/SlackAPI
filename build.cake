@@ -119,9 +119,12 @@ Task("ConfigureTest")
                 ""botAuthToken"": ""{EnvironmentVariable("botAuthToken")}"",
                 ""testChannel"": ""{EnvironmentVariable("testChannel")}"",
                 ""directMessageUser"": ""{EnvironmentVariable("directMessageUser")}"",
-                ""authCode"": ""{EnvironmentVariable("authCode")}"",
                 ""clientId"": ""{EnvironmentVariable("clientId")}"",
-                ""clientSecret"": ""{EnvironmentVariable("clientSecret")}""
+                ""clientSecret"": ""{EnvironmentVariable("clientSecret")}"",
+                ""redirectUrl"": ""{EnvironmentVariable("redirectUrl")}"",
+                ""authUsername"": ""{EnvironmentVariable("authUsername")}"",
+                ""authPassword"": ""{EnvironmentVariable("authPassword")}"",
+                ""authWorkspace"": ""{EnvironmentVariable("authWorkspace")}""
             }}
         }}");
     }

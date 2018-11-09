@@ -24,41 +24,6 @@ namespace SlackAPI.Tests
             Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
-        [Fact(Skip = "Unable to get a working test with data we have in config.json")]
-        public void TestGetAccessToken()
-        {
-            // assemble
-            var clientId = this.fixture.Config.ClientId;
-            var clientSecret = this.fixture.Config.ClientSecret;
-            var authCode = this.fixture.Config.AuthCode;
-
-            // act
-            var accessTokenResponse = GetAccessToken(clientId, clientSecret, "", authCode);
-            
-            // assert
-            Assert.NotNull(accessTokenResponse);
-            Assert.NotNull(accessTokenResponse.bot);
-            Assert.NotNull(accessTokenResponse.bot.bot_user_id);
-            Assert.NotNull(accessTokenResponse.bot.bot_access_token);
-        }
-
-        private AccessTokenResponse GetAccessToken(string clientId, string clientSecret, string redirectUri, string authCode)
-        {
-            AccessTokenResponse accessTokenResponse = null;
-
-            using (var sync = new InSync(nameof(SlackClient.GetAccessToken)))
-            {
-                SlackClient.GetAccessToken(response =>
-                {
-                    accessTokenResponse = response;
-                    sync.Proceed();
-
-                }, clientId, clientSecret, redirectUri, authCode);
-            }
-
-            return accessTokenResponse;
-        }
-
         [Fact]
         public void TestConnectAsBot()
         {
