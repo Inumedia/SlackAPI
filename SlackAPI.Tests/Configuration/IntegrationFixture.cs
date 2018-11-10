@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using Newtonsoft.Json;
 using SlackAPI.Tests.Helpers;
@@ -55,8 +56,10 @@ namespace SlackAPI.Tests.Configuration
 
             using (var syncClient = new InSync($"{nameof(SlackClient.Connect)} - Connected callback"))
             using (var syncClientSocket = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected callback"))
+            using (var syncClientSocketHello = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected hello callback"))
             {
                 client = new SlackSocketClient(authToken);
+                client.OnHello += () => syncClientSocketHello.Proceed();
                 client.Connect(x =>
                 {
                     Console.WriteLine("Connected");
