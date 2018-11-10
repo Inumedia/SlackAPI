@@ -52,8 +52,9 @@ namespace SlackAPI
         {
             EmitLogin((loginDetails) =>
             {
-				if(loginDetails.ok)
-					Connected(loginDetails);
+                loginDetails.AssertOk();
+                Connected(loginDetails);
+
                 if (onConnected != null)
                     onConnected(loginDetails);
             });
