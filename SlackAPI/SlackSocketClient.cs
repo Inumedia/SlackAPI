@@ -1,7 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System;
-using System.Diagnostics;
-using System.Threading;
+using System.Net;
 using SlackAPI.WebSocketMessages;
 
 namespace SlackAPI
@@ -22,12 +21,16 @@ namespace SlackAPI
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
         public event Action OnHello;
-		internal LoginResponse loginDetails;
+        private LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
             : base(token)
         {
+        }
 
+        public SlackSocketClient(string token, IWebProxy proxySettings)
+            : base(token, proxySettings)
+        {
         }
 
 		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
@@ -45,7 +48,7 @@ namespace SlackAPI
 		}
 
 		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
+			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected, this.proxySettings);
 		}
 
         public void ErrorReceiving<K>(Action<WebSocketException> callback)
