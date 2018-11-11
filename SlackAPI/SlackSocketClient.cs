@@ -33,23 +33,25 @@ namespace SlackAPI
         {
         }
 
-		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
-		{
-			base.Connect((s) => {
-				ConnectSocket(onSocketConnected);
-				onConnected(s);
-			});
-		}
+        public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
+        {
+            base.Connect((s) => {
+                if (s.ok)
+                    ConnectSocket(onSocketConnected);
+
+                onConnected(s);
+            });
+        }
 
         protected override void Connected(LoginResponse loginDetails)
-		{
-			this.loginDetails = loginDetails;
-			base.Connected(loginDetails);
-		}
+        {
+            this.loginDetails = loginDetails;
+            base.Connected(loginDetails);
+        }
 
-		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected, this.proxySettings);
-		}
+        public void ConnectSocket(Action onSocketConnected){
+            underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected, this.proxySettings);
+        }
 
         public void ErrorReceiving<K>(Action<WebSocketException> callback)
         {
