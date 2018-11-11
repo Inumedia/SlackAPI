@@ -36,7 +36,7 @@ namespace SlackAPI
             APIRequest(callback, new Tuple<string, string>[] { domainName }, new Tuple<string, string>[0]);
         }
 
-        public Task<FindTeamResponse> FindTeam(string team)
+        public Task<FindTeamResponse> FindTeamAsync(string team)
         {
             //This seems to accept both 'team.slack.com' and just plain 'team'.
             //Going to go with the latter.
@@ -53,7 +53,7 @@ namespace SlackAPI
             }, new Tuple<string, string>[0]);
         }
 
-        public Task<AuthSigninResponse> AuthSignin(string userId, string teamId, string password)
+        public Task<AuthSigninResponse> AuthSigninAsync(string userId, string teamId, string password)
         {
             return APIRequestAsync<AuthSigninResponse>(new Tuple<string, string>[] {
                 new Tuple<string,string>("user", userId),
@@ -76,6 +76,13 @@ namespace SlackAPI
         public void GetAccessToken(Action<AccessTokenResponse> callback, string clientId, string clientSecret, string redirectUri, string code)
         {
             APIRequest<AccessTokenResponse>(callback, new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
+                new Tuple<string, string>("client_secret", clientSecret), new Tuple<string, string>("code", code),
+                new Tuple<string, string>("redirect_uri", redirectUri) }, new Tuple<string, string>[] { });
+        }
+
+        public Task<AccessTokenResponse> GetAccessTokenAsync(string clientId, string clientSecret, string redirectUri, string code)
+        {
+            return APIRequestAsync<AccessTokenResponse>(new Tuple<string, string>[] { new Tuple<string, string>("client_id", clientId),
                 new Tuple<string, string>("client_secret", clientSecret), new Tuple<string, string>("code", code),
                 new Tuple<string, string>("redirect_uri", redirectUri) }, new Tuple<string, string>[] { });
         }
