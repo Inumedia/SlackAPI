@@ -11,12 +11,16 @@ namespace SlackAPI.Tests.Configuration
     {
         private Lazy<SlackSocketClient> userClient;
         private Lazy<SlackSocketClient> botClient;
+        private Lazy<SlackTaskClient> userClientAsync;
+        private Lazy<SlackTaskClient> botClientAsync;
 
         public IntegrationFixture()
         {
             this.Config = this.GetConfig();
             this.userClient = new Lazy<SlackSocketClient>(() => this.GetClient(this.Config.UserAuthToken));
             this.botClient = new Lazy<SlackSocketClient>(() => this.GetClient(this.Config.BotAuthToken));
+            this.userClientAsync = new Lazy<SlackTaskClient>(() => new SlackTaskClient(this.Config.UserAuthToken));
+            this.botClientAsync = new Lazy<SlackTaskClient>(() => new SlackTaskClient(this.Config.BotAuthToken));
         }
 
         public SlackConfig Config { get; }
@@ -24,6 +28,10 @@ namespace SlackAPI.Tests.Configuration
         public SlackSocketClient UserClient => userClient.Value;
 
         public SlackSocketClient BotClient => botClient.Value;
+
+        public SlackTaskClient UserClientAsync => userClientAsync.Value;
+
+        public SlackTaskClient BotClientAsync => botClientAsync.Value;
 
         public void Dispose()
         {

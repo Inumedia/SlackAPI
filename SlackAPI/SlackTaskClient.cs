@@ -533,7 +533,7 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<PostMessageResponse>(parameters.ToArray());
         }
 
-        public Task<FileUploadResponse> UploadFileAsync(byte[] fileData, string fileName, string[] channelIds, string title = null, string initialComment = null, bool useAsync = false, string fileType = null)
+        public async Task<FileUploadResponse> UploadFileAsync(byte[] fileData, string fileName, string[] channelIds, string title = null, string initialComment = null, bool useAsync = false, string fileType = null)
         {
             Uri target = new Uri(Path.Combine(APIBaseLocation, useAsync ? "files.uploadAsync" : "files.upload"));
 
@@ -559,10 +559,9 @@ namespace SlackAPI
             using (MultipartFormDataContent form = new MultipartFormDataContent())
             {
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
-                HttpResponseMessage response = client.PostAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form).Result;
-                string result = response.Content.ReadAsStringAsync().Result;
-                //callback(JsonConvert.DeserializeObject<FileUploadResponse>(result, new JavascriptDateTimeConverter()));
-                throw new NotImplementedException("This operation has not been implemented.");
+                HttpResponseMessage response = await client.PostAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form);
+                string result = await response.Content.ReadAsStringAsync();
+                return result.Deserialize<FileUploadResponse>();
             }
         }
 
