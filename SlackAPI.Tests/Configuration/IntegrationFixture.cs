@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Reflection;
+using System.Threading;
 using Newtonsoft.Json;
 using SlackAPI.Tests.Helpers;
 using Xunit;
@@ -15,15 +17,39 @@ namespace SlackAPI.Tests.Configuration
         public IntegrationFixture()
         {
             this.Config = this.GetConfig();
-            this.userClient = new Lazy<SlackSocketClient>(() => this.GetClient(this.Config.UserAuthToken));
-            this.botClient = new Lazy<SlackSocketClient>(() => this.GetClient(this.Config.BotAuthToken));
+            this.userClient = new Lazy<SlackSocketClient>(() => this.CreateClient(this.Config.UserAuthToken));
+            this.botClient = new Lazy<SlackSocketClient>(() => this.CreateClient(this.Config.BotAuthToken));
         }
 
         public SlackConfig Config { get; }
 
-        public SlackSocketClient UserClient => userClient.Value;
+        public SlackSocketClient UserClient
+        {
+            get
+            {
+                Assert.True(userClient.Value.IsReady);
+                return userClient.Value;
+            }
+        }
 
-        public SlackSocketClient BotClient => botClient.Value;
+        public SlackSocketClient BotClient
+        {
+            get
+            {
+                Assert.True(botClient.Value.IsReady);
+                return botClient.Value;
+            }
+        }
+
+        public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null)
+        {
+            return this.CreateClient(this.Config.UserAuthToken, proxySettings);
+        }
+
+        public SlackSocketClient CreateBotClient(IWebProxy proxySettings = null)
+        {
+            return this.CreateClient(this.Config.BotAuthToken, proxySettings);
+        }
 
         public void Dispose()
         {
@@ -49,18 +75,29 @@ namespace SlackAPI.Tests.Configuration
             return JsonConvert.DeserializeAnonymousType(json, jsonObject).slack;
         }
 
-        private SlackSocketClient GetClient(string authToken)
+        private SlackSocketClient CreateClient(string authToken, IWebProxy proxySettings = null)
         {
             SlackSocketClient client;
 
+            LoginResponse loginResponse = null;
             using (var syncClient = new InSync($"{nameof(SlackClient.Connect)} - Connected callback"))
             using (var syncClientSocket = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected callback"))
+            using (var syncClientSocketHello = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected hello callback"))
             {
-                client = new SlackSocketClient(authToken);
+                client = new SlackSocketClient(authToken, proxySettings);
+                client.OnHello += () => syncClientSocketHello.Proceed();
                 client.Connect(x =>
                 {
-                    Console.WriteLine("Connected");
+                    loginResponse = x;
+
+                    Console.WriteLine($"Connected {x.ok}");
                     syncClient.Proceed();
+                    if (!x.ok)
+                    {
+                        // If connect fails, socket connect callback is not called
+                        syncClientSocket.Proceed();
+                        syncClientSocketHello.Proceed();
+                    }
                 }, () =>
                 {
                     Console.WriteLine("Socket Connected");
@@ -68,7 +105,7 @@ namespace SlackAPI.Tests.Configuration
                 });
             }
 
-            Assert.True(client.IsConnected, "Doh, still isn't connected");
+            loginResponse.AssertOk();
 
             return client;
         }

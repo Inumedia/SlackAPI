@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Net;
 
 #if NETSTANDARD1_6
 using Microsoft.Extensions.DependencyModel;
@@ -91,10 +92,15 @@ namespace SlackAPI
             }
         }
 
-		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null)
+		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null, IWebProxy proxySettings = null)
         {
             BuildRoutes(routingTo);
             socket = new ClientWebSocket();
+            if (proxySettings != null)
+            {
+                socket.Options.Proxy = proxySettings;
+            }
+
             callbacks = new Dictionary<int, Action<string>>();
             sendingQueue = new LockFreeQueue<string>();
             currentId = 1;
