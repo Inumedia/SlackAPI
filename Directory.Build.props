@@ -1,6 +1,6 @@
 ﻿<Project>
     <PropertyGroup>
-        <VersionPrefix>1.0.7</VersionPrefix>
+        <VersionPrefix>1.1.0</VersionPrefix>
         <!-- VersionSuffix is computed in build.cake depending of the type of the build -->
         <VersionSuffix>dev.0+sha.0</VersionSuffix>
 
