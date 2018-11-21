@@ -1,7 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System;
-using System.Diagnostics;
-using System.Threading;
+using System.Net;
 using SlackAPI.WebSocketMessages;
 
 namespace SlackAPI
@@ -22,31 +21,37 @@ namespace SlackAPI
         public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
 
         public event Action OnHello;
-		internal LoginResponse loginDetails;
+        private LoginResponse loginDetails;
 
         public SlackSocketClient(string token)
             : base(token)
         {
-
         }
 
-		public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
-		{
-			base.Connect((s) => {
-				ConnectSocket(onSocketConnected);
-				onConnected(s);
-			});
-		}
+        public SlackSocketClient(string token, IWebProxy proxySettings)
+            : base(token, proxySettings)
+        {
+        }
+
+        public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
+        {
+            base.Connect((s) => {
+                if (s.ok)
+                    ConnectSocket(onSocketConnected);
+
+                onConnected(s);
+            });
+        }
 
         protected override void Connected(LoginResponse loginDetails)
-		{
-			this.loginDetails = loginDetails;
-			base.Connected(loginDetails);
-		}
+        {
+            this.loginDetails = loginDetails;
+            base.Connected(loginDetails);
+        }
 
-		public void ConnectSocket(Action onSocketConnected){
-			underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected);
-		}
+        public void ConnectSocket(Action onSocketConnected){
+            underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected, this.proxySettings);
+        }
 
         public void ErrorReceiving<K>(Action<WebSocketException> callback)
         {

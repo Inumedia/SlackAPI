@@ -40,25 +40,26 @@ namespace SlackAPI.Tests
                 driver.FindElement(By.Id("password")).SendKeys(authPassword);
                 driver.FindElement(By.Id("signin_btn")).Click();
 
-                var uri = SlackClient.GetAuthorizeUri(clientId, SlackScope.Identify);
+                var slackClientHelpers = new SlackClientHelpers();
+                var uri = slackClientHelpers.GetAuthorizeUri(clientId, SlackScope.Identify);
                 driver.Navigate().GoToUrl(uri);
                 driver.FindElement(By.Id("oauth_authorizify")).Click();
 
                 var code = Regex.Match(driver.Url, "code=(?<code>[^&]+)&state").Groups["code"].Value;
 
-                var accessTokenResponse = GetAccessToken(clientId, clientSecret, redirectUrl, code);
+                var accessTokenResponse = GetAccessToken(slackClientHelpers, clientId, clientSecret, redirectUrl, code);
                 Assert.True(accessTokenResponse.ok);
                 Assert.Equal("identify", accessTokenResponse.scope);
             }
         }
 
-        private AccessTokenResponse GetAccessToken(string clientId, string clientSecret, string redirectUri, string authCode)
+        private AccessTokenResponse GetAccessToken(SlackClientHelpers slackClientHelpers, string clientId, string clientSecret, string redirectUri, string authCode)
         {
             AccessTokenResponse accessTokenResponse = null;
 
-            using (var sync = new InSync(nameof(SlackClient.GetAccessToken)))
+            using (var sync = new InSync(nameof(slackClientHelpers.GetAccessToken)))
             {
-                SlackClient.GetAccessToken(response =>
+                slackClientHelpers.GetAccessToken(response =>
                 {
                     accessTokenResponse = response;
                     sync.Proceed();

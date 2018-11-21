@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
 using SlackAPI.WebSocketMessages;
@@ -20,22 +21,32 @@ namespace SlackAPI.Tests
         [Fact]
         public void TestConnectAsUser()
         {
-            var client = this.fixture.UserClient;
+            var client = this.fixture.CreateUserClient();
             Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
+            client.CloseSocket();
         }
 
         [Fact]
         public void TestConnectAsBot()
         {
-            var client = this.fixture.BotClient;
+            var client = this.fixture.CreateBotClient();
             Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
+            client.CloseSocket();
+        }
+
+        [Fact]
+        public void TestConnectWithWrongProxySettings()
+        {
+            var proxySettings = new WebProxy { Address = new Uri("http://127.0.0.1:8080")};
+            Assert.Throws<InvalidOperationException>(() => this.fixture.CreateUserClient(proxySettings));
+            Assert.Throws<InvalidOperationException>(() => this.fixture.CreateBotClient(proxySettings));
         }
 
         [Fact]
         public void TestConnectPostAndDelete()
         {
             // given
-            SlackSocketClient client = this.fixture.UserClient;
+            SlackSocketClient client = this.fixture.CreateUserClient();
             string channel = this.fixture.Config.TestChannel;
 
             // when

@@ -6,28 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-    public class SlackTaskClient
+    public class SlackTaskClient : SlackClientBase
     {
-        readonly string APIToken;
-
-        const string APIBaseLocation = "https://slack.com/api/";
-        const int Timeout = 5000;
-
-        const char StartHighlight = '\uE001';
-        const char EndHightlight = '\uE001';
-
-        static List<Tuple<string, string>> replacers = new List<Tuple<string, string>>(){
-            new Tuple<string,string>("&", "&amp;"),
-            new Tuple<string,string>("<", "&lt;"),
-            new Tuple<string,string>(">", "&gt;")
-        };
-
-        //Dictionary<int, Action<ReceivingMessage>> socketCallbacks;
+        private readonly string APIToken;
 
         public Self MySelf;
         public User MyData;
@@ -45,21 +30,22 @@ namespace SlackAPI
         public Dictionary<string, Channel> GroupLookup;
         public Dictionary<string, DirectMessageConversation> DirectMessageLookup;
 
-        //public event Action<ReceivingMessage> OnUserTyping;
-        //public event Action<ReceivingMessage> OnMessageReceived;
-        //public event Action<ReceivingMessage> OnPresenceChanged;
-        //public event Action<ReceivingMessage> OnHello;
-
         public SlackTaskClient(string token)
         {
             APIToken = token;
         }
 
-		public virtual async Task<LoginResponse> ConnectAsync()
+        public SlackTaskClient(string token, IWebProxy proxySettings)
+            : base(proxySettings)
+        {
+            APIToken = token;
+        }
+
+        public virtual async Task<LoginResponse> ConnectAsync()
         {
             var loginDetails = await EmitLoginAsync();
-			if(loginDetails.ok)
-				Connected(loginDetails);
+            if(loginDetails.ok)
+                Connected(loginDetails);
 
             return loginDetails;
         }
@@ -95,27 +81,6 @@ namespace SlackAPI
             foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
         }
 
-        public static Task<K> APIRequestAsync<K>(Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
-            where K : Response
-        {
-            RequestPath path = RequestPath.GetRequestPath<K>();
-            //TODO: Custom paths? Appropriate subdomain paths? Not sure.
-            //Maybe store custom path in the requestpath.path itself?
-
-            Uri requestUri = SlackClient.GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(requestUri);
-
-            //This will handle all of the processing.
-            var state = new RequestStateForTask<K>(request, postParameters);
-            return state.Execute();
-        }
-
-        public static Task<K> APIGetRequestAsync<K>(params Tuple<string, string>[] getParameters)
-            where K : Response
-        {
-            return APIRequestAsync<K>(getParameters, new Tuple<string, string>[0]);
-        }
-
         public Task<K> APIRequestWithTokenAsync<K>()
             where K : Response
         {
@@ -130,29 +95,6 @@ namespace SlackAPI
             };
 
             return APIRequestAsync<K>(tokenArray, postParameters);
-        }
-
-        [Obsolete("Please use the OAuth method for authenticating users")]
-        public static Task<AuthStartResponse> StartAuthAsync(string email)
-        {
-            return APIRequestAsync<AuthStartResponse>(new Tuple<string, string>[] { new Tuple<string, string>("email", email) }, new Tuple<string, string>[0]);
-        }
-
-        public static Task<FindTeamResponse> FindTeam(string team)
-        {
-            //This seems to accept both 'team.slack.com' and just plain 'team'.
-            //Going to go with the latter.
-            Tuple<string, string> domainName = new Tuple<string, string>("domain", team);
-            return APIRequestAsync<FindTeamResponse>(new Tuple<string, string>[] { domainName }, new Tuple<string, string>[0]);
-        }
-
-        public static Task<AuthSigninResponse> AuthSignin(string userId, string teamId, string password)
-        {
-            return APIRequestAsync<AuthSigninResponse>(new Tuple<string, string>[] { 
-                new Tuple<string,string>("user", userId),
-                new Tuple<string,string>("team", teamId),
-                new Tuple<string,string>("password", password)
-            }, new Tuple<string, string>[0]);
         }
 
         public Task<AuthTestResponse> TestAuthAsync()
@@ -555,11 +497,10 @@ namespace SlackAPI
 
             parameters.Add(string.Format("{0}={1}", "channels", string.Join(",", channelIds)));
 
-            using(HttpClient client = new HttpClient())
             using (MultipartFormDataContent form = new MultipartFormDataContent())
             {
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
-                HttpResponseMessage response = await client.PostAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form);
+                HttpResponseMessage response = PostRequest(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form);
                 string result = await response.Content.ReadAsStringAsync();
                 return result.Deserialize<FileUploadResponse>();
             }
