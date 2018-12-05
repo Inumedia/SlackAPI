@@ -45,13 +45,14 @@
                 },
                 actions = new []
                 {
-                    new AttachmentAction("Button 1", "Button 1 Text") ,
-                    new AttachmentAction("Button 2", "Button 2 Text") {style = "primary"},
-                    new AttachmentAction("Button 3", "Button 3 Text") {style = "danger"},
-                    new AttachmentAction("Button 4", "Button 4 Text") {style = "danger", confirm = new ActionConfirm {text = "Are you sure?????"} },
-                    new AttachmentAction("Button 5", "Button 5 Text") {style = "danger", confirm = new ActionConfirm {text = "Do you really want to do this", dismiss_text = "No I don't", ok_text = "Sure I do", title = "Just checking"} }
+                    new AttachmentAction(AttachmentActionTypeEnum.Button, "Button 1", "Button 1 Text") ,
+                    new AttachmentAction(AttachmentActionTypeEnum.Button, "Button 2", "Button 2 Text") {style = AttachmentActionStyleEnum.Primary },
+                    new AttachmentAction(AttachmentActionTypeEnum.Button, "Button 3", "Button 3 Text") {style = AttachmentActionStyleEnum.Danger },
+                    new AttachmentAction(AttachmentActionTypeEnum.Button, "Button 4", "Button 4 Text") {style = AttachmentActionStyleEnum.Danger, confirm = new ActionConfirm {text = "Are you sure?????"} },
+                    new AttachmentAction(AttachmentActionTypeEnum.Button, "Button 5", "Button 5 Text") {style = AttachmentActionStyleEnum.Danger, confirm = new ActionConfirm {text = "Do you really want to do this", dismiss_text = "No I don't", ok_text = "Sure I do", title = "Just checking"}
                 }
             }
-        };
+        }
+    };
     }
 }
