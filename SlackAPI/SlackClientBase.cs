@@ -110,7 +110,7 @@ namespace SlackAPI
             return httpClient.PostAsync(requestUri, form).Result;
         }
 
-        public void RegisterConverter(JsonConverter converter)
+        public void RegisterConverter(Newtonsoft.Json.JsonConverter converter)
         {
             if (converter == null)
             {

@@ -493,7 +493,7 @@ namespace SlackAPI
             if (attachments != null && attachments.Length > 0)
                 parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments)));
 
-            parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+                parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
