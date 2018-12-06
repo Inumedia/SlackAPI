@@ -11,7 +11,7 @@ using SlackAPI.RPCMessages;
 namespace SlackAPI
 {
     /// <summary>
-    /// SlackClient is intended to solely handle RPC (HTTP-based) functionality. Does not handle WebSocket connectivity.
+    /// SlackClient is intendedfty. Does not handle WebSocket connectivity.
     ///
     /// For WebSocket connectivity, refer to <see cref="SlackAPI.SlackSocketClient"/>
     /// </summary>
@@ -516,46 +516,46 @@ namespace SlackAPI
             string icon_url = null,
             string icon_emoji = null,
             bool? as_user = null,
-	          string thread_ts = null)
-        {
-            List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
+	        string thread_ts = null)
+            {
+                List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
-            parameters.Add(new Tuple<string,string>("channel", channelId));
-            parameters.Add(new Tuple<string,string>("text", text));
+                parameters.Add(new Tuple<string,string>("channel", channelId));
+                parameters.Add(new Tuple<string,string>("text", text));
 
-            if(!string.IsNullOrEmpty(botName))
-                parameters.Add(new Tuple<string,string>("username", botName));
+                if(!string.IsNullOrEmpty(botName))
+                    parameters.Add(new Tuple<string,string>("username", botName));
 
-            if (!string.IsNullOrEmpty(parse))
-                parameters.Add(new Tuple<string, string>("parse", parse));
+                if (!string.IsNullOrEmpty(parse))
+                    parameters.Add(new Tuple<string, string>("parse", parse));
 
-            if (linkNames)
-                parameters.Add(new Tuple<string, string>("link_names", "1"));
+                if (linkNames)
+                    parameters.Add(new Tuple<string, string>("link_names", "1"));
 
-            if (attachments != null && attachments.Length > 0)
-                parameters.Add(new Tuple<string, string>("attachments",
-                    JsonConvert.SerializeObject(attachments, Formatting.None,
-                            new JsonSerializerSettings // Shouldn't include a not set property
-                            {
-                                NullValueHandling = NullValueHandling.Ignore
-                            })));
+                if (attachments != null && attachments.Length > 0)
+                    parameters.Add(new Tuple<string, string>("attachments",
+                        JsonConvert.SerializeObject(attachments, Formatting.None,
+                                new JsonSerializerSettings // Shouldn't include a not set property
+                                {
+                                    NullValueHandling = NullValueHandling.Ignore
+                                })));
 
-            if (unfurl_links)
-                parameters.Add(new Tuple<string, string>("unfurl_links", "1"));
+                if (unfurl_links)
+                    parameters.Add(new Tuple<string, string>("unfurl_links", "1"));
 
-            if (!string.IsNullOrEmpty(icon_url))
-                parameters.Add(new Tuple<string, string>("icon_url", icon_url));
+                if (!string.IsNullOrEmpty(icon_url))
+                    parameters.Add(new Tuple<string, string>("icon_url", icon_url));
 
-            if (!string.IsNullOrEmpty(icon_emoji))
-                parameters.Add(new Tuple<string, string>("icon_emoji", icon_emoji));
+                if (!string.IsNullOrEmpty(icon_emoji))
+                    parameters.Add(new Tuple<string, string>("icon_emoji", icon_emoji));
 
-            if (as_user.HasValue)
-                parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+                if (as_user.HasValue)
+                    parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
 
-            if (!string.IsNullOrEmpty(thread_ts))
-                parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
+                if (!string.IsNullOrEmpty(thread_ts))
+                    parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
 
-            APIRequestWithToken(callback, parameters.ToArray());
+                APIRequestWithToken(callback, parameters.ToArray());
         }
 
         public void PostEphemeralMessage(
