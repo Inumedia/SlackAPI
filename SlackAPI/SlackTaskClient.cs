@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using SlackAPI.RPCMessages;
 
 namespace SlackAPI
 {
@@ -473,6 +474,24 @@ namespace SlackAPI
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
 
             return APIRequestWithTokenAsync<PostMessageResponse>(parameters.ToArray());
+        }
+      
+        public Task<DialogOpenResponse> DialogOpenAsync(
+           string triggerId,
+           Dialog dialog)
+        {
+           List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+           parameters.Add(new Tuple<string, string>("trigger_id", triggerId));
+    
+           parameters.Add(new Tuple<string, string>("dialog", 
+              JsonConvert.SerializeObject(dialog, 
+                 new JsonSerializerSettings
+                 {
+                    NullValueHandling = NullValueHandling.Ignore
+                 })));
+
+           return APIRequestWithTokenAsync<DialogOpenResponse>(parameters.ToArray());
         }
 
         public async Task<FileUploadResponse> UploadFileAsync(byte[] fileData, string fileName, string[] channelIds, string title = null, string initialComment = null, bool useAsync = false, string fileType = null)
