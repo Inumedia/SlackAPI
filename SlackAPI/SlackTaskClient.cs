@@ -460,12 +460,20 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("link_names", "1"));
 
             if (blocks != null && blocks.Length > 0)
-               parameters.Add(new Tuple<string, string>("blocks", JsonConvert.SerializeObject(blocks)));
+               parameters.Add(new Tuple<string, string>("blocks", JsonConvert.SerializeObject(blocks,
+                  new JsonSerializerSettings()
+                  {
+                     NullValueHandling = NullValueHandling.Ignore
+                  })));
 
-            if (attachments != null && attachments.Length > 0)
-                   parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments)));
+         if (attachments != null && attachments.Length > 0)
+                   parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments,
+                      new JsonSerializerSettings()
+                      {
+                         NullValueHandling = NullValueHandling.Ignore
+                      })));
 
-            if (unfurl_links)
+         if (unfurl_links)
                 parameters.Add(new Tuple<string, string>("unfurl_links", "1"));
 
             if (!string.IsNullOrEmpty(icon_url))
