@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SlackAPI
+﻿namespace SlackAPI
 {
    //see https://api.slack.com/reference/messaging/blocks
    public class Block
@@ -26,7 +20,7 @@ namespace SlackAPI
       public bool? emoji { get; set; }
       public bool? verbatim { get; set; }
    }
-   
+
    public class Option
    {
       public Text text { get; set; }
@@ -90,6 +84,4 @@ namespace SlackAPI
       public const string Overflow = "overflow";
       public const string DatePicker = "date_picker";
    }
-
-
 }
