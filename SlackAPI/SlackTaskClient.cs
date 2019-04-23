@@ -432,13 +432,14 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<JoinDirectMessageChannelResponse>(param);
         }
 
-        public Task<PostMessageResponse> PostMessageAsync(
-            string channelId,
-            string text,
-            string botName = null,
-            string parse = null,
-            bool linkNames = false,
-            Attachment[] attachments = null,
+		public Task<PostMessageResponse> PostMessageAsync(
+			string channelId,
+			string text,
+			string botName = null,
+			string parse = null,
+			bool linkNames = false,
+			Attachment[] attachments = null,
+			Block[] blocks = null,
             bool unfurl_links = false,
             string icon_url = null,
             string icon_emoji = null,
@@ -461,6 +462,9 @@ namespace SlackAPI
             if (attachments != null && attachments.Length > 0)
                 parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments)));
 
+			if (blocks != null && blocks.Length > 0)
+				parameters.Add(new Tuple<string, string>("blocks", JsonConvert.SerializeObject(blocks)));
+			
             if (unfurl_links)
                 parameters.Add(new Tuple<string, string>("unfurl_links", "1"));
 

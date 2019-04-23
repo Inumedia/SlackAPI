@@ -473,6 +473,7 @@ namespace SlackAPI
             string parse = null,
             bool linkNames = false,
             Attachment[] attachments = null,
+			Block[] blocks = null,
             bool as_user = false)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
@@ -492,6 +493,9 @@ namespace SlackAPI
 
             if (attachments != null && attachments.Length > 0)
                 parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments)));
+
+			if (blocks != null && blocks.Length > 0)
+				parameters.Add(new Tuple<string, string>("blocks", JsonConvert.SerializeObject(blocks)));
 
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
 
