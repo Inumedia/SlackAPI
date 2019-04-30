@@ -55,8 +55,10 @@ namespace SlackAPI
 
     public enum SearchSort
     {
+		not_set,
         score,
-        timestamp
+        timestamp,
+		relevant
     }
 
     public enum SearchSortDirection
