@@ -92,7 +92,7 @@ namespace SlackAPI
             }
         }
 
-		public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null, IWebProxy proxySettings = null)
+        public SlackSocket(LoginResponse loginDetails, object routingTo, Action onConnected = null, IWebProxy proxySettings = null)
         {
             BuildRoutes(routingTo);
             socket = new ClientWebSocket();
@@ -164,7 +164,7 @@ namespace SlackAPI
                 message.id = Interlocked.Increment(ref currentId);
             //socket.Send(JsonConvert.SerializeObject(message));
 
-			if (string.IsNullOrEmpty(message.type)){
+            if (string.IsNullOrEmpty(message.type)){
                 IEnumerable<SlackSocketRouting> routes = message.GetType().GetTypeInfo().GetCustomAttributes<SlackSocketRouting>();
 
                 SlackSocketRouting route = null;
@@ -180,7 +180,7 @@ namespace SlackAPI
                 }
             }
 
-			sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            sendingQueue.Push(JsonConvert.SerializeObject(message, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             if (Interlocked.CompareExchange(ref currentlySending, 1, 0) == 0)
                 Task.Factory.StartNew(HandleSending);
         }
@@ -332,20 +332,20 @@ namespace SlackAPI
             currentlySending = 0;
         }
 
-		public void Close()
-		{
+        public void Close()
+        {
             try
             {
                 this.socket.Abort();
             }
-		    catch (Exception)
-		    {
-		        // ignored
-		    }
+            catch (Exception)
+            {
+                // ignored
+            }
 
-		    if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
+            if (Interlocked.CompareExchange(ref closedEmitted, 1, 0) == 0 && ConnectionClosed != null)
                 ConnectionClosed();
-		}
+        }
     }
 
     public class SlackSocketMessage

@@ -56,9 +56,9 @@ namespace SlackAPI
         public string highlight_words;
         //public string newxp_slackbot_step; //I don't even...
         public SearchSort search_sort;
-		public SearchSort search_file_sort;
-		public SearchSort search_channel_sort;
-		public SearchSort search_people_sort;
+        public SearchSort search_file_sort;
+        public SearchSort search_channel_sort;
+        public SearchSort search_people_sort;
         public string push_loud_channels;
         public string push_mention_channels;
         public string push_loud_channels_set;
