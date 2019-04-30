@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 
 	using System.Globalization;
+	using System.Reflection;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
 	using Newtonsoft.Json.Linq;
@@ -84,7 +85,8 @@
 				Block baseBlock = (Block)value;
 				JObject block = new JObject();
 				block["type"] = baseBlock.Type;
-				block["block_id"] = baseBlock.Block_ID;
+				if (baseBlock.Block_ID != null)
+					block["block_id"] = baseBlock.Block_ID;
 				if (value is SectionBlock)
 				{
 					SectionBlock derivedBlock = (SectionBlock)value;
@@ -122,11 +124,18 @@
 		public SlackElement Accessory { get; set; }
 		[JsonProperty("text")]
 		public SlackText Text { get; set; }
+		public SectionBlock()
+		{
+			Type = "section";
+		}
 	}
 
 	public class DividerBlock : Block
 	{
-
+		public DividerBlock()
+		{
+			Type = "divider";
+		}
 	}
 
 	public class ImageBlock : Block
@@ -137,18 +146,30 @@
 		public string AltText { get; set; }
 		[JsonProperty("title")]
 		public SlackText Title { get; set; }
+		public ImageBlock()
+		{
+			Type = "image";
+		}
 	}
 
 	public class ActionBlock : Block
 	{
 		[JsonProperty("elements")]
 		public InteractiveElement[] Elements { get; set; }
+		public ActionBlock()
+		{
+			Type = "actions";
+		}
 	}
 
 	public class ContextBlock : Block
 	{
 		[JsonProperty("elements")]
 		public NonInteractiveElement[] Elements { get; set; }
+		public ContextBlock()
+		{
+			Type = "context";
+		}
 	}
 
 	[JsonConverter(typeof(JsonElementConverter))]
@@ -309,6 +330,10 @@
 		public string Image_URL { get; set; }
 		[JsonProperty("alt_text")]
 		public string Alt_Text { get; set; }
+		public ImageElement()
+		{
+			Type = "image";
+		}
 	}
 
 	public abstract class InteractiveElement : SlackElement
@@ -329,6 +354,10 @@
 		public string Value { get; set; }
 		[JsonProperty("style")]
 		public string Style { get; set; }
+		public ButtonElement()
+		{
+			Type = "button";
+		}
 	}
 
 	public abstract class SelectOrDatePickerElement : InteractiveElement
@@ -345,6 +374,10 @@
 		public SlackOptionGroup[] OptionGroups { get; set; }
 		[JsonProperty("initial_option")]
 		public SlackOption InitialOption { get; set; }
+		public StaticSelectElement()
+		{
+			Type = "static_select";
+		}
 	}
 
 	public class ExternalSelectElement : SelectOrDatePickerElement
@@ -353,36 +386,60 @@
 		public SlackOption InitialOption { get; set; }
 		[JsonProperty("min_query_length")]
 		public int MinQueryLength { get; set; }
+		public ExternalSelectElement()
+		{
+			Type = "external_select";
+		}
 	}
 
 	public class UserSelectElement : SelectOrDatePickerElement
 	{
 		[JsonProperty("initial_user")]
 		public string InitialUser { get; set; }
+		public UserSelectElement()
+		{
+			Type = "users_select";
+		}
 	}
 
 	public class ConversationSelectElement : SelectOrDatePickerElement
 	{
 		[JsonProperty("initial_conversation")]
 		public string InitialConversation { get; set; }
+		public ConversationSelectElement()
+		{
+			Type = "conversations_select";
+		}
 	}
 
 	public class ChannelSelectElement : SelectOrDatePickerElement
 	{
 		[JsonProperty("initial_channel")]
 		public string InitialChannel { get; set; }
+		public ChannelSelectElement()
+		{
+			Type = "channels_select";
+		}
 	}
 
 	public class DatePickerElement : SelectOrDatePickerElement
 	{
 		[JsonProperty("initial_date")]
 		public string InitialDate { get; set; }
+		public DatePickerElement()
+		{
+			Type = "datepicker";
+		}
 	}
 
 	public class OverflowElement : InteractiveElement
 	{
 		[JsonProperty("options")]
 		public SlackOption[] Options { get; set; }
+		public OverflowElement()
+		{
+			Type = "overflow";
+		}
 	}
 
 	public partial class SlackConfirm
@@ -420,7 +477,7 @@
 
 		public override bool CanConvert(Type objectType)
 		{
-			return typeof(T).IsAssignableFrom(objectType);
+			return typeof(T).GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo());
 		}
 
 		public override object ReadJson(JsonReader reader, Type objectType,
