@@ -48,7 +48,7 @@ namespace SlackAPI
             APIToken = token;
         }
 
-		public virtual void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
+        public virtual void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
         {
             EmitLogin((loginDetails) =>
             {
@@ -127,10 +127,10 @@ namespace SlackAPI
         {
             APIRequestWithToken(callback);
         }
-		public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name) {
-			APIRequestWithToken(callback, new Tuple<string, string>("name", name));
-		}
-		public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
+        public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name) {
+            APIRequestWithToken(callback, new Tuple<string, string>("name", name));
+        }
+        public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
@@ -473,6 +473,7 @@ namespace SlackAPI
             string parse = null,
             bool linkNames = false,
             Attachment[] attachments = null,
+            Block[] blocks = null,
             bool as_user = false)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
@@ -492,6 +493,9 @@ namespace SlackAPI
 
             if (attachments != null && attachments.Length > 0)
                 parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments)));
+
+            if (blocks != null && blocks.Length > 0)
+                parameters.Add(new Tuple<string, string>("blocks", JsonConvert.SerializeObject(blocks)));
 
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
 
@@ -516,7 +520,7 @@ namespace SlackAPI
             string icon_url = null,
             string icon_emoji = null,
             bool? as_user = null,
-	          string thread_ts = null)
+              string thread_ts = null)
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
@@ -567,7 +571,7 @@ namespace SlackAPI
             bool linkNames = false,
             Attachment[] attachments = null,
             bool as_user = false,
-	    string thread_ts = null)
+        string thread_ts = null)
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 

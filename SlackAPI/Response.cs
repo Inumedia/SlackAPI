@@ -18,10 +18,21 @@ namespace SlackAPI
         /// </summary>
         public string error;
 
+        /// <summary>
+        /// May be supplied.
+        /// </summary>
+        public string needed;
+
         public void AssertOk()
         {
             if (!(ok))
+            {
+                if (error == "missing_scope")
+                {
+                    throw new InvalidOperationException(String.Format("missing_scope: needed: {0}", needed));
+                }
                 throw new InvalidOperationException(string.Format("An error occurred: {0}", this.error));
+            }
         }
     }
 }

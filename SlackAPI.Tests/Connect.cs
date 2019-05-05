@@ -21,9 +21,9 @@ namespace SlackAPI.Tests
         [Fact]
         public void TestConnectAsUser()
         {
-            var client = this.fixture.CreateUserClient();
-            Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
-            client.CloseSocket();
+			var client = this.fixture.CreateUserClient();
+			Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
+			client.CloseSocket();
         }
 
         [Fact]
