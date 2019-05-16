@@ -14,7 +14,6 @@ namespace SlackAPI
         public string team_name;
         public string team_id { get; set; }
         public BotTokenResponse bot;
-        public IncomingWebhook incoming_webhook { get; set; }
     }
 
     public class BotTokenResponse
@@ -32,13 +31,5 @@ namespace SlackAPI
        public string name;
        public string bot_user_id;
        public string bot_access_token;
-    }
-
-    public class IncomingWebhook
-    {
-        public string channel { get; set; }
-        public string channel_id { get; set; }
-        public string configuration_url { get; set; }
-        public string url { get; set; }
     }
 }
