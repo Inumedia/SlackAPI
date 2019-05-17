@@ -624,7 +624,24 @@ namespace SlackAPI
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
+        public void DialogOpen(
+           Action<DialogOpenResponse> callback,
+           string triggerId,
+           Dialog dialog)
+        {
+           List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
+           parameters.Add(new Tuple<string, string>("trigger_id", triggerId));
+
+           parameters.Add(new Tuple<string, string>("dialog",
+              JsonConvert.SerializeObject(dialog,
+                 new JsonSerializerSettings
+                 {
+                    NullValueHandling = NullValueHandling.Ignore
+                 })));
+
+           APIRequestWithToken(callback, parameters.ToArray());
+        }
 
         public void AddReaction(
             Action<ReactionAddedResponse> callback,
