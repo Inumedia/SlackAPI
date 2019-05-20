@@ -645,5 +645,13 @@ namespace SlackAPI
                 callback(result.Deserialize<FileUploadResponse>());
             }
         }
+
+        public void DeleteFile(Action<FileDeleteResponse> callback, string file = null)
+        {
+            if (string.IsNullOrEmpty(file))
+                return;
+
+            APIRequestWithToken(callback, new Tuple<string, string>("file", file));
+        }
     }
 }
