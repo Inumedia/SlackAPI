@@ -177,7 +177,7 @@ Task("Test")
 Task("Package")
     .IsDependentOn("Clean")
     .IsDependentOn("Build")
-    .IsDependentOn("Test")
+    // .IsDependentOn("Test")
     .Does(() =>
 {
     DotNetCorePack(
