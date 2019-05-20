@@ -145,7 +145,7 @@ namespace SlackAPI
             APIRequestWithToken(callback);
         }
 
-        public void GetFiles(Action<FileListResponse> callback, string userId = null, DateTime? from = null, DateTime? to = null, int? count = null, int? page = null, FileTypes types = FileTypes.all)
+        public void GetFiles(Action<FileListResponse> callback, string userId = null, DateTime? from = null, DateTime? to = null, int? count = null, int? page = null, FileTypes types = FileTypes.all, string channel = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
@@ -185,6 +185,9 @@ namespace SlackAPI
 
             if (page.HasValue)
                 parameters.Add(new Tuple<string, string>("page", page.Value.ToString()));
+
+            if (!string.IsNullOrEmpty(channel))
+                parameters.Add(new Tuple<string, string>("channel", channel));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
