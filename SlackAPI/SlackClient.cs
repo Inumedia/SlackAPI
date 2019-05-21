@@ -472,7 +472,7 @@ namespace SlackAPI
             string botName = null,
             string parse = null,
             bool linkNames = false,
-            Block[] blocks = null,
+            IBlock[] blocks = null,
             Attachment[] attachments = null,
             bool as_user = false)
         {
@@ -524,7 +524,7 @@ namespace SlackAPI
             string botName = null,
             string parse = null,
             bool linkNames = false,
-            Block[] blocks = null,
+            IBlock[] blocks = null,
             Attachment[] attachments = null,
             bool unfurl_links = false,
             string icon_url = null,
