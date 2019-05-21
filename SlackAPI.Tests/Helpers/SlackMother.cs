@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SlackAPI.Tests.Helpers
+﻿namespace SlackAPI.Tests.Helpers
 {
     public class SlackMother
     {
@@ -71,7 +68,7 @@ namespace SlackAPI.Tests.Helpers
                             text = "<http://flickr.com/bobby/|Bobby Tables>"
                     }
                 },
-                
+
             },
             new SectionBlock
             {
@@ -147,7 +144,7 @@ namespace SlackAPI.Tests.Helpers
                         text = "Select a date"
                     }
                 }
-            }, 
+            },
             new ActionsBlock
             {
                 block_id = "Optional unique identifier for a block",
