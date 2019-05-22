@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -141,20 +141,23 @@ namespace SlackAPI
             UsePrimaryAPI = isPrimaryAPI;
         }
 
-        static Dictionary<Type, RequestPath> paths = new Dictionary<Type, RequestPath>();
+        static ConcurrentDictionary<Type, RequestPath> paths = new ConcurrentDictionary<Type, RequestPath>();
 
         public static RequestPath GetRequestPath<K>()
         {
             Type t = typeof(K);
-            if (paths.ContainsKey(t))
-                return paths[t];
+            if (paths.TryGetValue(t, out var path))
+                return path;
 
             TypeInfo info = t.GetTypeInfo();
 
-            RequestPath path = info.GetCustomAttribute<RequestPath>();
+            path = info.GetCustomAttribute<RequestPath>();
             if (path == null) throw new InvalidOperationException(string.Format("No valid request path for {0}", t.Name));
 
-            paths.Add(t, path);
+            // Some other thread may have already placed the path to the dictionary, 
+            // the original one will remain there and current one will be GCed once it
+            // gets out of scope of this request.
+            paths.TryAdd(t, path);
             return path;
         }
     }
