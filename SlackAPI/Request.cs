@@ -148,14 +148,18 @@ namespace SlackAPI
             Type t = typeof(K);
             if (paths.ContainsKey(t))
                 return paths[t];
-
-            TypeInfo info = t.GetTypeInfo();
-
-            RequestPath path = info.GetCustomAttribute<RequestPath>();
-            if (path == null) throw new InvalidOperationException(string.Format("No valid request path for {0}", t.Name));
-
-            paths.Add(t, path);
-            return path;
+            lock(paths)
+            {
+                if (paths.ContainsKey(t))
+                return paths[t];
+                
+                TypeInfo info = t.GetTypeInfo();
+                RequestPath path = info.GetCustomAttribute<RequestPath>();
+                if (path == null) throw new InvalidOperationException(string.Format("No valid request path for {0}", t.Name));
+                
+                paths.Add(t, path);
+                return path;
+            }
         }
     }
 }
