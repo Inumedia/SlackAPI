@@ -63,5 +63,36 @@ namespace SlackAPI.Tests
             // then
             Assert.True(actual.ok, "Error while posting message to channel. ");
         }
+
+        [Fact]
+        public void BlocksInAttachment()
+        {
+            // given
+            var client = this.fixture.UserClient;
+            PostMessageResponse actual = null;
+
+            // when
+            using (var sync = new InSync(nameof(SlackClient.PostMessage)))
+            {
+                client.PostMessage(
+                    response =>
+                    {
+                        actual = response;
+                        sync.Proceed();
+                    },
+                    this.fixture.Config.TestChannel,
+                    "These blocks are in an attachment",
+                    attachments: new []
+                    {
+                        new Attachment
+                        {
+                            blocks = SlackMother.SomeBlocks
+                        } 
+                    });
+            }
+
+            // then
+            Assert.True(actual.ok, "Error while posting message to channel. ");
+        }
     }
 }
