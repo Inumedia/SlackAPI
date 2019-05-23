@@ -14,6 +14,7 @@
         public string title_link;
         public string text;
         public Field[] fields;
+        public IBlock[] blocks;
         
         public string image_url;
         public string thumb_url;
