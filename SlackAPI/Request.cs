@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -154,10 +155,27 @@ namespace SlackAPI
             path = info.GetCustomAttribute<RequestPath>();
             if (path == null) throw new InvalidOperationException(string.Format("No valid request path for {0}", t.Name));
 
-            // Some other thread may have already placed the path to the dictionary, 
-            // the original one will remain there and current one will be GCed once it
-            // gets out of scope of this request.
-            paths.TryAdd(t, path);
+            try
+            {
+                // Some other thread may have already placed the path to the dictionary, 
+                // the original one will remain there and current one will be GCed once it
+                // gets out of scope of this request.
+                paths.TryAdd(t, path);
+            }
+            catch (Exception e)
+            {
+                // There is a slight chance of TryAdd throwing, we want to be extra safe
+                // so we just consume it and leave the dictionary as-is, next call of
+                // the same function will try to add the path again.
+                // This may be removed in the future if TryAdd is verified as safe.
+                // See #190.
+#if NET45 || NETSTANDARD2_0
+                Trace.TraceError(e.ToString());
+#else
+                Debug.Write(e);
+#endif
+            }
+
             return path;
         }
     }
