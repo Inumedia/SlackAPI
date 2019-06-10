@@ -127,10 +127,22 @@ namespace SlackAPI
         {
             APIRequestWithToken(callback);
         }
+
 		public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name) {
 			APIRequestWithToken(callback, new Tuple<string, string>("name", name));
 		}
-		public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
+
+        public void ChannelsInvite(Action<ChannelInviteResponse> callback, string userId, string channelId)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("user", userId));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
