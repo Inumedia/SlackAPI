@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Newtonsoft.Json;
 
 namespace SlackAPI
@@ -17,10 +18,10 @@ namespace SlackAPI
         {
             if (toUTC)
             {
-                return ((that.ToUniversalTime().Ticks - 621355968000000000m) / 10000000m).ToString("F6");
+                return ((that.ToUniversalTime().Ticks - 621355968000000000m) / 10000000m).ToString("F6", CultureInfo.InvariantCulture);
             }
             else
-                return that.Subtract(new DateTime(1970, 1, 1)).TotalSeconds.ToString();
+                return that.Subtract(new DateTime(1970, 1, 1)).TotalSeconds.ToString(CultureInfo.InvariantCulture);
         }
 
         public static K Deserialize<K>(this string data)
