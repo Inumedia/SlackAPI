@@ -350,13 +350,13 @@ namespace SlackAPI
 
         #endregion
 
-        public void SearchAll(Action<SearchResponseAll> callback, string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public void SearchAll(Action<SearchResponseAll> callback, string query, string sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
 
-            if (sorting.HasValue)
-                parameters.Add(new Tuple<string, string>("sort", sorting.Value.ToString()));
+            if (sorting != null)
+                parameters.Add(new Tuple<string, string>("sort", sorting));
 
             if (direction.HasValue)
                 parameters.Add(new Tuple<string, string>("sort_dir", direction.Value.ToString()));
@@ -373,13 +373,13 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
-        public void SearchMessages(Action<SearchResponseMessages> callback, string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public void SearchMessages(Action<SearchResponseMessages> callback, string query, string sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
 
-            if (sorting.HasValue)
-                parameters.Add(new Tuple<string, string>("sort", sorting.Value.ToString()));
+            if (sorting != null)
+                parameters.Add(new Tuple<string, string>("sort", sorting));
 
             if (direction.HasValue)
                 parameters.Add(new Tuple<string, string>("sort_dir", direction.Value.ToString()));
@@ -396,13 +396,13 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
-        public void SearchFiles(Action<SearchResponseFiles> callback, string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public void SearchFiles(Action<SearchResponseFiles> callback, string query, string sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
 
-            if (sorting.HasValue)
-                parameters.Add(new Tuple<string, string>("sort", sorting.Value.ToString()));
+            if (sorting != null)
+                parameters.Add(new Tuple<string, string>("sort", sorting));
 
             if (direction.HasValue)
                 parameters.Add(new Tuple<string, string>("sort_dir", direction.Value.ToString()));
@@ -507,14 +507,14 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("link_names", "1"));
 
             if (blocks != null && blocks.Length > 0)
-               parameters.Add(new Tuple<string, string>("blocks", 
+               parameters.Add(new Tuple<string, string>("blocks",
                   JsonConvert.SerializeObject(blocks, new JsonSerializerSettings()
                   {
                      NullValueHandling = NullValueHandling.Ignore
                   })));
 
             if (attachments != null && attachments.Length > 0)
-                parameters.Add(new Tuple<string, string>("attachments", 
+                parameters.Add(new Tuple<string, string>("attachments",
                    JsonConvert.SerializeObject(attachments, new JsonSerializerSettings()
                    {
                       NullValueHandling = NullValueHandling.Ignore

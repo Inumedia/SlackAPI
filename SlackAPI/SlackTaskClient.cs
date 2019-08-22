@@ -326,13 +326,13 @@ namespace SlackAPI
 
         #endregion
 
-        public Task<SearchResponseAll> SearchAllAsync(string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public Task<SearchResponseAll> SearchAllAsync(string query, string sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
 
-            if (sorting.HasValue)
-                parameters.Add(new Tuple<string, string>("sort", sorting.Value.ToString()));
+            if (sorting != null)
+                parameters.Add(new Tuple<string, string>("sort", sorting));
 
             if (direction.HasValue)
                 parameters.Add(new Tuple<string, string>("sort_dir", direction.Value.ToString()));
@@ -349,13 +349,13 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<SearchResponseAll>(parameters.ToArray());
         }
 
-        public Task<SearchResponseMessages> SearchMessagesAsync(string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public Task<SearchResponseMessages> SearchMessagesAsync(string query, string sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
 
-            if (sorting.HasValue)
-                parameters.Add(new Tuple<string, string>("sort", sorting.Value.ToString()));
+            if (sorting != null)
+                parameters.Add(new Tuple<string, string>("sort", sorting));
 
             if (direction.HasValue)
                 parameters.Add(new Tuple<string, string>("sort_dir", direction.Value.ToString()));
@@ -372,13 +372,13 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<SearchResponseMessages>(parameters.ToArray());
         }
 
-        public Task<SearchResponseFiles> SearchFilesAsync(string query, SearchSort? sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
+        public Task<SearchResponseFiles> SearchFilesAsync(string query, string sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
             parameters.Add(new Tuple<string, string>("query", query));
 
-            if (sorting.HasValue)
-                parameters.Add(new Tuple<string, string>("sort", sorting.Value.ToString()));
+            if (sorting != null)
+                parameters.Add(new Tuple<string, string>("sort", sorting));
 
             if (direction.HasValue)
                 parameters.Add(new Tuple<string, string>("sort_dir", direction.Value.ToString()));
