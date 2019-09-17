@@ -20,5 +20,7 @@ namespace SlackAPI
         public string permalink;
         public Reaction[] reactions;
         //Wibblr? Not really sure what this applies to.  :<
+
+        public DateTime? thread_ts;
     }
 }

@@ -11,7 +11,7 @@ namespace SlackAPI
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(DateTime);
+            return objectType == typeof(DateTime) || objectType == typeof(DateTime?);
         }
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
