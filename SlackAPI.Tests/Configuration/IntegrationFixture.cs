@@ -45,9 +45,9 @@ namespace SlackAPI.Tests.Configuration
             }
         }
 
-        public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null)
+        public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null, bool subscribePresenceChanges = false)
         {
-            return this.CreateClient(this.Config.UserAuthToken, proxySettings);
+            return this.CreateClient(this.Config.UserAuthToken, proxySettings, subscribePresenceChanges);
         }
 
         public SlackSocketClient CreateBotClient(IWebProxy proxySettings = null)
@@ -83,7 +83,7 @@ namespace SlackAPI.Tests.Configuration
             return JsonConvert.DeserializeAnonymousType(json, jsonObject).slack;
         }
 
-        private SlackSocketClient CreateClient(string authToken, IWebProxy proxySettings = null)
+        private SlackSocketClient CreateClient(string authToken, IWebProxy proxySettings = null, bool subscribePresenceChanges = false)
         {
             SlackSocketClient client;
 
@@ -92,7 +92,7 @@ namespace SlackAPI.Tests.Configuration
             using (var syncClientSocket = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected callback"))
             using (var syncClientSocketHello = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected hello callback"))
             {
-                client = new SlackSocketClient(authToken, proxySettings);
+                client = new SlackSocketClient(authToken, proxySettings, subscribePresenceChanges);
                 client.OnHello += () => syncClientSocketHello.Proceed();
                 client.Connect(x =>
                 {

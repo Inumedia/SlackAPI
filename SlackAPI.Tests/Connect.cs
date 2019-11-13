@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
 using SlackAPI.WebSocketMessages;
@@ -58,6 +59,57 @@ namespace SlackAPI.Tests
             Assert.True(deletedResponse.ok);
             Assert.Equal(channel, deletedResponse.channel);
             Assert.Equal(messageTimestamp, deletedResponse.ts);
+        }
+
+        [Fact]
+        public void TestConnectGetPresenceChanges()
+        {
+            // Arrange
+            SlackSocketClient client;
+            int presenceChangesRaisedCount = 0;
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            {
+                // Act
+                client = this.fixture.CreateUserClient(subscribePresenceChanges: true);
+                client.OnPresenceChanged += x =>
+                {
+                    presenceChangesRaisedCount++;
+                    if (presenceChangesRaisedCount == client.Users.Count)
+                    {
+                        sync.Proceed();
+                    }
+                };
+            }
+
+            // Assert
+            Assert.Equal(client.Users.Count, presenceChangesRaisedCount);
+        }
+
+        [Fact]
+        public void TestEmitPresenceManualPresenceChangeEventRaised()
+        {
+            // Arrange
+            SlackSocketClient client = this.fixture.CreateUserClient();
+            using (var sync = new InSync(nameof(TestEmitPresenceManualPresenceChangeEventRaised)))
+            {
+                client.EmitPresence(p => sync.Proceed(), Presence.active);
+            }
+
+            bool manualPresenceChangeRaised = false;
+            using (var sync = new InSync(nameof(TestEmitPresenceManualPresenceChangeEventRaised)))
+            {
+                client.OnPresenceChanged += p =>
+                {
+                    manualPresenceChangeRaised = p is ManualPresenceChange;
+                    sync.Proceed();
+                };
+
+                // Act
+                client.EmitPresence(p => { }, Presence.away);
+            }
+
+            // Assert
+            Assert.True(manualPresenceChangeRaised);
         }
 
         private static DateTime PostMessage(SlackSocketClient client, string channel)

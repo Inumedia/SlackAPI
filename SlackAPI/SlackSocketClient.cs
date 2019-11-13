@@ -1,5 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System;
+using System.Linq;
 using System.Net;
 using SlackAPI.WebSocketMessages;
 
@@ -7,11 +8,13 @@ namespace SlackAPI
 {
     public class SlackSocketClient : SlackClient
     {
+        readonly bool subscribePresenceChanges;
         SlackSocket underlyingSocket;
 
         public event Action<NewMessage> OnMessageReceived;
         public event Action<ReactionAdded> OnReactionAdded;
         public event Action<Pong> OnPongReceived;
+        public event Action<PresenceChange> OnPresenceChanged;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -23,14 +26,10 @@ namespace SlackAPI
         public event Action OnHello;
         private LoginResponse loginDetails;
 
-        public SlackSocketClient(string token)
-            : base(token)
-        {
-        }
-
-        public SlackSocketClient(string token, IWebProxy proxySettings)
+        public SlackSocketClient(string token, IWebProxy proxySettings = null, bool subscribePresenceChanges = false)
             : base(token, proxySettings)
         {
+            this.subscribePresenceChanges = subscribePresenceChanges;
         }
 
         public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
@@ -80,7 +79,7 @@ namespace SlackAPI
 
         public void SendPresence(Presence status)
         {
-            underlyingSocket.Send(new PresenceChange() { presence = Presence.active, user = base.MySelf.id });
+            underlyingSocket.Send(new PresenceChange() { presence = status, user = base.MySelf.id });
         }
 
         public void SendTyping(string channelId)
@@ -107,6 +106,18 @@ namespace SlackAPI
             underlyingSocket.Send(new Ping());
         }
 
+        public void SubscribePresenceChange(params string[] usersIds)
+        {
+            if (subscribePresenceChanges)
+            {
+                underlyingSocket.Send(new PresenceChangeSubscription(usersIds));
+            }
+            else
+            {
+                throw new InvalidOperationException($"{nameof(subscribePresenceChanges)} option must be enabled to use this feature.");
+            }
+        }
+
         public void HandlePongReceived(Pong pong)
         {
             if (OnPongReceived != null)
@@ -121,6 +132,12 @@ namespace SlackAPI
 
         public void HandleHello(Hello hello)
         {
+            if (subscribePresenceChanges)
+            {
+                // Subscribe presence change event for all the users on startup
+                SubscribePresenceChange(UserLookup.Keys.ToArray());
+            }
+
             HelloReceived = true;
 
             if (OnHello != null)
@@ -216,13 +233,17 @@ namespace SlackAPI
 
         public void FileShareMessage(FileShareMessage m)
         {
-            if (OnMessageReceived != null)
-                OnMessageReceived(m);
+            Message(m);
         }
 
         public void PresenceChange(PresenceChange p)
         {
+            OnPresenceChanged?.Invoke(p);
+        }
 
+        public void ManualPresenceChange(ManualPresenceChange p)
+        {
+            PresenceChange(p);
         }
 
         public void ChannelMarked(ChannelMarked m)
