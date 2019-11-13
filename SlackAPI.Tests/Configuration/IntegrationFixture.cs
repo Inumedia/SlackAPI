@@ -45,9 +45,9 @@ namespace SlackAPI.Tests.Configuration
             }
         }
 
-        public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null, bool subscribePresenceChanges = false)
+        public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null, bool maintainPresenceChangesStatus = false)
         {
-            return this.CreateClient(this.Config.UserAuthToken, proxySettings, subscribePresenceChanges);
+            return this.CreateClient(this.Config.UserAuthToken, proxySettings, maintainPresenceChangesStatus);
         }
 
         public SlackSocketClient CreateBotClient(IWebProxy proxySettings = null)

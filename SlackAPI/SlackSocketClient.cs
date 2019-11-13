@@ -8,7 +8,7 @@ namespace SlackAPI
 {
     public class SlackSocketClient : SlackClient
     {
-        readonly bool subscribePresenceChanges;
+        readonly bool maintainPresenceChanges;
         SlackSocket underlyingSocket;
 
         public event Action<NewMessage> OnMessageReceived;
@@ -26,10 +26,10 @@ namespace SlackAPI
         public event Action OnHello;
         private LoginResponse loginDetails;
 
-        public SlackSocketClient(string token, IWebProxy proxySettings = null, bool subscribePresenceChanges = false)
+        public SlackSocketClient(string token, IWebProxy proxySettings = null, bool maintainPresenceChanges = false)
             : base(token, proxySettings)
         {
-            this.subscribePresenceChanges = subscribePresenceChanges;
+            this.maintainPresenceChanges = maintainPresenceChanges;
         }
 
         public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
@@ -108,14 +108,7 @@ namespace SlackAPI
 
         public void SubscribePresenceChange(params string[] usersIds)
         {
-            if (subscribePresenceChanges)
-            {
-                underlyingSocket.Send(new PresenceChangeSubscription(usersIds));
-            }
-            else
-            {
-                throw new InvalidOperationException($"{nameof(subscribePresenceChanges)} option must be enabled to use this feature.");
-            }
+            underlyingSocket.Send(new PresenceChangeSubscription(usersIds));
         }
 
         public void HandlePongReceived(Pong pong)
@@ -132,9 +125,9 @@ namespace SlackAPI
 
         public void HandleHello(Hello hello)
         {
-            if (subscribePresenceChanges)
+            if (maintainPresenceChanges)
             {
-                // Subscribe presence change event for all the users on startup
+                // Subscribe presence change event for all the users on startup to maintain status in the the lookup table
                 SubscribePresenceChange(UserLookup.Keys.ToArray());
             }
 
@@ -147,6 +140,12 @@ namespace SlackAPI
         public void HandlePresence(PresenceChange change)
         {
             UserLookup[change.user].presence = change.presence.ToString().ToLower();
+        }
+
+        public void HandleManualPresence(ManualPresenceChange change)
+        {
+            change.user = MySelf.id;
+            HandlePresence(change);
         }
 
         public void HandleUserChange(UserChange change)
@@ -243,6 +242,7 @@ namespace SlackAPI
 
         public void ManualPresenceChange(ManualPresenceChange p)
         {
+            p.user = MySelf.id;
             PresenceChange(p);
         }
 

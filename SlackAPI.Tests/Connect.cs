@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using SlackAPI.Tests.Configuration;
@@ -70,11 +71,14 @@ namespace SlackAPI.Tests
             using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
             {
                 // Act
-                client = this.fixture.CreateUserClient(subscribePresenceChanges: true);
+                client = this.fixture.CreateUserClient(maintainPresenceChangesStatus: true);
+
+                // Reset presence
+                client.Users.ForEach(x => x.presence = null);
+
                 client.OnPresenceChanged += x =>
                 {
-                    presenceChangesRaisedCount++;
-                    if (presenceChangesRaisedCount == client.Users.Count)
+                    if (++presenceChangesRaisedCount == client.Users.Count)
                     {
                         sync.Proceed();
                     }
@@ -82,34 +86,49 @@ namespace SlackAPI.Tests
             }
 
             // Assert
-            Assert.Equal(client.Users.Count, presenceChangesRaisedCount);
+            Assert.True(client.Users.All(x => x.presence != null));
         }
 
         [Fact]
-        public void TestEmitPresenceManualPresenceChangeEventRaised()
+        public void TestManualSubscribePresenceChangeAndManualPresenceChange()
         {
             // Arrange
             SlackSocketClient client = this.fixture.CreateUserClient();
-            using (var sync = new InSync(nameof(TestEmitPresenceManualPresenceChangeEventRaised)))
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            {
+                client.OnPresenceChanged += x =>
+                {
+                    if (x.user == client.MySelf.id)
+                    {
+                        // Assert
+                        sync.Proceed();
+                    }
+                };
+
+                // Act
+                client.SubscribePresenceChange(client.MySelf.id);
+            }
+
+            // Set initial state
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
             {
                 client.EmitPresence(p => sync.Proceed(), Presence.active);
             }
 
-            bool manualPresenceChangeRaised = false;
-            using (var sync = new InSync(nameof(TestEmitPresenceManualPresenceChangeEventRaised)))
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
             {
-                client.OnPresenceChanged += p =>
+                client.OnPresenceChanged += x =>
                 {
-                    manualPresenceChangeRaised = p is ManualPresenceChange;
-                    sync.Proceed();
+                    if (x is ManualPresenceChange && x.user == client.MySelf.id)
+                    {
+                        // Assert
+                        sync.Proceed();
+                    }
                 };
 
                 // Act
-                client.EmitPresence(p => { }, Presence.away);
+                client.EmitPresence(x => { }, Presence.away);
             }
-
-            // Assert
-            Assert.True(manualPresenceChangeRaised);
         }
 
         private static DateTime PostMessage(SlackSocketClient client, string channel)
