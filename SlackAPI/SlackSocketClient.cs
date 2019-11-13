@@ -12,6 +12,7 @@ namespace SlackAPI
         public event Action<NewMessage> OnMessageReceived;
         public event Action<ReactionAdded> OnReactionAdded;
         public event Action<Pong> OnPongReceived;
+        public event Action<UserTyping> OnUserTyping;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -203,9 +204,10 @@ namespace SlackAPI
             GroupLookup[rename.channel.id].created = rename.channel.created;
         }
 
-        public void UserTyping(Typing t)
+        public void HandleUserTyping(UserTyping userTyping)
         {
-
+            if (OnUserTyping != null)
+                OnUserTyping(userTyping);
         }
 
         public void Message(NewMessage m)

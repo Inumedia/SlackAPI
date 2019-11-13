@@ -2,8 +2,8 @@
 
 namespace SlackAPI.WebSocketMessages
 {
-    [SlackSocketRouting("typing")]
-    public class Typing : SlackSocketMessage
+    [SlackSocketRouting("user_typing")]
+    public class UserTyping : SlackSocketMessage
     {
         public string user;
         public string channel;
