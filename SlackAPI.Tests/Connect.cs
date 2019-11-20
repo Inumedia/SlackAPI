@@ -91,23 +91,21 @@ namespace SlackAPI.Tests
         {
             // Arrange
             SlackSocketClient client = this.fixture.CreateUserClient();
-
-            // Ensure the initial state is 'away'
-            var manualResetEvent = new ManualResetEventSlim(false);
-            client.OnPresenceChanged += x =>
+            using (var sync = new InSync())
             {
-                if (x.user == client.MySelf.id && x.presence == Presence.away)
+                client.OnPresenceChanged += x =>
                 {
-                    // Assert
-                    manualResetEvent.Set();
-                }
-            };
+                    if (x.user == client.MySelf.id)
+                    {
+                        // Assert
+                        sync.Proceed();
+                    }
+                };
 
-            client.SubscribePresenceChange(client.MySelf.id);
-            client.EmitPresence(x => x.AssertOk(), Presence.away);
-            manualResetEvent.Wait(TimeSpan.FromSeconds(5));
+                client.SubscribePresenceChange(client.MySelf.id);
+            }
 
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            using (var sync = new InSync())
             {
                 client.OnPresenceChanged += x =>
                 {
@@ -119,6 +117,7 @@ namespace SlackAPI.Tests
                 };
 
                 // Act
+                client.EmitPresence(x => x.AssertOk(), Presence.away);
                 client.EmitPresence(x => x.AssertOk(), Presence.auto);
             }
         }
