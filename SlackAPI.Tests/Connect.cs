@@ -86,7 +86,7 @@ namespace SlackAPI.Tests
             Assert.True(client.Users.All(x => x.presence != null));
         }
 
-        [Fact]
+        [Fact(Skip = "Not stable on AppVeyor")]
         public void TestManualSubscribePresenceChangeAndManualPresenceChange()
         {
             // Arrange
