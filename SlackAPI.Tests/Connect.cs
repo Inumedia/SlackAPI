@@ -68,33 +68,30 @@ namespace SlackAPI.Tests
             // Arrange
             SlackSocketClient client;
             int presenceChangesRaisedCount = 0;
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges), this.fixture.ConnectionTimeout))
             {
-                // Act
-                client = this.fixture.CreateUserClient(maintainPresenceChangesStatus: true);
-
-                // Reset presence
-                client.Users.ForEach(x => x.presence = null);
-
-                client.OnPresenceChanged += x =>
+                void OnPresenceChanged(SlackSocketClient sender, PresenceChange e)
                 {
-                    if (++presenceChangesRaisedCount == client.Users.Count)
+                    if (++presenceChangesRaisedCount == sender.Users.Count)
                     {
                         sync.Proceed();
                     }
-                };
+                }
+
+                // Act
+                client = this.fixture.CreateUserClient(maintainPresenceChangesStatus: true, presenceChanged: OnPresenceChanged);
             }
 
             // Assert
             Assert.True(client.Users.All(x => x.presence != null));
         }
 
-        [Fact]
+        [Fact(Skip = "Not stable on AppVeyor")]
         public void TestManualSubscribePresenceChangeAndManualPresenceChange()
         {
             // Arrange
             SlackSocketClient client = this.fixture.CreateUserClient();
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            using (var sync = new InSync())
             {
                 client.OnPresenceChanged += x =>
                 {
@@ -105,17 +102,10 @@ namespace SlackAPI.Tests
                     }
                 };
 
-                // Act
                 client.SubscribePresenceChange(client.MySelf.id);
             }
 
-            // Set initial state
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
-            {
-                client.EmitPresence(p => sync.Proceed(), Presence.active);
-            }
-
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            using (var sync = new InSync())
             {
                 client.OnPresenceChanged += x =>
                 {
@@ -127,7 +117,8 @@ namespace SlackAPI.Tests
                 };
 
                 // Act
-                client.EmitPresence(x => { }, Presence.away);
+                client.EmitPresence(x => x.AssertOk(), Presence.away);
+                client.EmitPresence(x => x.AssertOk(), Presence.auto);
             }
         }
 
