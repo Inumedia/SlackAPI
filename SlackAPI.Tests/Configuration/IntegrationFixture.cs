@@ -4,6 +4,7 @@ using System.Net;
 using System.Reflection;
 using Newtonsoft.Json;
 using SlackAPI.Tests.Helpers;
+using SlackAPI.WebSocketMessages;
 using Xunit;
 
 namespace SlackAPI.Tests.Configuration
@@ -44,9 +45,9 @@ namespace SlackAPI.Tests.Configuration
             }
         }
 
-        public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null, bool maintainPresenceChangesStatus = false)
+        public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null, bool maintainPresenceChangesStatus = false, Action<SlackSocketClient, PresenceChange> presenceChanged = null)
         {
-            return this.CreateClient(this.Config.UserAuthToken, proxySettings, maintainPresenceChangesStatus);
+            return this.CreateClient(this.Config.UserAuthToken, proxySettings, maintainPresenceChangesStatus, presenceChanged);
         }
 
         public SlackSocketClient CreateBotClient(IWebProxy proxySettings = null)
@@ -82,7 +83,7 @@ namespace SlackAPI.Tests.Configuration
             return JsonConvert.DeserializeAnonymousType(json, jsonObject).slack;
         }
 
-        private SlackSocketClient CreateClient(string authToken, IWebProxy proxySettings = null, bool maintainPresenceChanges = false)
+        private SlackSocketClient CreateClient(string authToken, IWebProxy proxySettings = null, bool maintainPresenceChanges = false, Action<SlackSocketClient, PresenceChange> presenceChanged = null)
         {
             SlackSocketClient client;
 
@@ -92,6 +93,13 @@ namespace SlackAPI.Tests.Configuration
             using (var syncClientSocketHello = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected hello callback"))
             {
                 client = new SlackSocketClient(authToken, proxySettings, maintainPresenceChanges);
+
+                void OnPresenceChanged(PresenceChange x)
+                {
+                    presenceChanged?.Invoke(client, x);
+                }
+
+                client.OnPresenceChanged += OnPresenceChanged;
                 client.OnHello += () => syncClientSocketHello.Proceed();
                 client.Connect(x =>
                 {

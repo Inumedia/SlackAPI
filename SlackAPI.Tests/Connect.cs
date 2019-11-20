@@ -70,19 +70,16 @@ namespace SlackAPI.Tests
             int presenceChangesRaisedCount = 0;
             using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
             {
-                // Act
-                client = this.fixture.CreateUserClient(maintainPresenceChangesStatus: true);
-
-                // Reset presence
-                client.Users.ForEach(x => x.presence = null);
-
-                client.OnPresenceChanged += x =>
+                void OnPresenceChanged(SlackSocketClient sender, PresenceChange e)
                 {
-                    if (++presenceChangesRaisedCount == client.Users.Count)
+                    if (++presenceChangesRaisedCount == sender.Users.Count)
                     {
                         sync.Proceed();
                     }
-                };
+                }
+
+                // Act
+                client = this.fixture.CreateUserClient(maintainPresenceChangesStatus: true, presenceChanged: OnPresenceChanged);
             }
 
             // Assert
@@ -93,17 +90,19 @@ namespace SlackAPI.Tests
         public void TestManualSubscribePresenceChangeAndManualPresenceChange()
         {
             // Arrange
-            SlackSocketClient client = this.fixture.CreateUserClient();
+            SlackSocketClient client;
             using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
             {
-                client.OnPresenceChanged += x =>
+                void OnPresenceChanged(SlackSocketClient sender, PresenceChange e)
                 {
-                    if (x.user == client.MySelf.id)
+                    if (e.user == sender.MySelf.id)
                     {
                         // Assert
                         sync.Proceed();
                     }
-                };
+                }
+
+                client = this.fixture.CreateUserClient(presenceChanged: OnPresenceChanged);
 
                 // Act
                 client.SubscribePresenceChange(client.MySelf.id);

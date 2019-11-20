@@ -43,7 +43,7 @@ namespace SlackAPI.Tests
                 var slackClientHelpers = new SlackClientHelpers();
                 var uri = slackClientHelpers.GetAuthorizeUri(clientId, SlackScope.Identify);
                 driver.Navigate().GoToUrl(uri);
-                driver.FindElement(By.Id("oauth_authorizify")).Click();
+                driver.FindElement(By.CssSelector("button[type='submit']")).Click();
 
                 var code = Regex.Match(driver.Url, "code=(?<code>[^&]+)&state").Groups["code"].Value;
 
