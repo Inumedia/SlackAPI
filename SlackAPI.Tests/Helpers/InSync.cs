@@ -8,14 +8,16 @@ namespace SlackAPI.Tests.Helpers
 {
     public class InSync : IDisposable
     {
-        private readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(15);
+        private readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(15);
 
         private readonly ManualResetEventSlim waiter;
         private readonly string message;
+        private readonly TimeSpan waitTimeout;
 
-        public InSync([CallerMemberName] string message = null)
+        public InSync([CallerMemberName] string message = null, TimeSpan? waitTimeout = null)
         {
             this.message = message;
+            this.waitTimeout = waitTimeout.GetValueOrDefault(DefaultWaitTimeout);
             this.waiter = new ManualResetEventSlim();
         }
 
@@ -26,7 +28,7 @@ namespace SlackAPI.Tests.Helpers
 
         public void Dispose()
         {
-            Assert.True(this.waiter.Wait(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : this.WaitTimeout), $"Took too long to do '{this.message}'");
+            Assert.True(this.waiter.Wait(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : this.waitTimeout), $"Took too long to do '{this.message}'");
         }
     }
 }

@@ -68,7 +68,7 @@ namespace SlackAPI.Tests
             // Arrange
             SlackSocketClient client;
             int presenceChangesRaisedCount = 0;
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges), this.fixture.ConnectionTimeout))
             {
                 void OnPresenceChanged(SlackSocketClient sender, PresenceChange e)
                 {
@@ -91,7 +91,7 @@ namespace SlackAPI.Tests
         {
             // Arrange
             SlackSocketClient client;
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges), this.fixture.ConnectionTimeout))
             {
                 void OnPresenceChanged(SlackSocketClient sender, PresenceChange e)
                 {

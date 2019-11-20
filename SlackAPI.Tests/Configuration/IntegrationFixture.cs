@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -12,6 +13,8 @@ namespace SlackAPI.Tests.Configuration
 {
     public class IntegrationFixture : IDisposable
     {
+        private const int MaxConnectionAttempts = 5;
+
         private readonly Lazy<SlackSocketClient> userClient;
         private readonly Lazy<SlackSocketClient> botClient;
         private readonly Lazy<SlackTaskClient> userClientAsync;
@@ -25,8 +28,8 @@ namespace SlackAPI.Tests.Configuration
 
             this.connectRetryPolicy = Policy
                 .Handle<InvalidOperationException>(exception => exception.Message.Contains("ratelimited"))
-                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(2 * Math.Pow(2, retryAttempt)), // Retries after 4, 8, 16, 32, 64 seconds
-                    (exception, timeSpan, retryCount) => Console.WriteLine($"Connection failed ({exception.Message}). Retrying after {timeSpan.TotalSeconds}s ({retryCount}/5)"));
+                .WaitAndRetry(MaxConnectionAttempts, retryAttempt => TimeSpan.FromSeconds(ComputeExponentialBackoff(retryAttempt)),
+                    (exception, timeSpan, retryCount, context) => Console.WriteLine($"Connection failed ({exception.Message}). Retrying after {timeSpan.TotalSeconds}s ({retryCount}/5)"));
 
             this.userClient = new Lazy<SlackSocketClient>(() => connectRetryPolicy.Execute(() => this.CreateClient(this.Config.UserAuthToken)));
             this.botClient = new Lazy<SlackSocketClient>(() => connectRetryPolicy.Execute(() => this.CreateClient(this.Config.BotAuthToken)));
@@ -35,6 +38,8 @@ namespace SlackAPI.Tests.Configuration
         }
 
         public SlackConfig Config { get; }
+
+        public TimeSpan ConnectionTimeout => TimeSpan.FromSeconds(Enumerable.Range(1, MaxConnectionAttempts).Sum(ComputeExponentialBackoff)) + TimeSpan.FromSeconds(10); // Maximum exponential backoff + 10 seconds for connections attemps
 
         public SlackSocketClient UserClient
         {
@@ -132,6 +137,12 @@ namespace SlackAPI.Tests.Configuration
             loginResponse.AssertOk();
 
             return client;
+        }
+
+        private int ComputeExponentialBackoff(int retryAttempt)
+        {
+            // Retries after 4, 8, 16, 32, 64... seconds
+            return 2 * (int)Math.Pow(2, retryAttempt);
         }
     }
 }
