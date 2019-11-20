@@ -90,29 +90,22 @@ namespace SlackAPI.Tests
         public void TestManualSubscribePresenceChangeAndManualPresenceChange()
         {
             // Arrange
-            SlackSocketClient client;
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges), this.fixture.ConnectionTimeout))
+            SlackSocketClient client = this.fixture.CreateUserClient();
+
+            // Ensure the initial state is 'away'
+            var manualResetEvent = new ManualResetEventSlim(false);
+            client.OnPresenceChanged += x =>
             {
-                void OnPresenceChanged(SlackSocketClient sender, PresenceChange e)
+                if (x.user == client.MySelf.id && x.presence == Presence.away)
                 {
-                    if (e.user == sender.MySelf.id)
-                    {
-                        // Assert
-                        sync.Proceed();
-                    }
+                    // Assert
+                    manualResetEvent.Set();
                 }
+            };
 
-                client = this.fixture.CreateUserClient(presenceChanged: OnPresenceChanged);
-
-                // Act
-                client.SubscribePresenceChange(client.MySelf.id);
-            }
-
-            // Set initial state
-            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
-            {
-                client.EmitPresence(p => sync.Proceed(), Presence.active);
-            }
+            client.SubscribePresenceChange(client.MySelf.id);
+            client.EmitPresence(x => x.AssertOk(), Presence.away);
+            manualResetEvent.Wait(TimeSpan.FromSeconds(5));
 
             using (var sync = new InSync(nameof(TestConnectGetPresenceChanges)))
             {
@@ -126,7 +119,7 @@ namespace SlackAPI.Tests
                 };
 
                 // Act
-                client.EmitPresence(x => { }, Presence.away);
+                client.EmitPresence(x => x.AssertOk(), Presence.auto);
             }
         }
 
