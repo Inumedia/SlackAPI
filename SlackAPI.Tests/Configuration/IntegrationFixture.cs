@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using Newtonsoft.Json;
+using Polly;
 using SlackAPI.Tests.Helpers;
 using SlackAPI.WebSocketMessages;
 using Xunit;
@@ -11,16 +12,24 @@ namespace SlackAPI.Tests.Configuration
 {
     public class IntegrationFixture : IDisposable
     {
-        private Lazy<SlackSocketClient> userClient;
-        private Lazy<SlackSocketClient> botClient;
-        private Lazy<SlackTaskClient> userClientAsync;
-        private Lazy<SlackTaskClient> botClientAsync;
+        private readonly Lazy<SlackSocketClient> userClient;
+        private readonly Lazy<SlackSocketClient> botClient;
+        private readonly Lazy<SlackTaskClient> userClientAsync;
+        private readonly Lazy<SlackTaskClient> botClientAsync;
+
+        private readonly Policy connectRetryPolicy;
 
         public IntegrationFixture()
         {
             this.Config = this.GetConfig();
-            this.userClient = new Lazy<SlackSocketClient>(() => this.CreateClient(this.Config.UserAuthToken));
-            this.botClient = new Lazy<SlackSocketClient>(() => this.CreateClient(this.Config.BotAuthToken));
+
+            this.connectRetryPolicy = Policy
+                .Handle<InvalidOperationException>(exception => exception.Message.Contains("ratelimited"))
+                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(2 * Math.Pow(2, retryAttempt)), // Retries after 4, 8, 16, 32, 64 seconds
+                    (exception, timeSpan, retryCount) => Console.WriteLine($"Connection failed ({exception.Message}). Retrying after {timeSpan.TotalSeconds}s ({retryCount}/5)"));
+
+            this.userClient = new Lazy<SlackSocketClient>(() => connectRetryPolicy.Execute(() => this.CreateClient(this.Config.UserAuthToken)));
+            this.botClient = new Lazy<SlackSocketClient>(() => connectRetryPolicy.Execute(() => this.CreateClient(this.Config.BotAuthToken)));
             this.userClientAsync = new Lazy<SlackTaskClient>(() => new SlackTaskClient(this.Config.UserAuthToken));
             this.botClientAsync = new Lazy<SlackTaskClient>(() => new SlackTaskClient(this.Config.BotAuthToken));
         }
@@ -47,12 +56,12 @@ namespace SlackAPI.Tests.Configuration
 
         public SlackSocketClient CreateUserClient(IWebProxy proxySettings = null, bool maintainPresenceChangesStatus = false, Action<SlackSocketClient, PresenceChange> presenceChanged = null)
         {
-            return this.CreateClient(this.Config.UserAuthToken, proxySettings, maintainPresenceChangesStatus, presenceChanged);
+            return this.connectRetryPolicy.Execute(() => this.CreateClient(this.Config.UserAuthToken, proxySettings, maintainPresenceChangesStatus, presenceChanged));
         }
 
         public SlackSocketClient CreateBotClient(IWebProxy proxySettings = null)
         {
-            return this.CreateClient(this.Config.BotAuthToken, proxySettings);
+            return this.connectRetryPolicy.Execute(() => this.CreateClient(this.Config.BotAuthToken, proxySettings));
         }
 
         public SlackTaskClient UserClientAsync => userClientAsync.Value;
