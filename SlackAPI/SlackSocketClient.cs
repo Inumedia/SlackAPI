@@ -139,7 +139,11 @@ namespace SlackAPI
 
         public void HandleTeamJoin(TeamJoin newuser)
         {
-            UserLookup.Add(newuser.user.id, newuser.user);
+            try
+            {
+                UserLookup.Add(newuser.user.id, newuser.user);
+            }
+            catch { }
         }
 
         public void HandleChannelCreated(ChannelCreated created)

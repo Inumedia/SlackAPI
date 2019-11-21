@@ -109,6 +109,10 @@ namespace SlackAPI
         {
             return httpClient.PostAsync(requestUri, form).Result;
         }
+        protected Task<HttpResponseMessage> PostRequestAsync(string requestUri, MultipartFormDataContent form)
+        {
+            return httpClient.PostAsync(requestUri, form);
+        }
 
         public void RegisterConverter(JsonConverter converter)
         {
