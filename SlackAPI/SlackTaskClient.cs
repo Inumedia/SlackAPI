@@ -11,6 +11,7 @@ using SlackAPI.RPCMessages;
 
 namespace SlackAPI
 {
+    [Obsolete("Use SlackClient Async methods instead")]
     public class SlackTaskClient : SlackClientBase
     {
         private readonly string APIToken;
