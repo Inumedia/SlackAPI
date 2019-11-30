@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
+using System.Threading;
 using SlackAPI.Tests.Configuration;
 using SlackAPI.Tests.Helpers;
 using SlackAPI.WebSocketMessages;
@@ -8,30 +10,38 @@ using Xunit;
 namespace SlackAPI.Tests
 {
     [Collection("Integration tests")]
-    public class Connect
+    public class Connect : IDisposable
     {
         const string TestText = "Test :D";
         private readonly IntegrationFixture fixture;
 
+        private SlackSocketClient slackClient;
+
         public Connect(IntegrationFixture fixture)
         {
             this.fixture = fixture;
+
+            // Extra wait to mitigate Slack throttling
+            Thread.Sleep(2000);
+        }
+
+        public void Dispose()
+        {
+            slackClient?.CloseSocket();
         }
 
         [Fact]
         public void TestConnectAsUser()
         {
-            var client = this.fixture.CreateUserClient();
-            Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
-            client.CloseSocket();
+            slackClient = this.fixture.CreateUserClient();
+            Assert.True(slackClient.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
         [Fact]
         public void TestConnectAsBot()
         {
-            var client = this.fixture.CreateBotClient();
-            Assert.True(client.IsConnected, "Invalid, doesn't think it's connected.");
-            client.CloseSocket();
+            slackClient = this.fixture.CreateBotClient();
+            Assert.True(slackClient.IsConnected, "Invalid, doesn't think it's connected.");
         }
 
         [Fact]
@@ -46,18 +56,77 @@ namespace SlackAPI.Tests
         public void TestConnectPostAndDelete()
         {
             // given
-            SlackSocketClient client = this.fixture.CreateUserClient();
+            slackClient = this.fixture.CreateUserClient();
             string channel = this.fixture.Config.TestChannel;
 
             // when
-            DateTime messageTimestamp = PostMessage(client, channel);
-            DeletedResponse deletedResponse = DeleteMessage(client, channel, messageTimestamp);
+            DateTime messageTimestamp = PostMessage(slackClient, channel);
+            DeletedResponse deletedResponse = DeleteMessage(slackClient, channel, messageTimestamp);
 
             // then
             Assert.NotNull(deletedResponse);
             Assert.True(deletedResponse.ok);
             Assert.Equal(channel, deletedResponse.channel);
             Assert.Equal(messageTimestamp, deletedResponse.ts);
+        }
+
+        [Fact]
+        public void TestConnectGetPresenceChanges()
+        {
+            // Arrange
+            int presenceChangesRaisedCount = 0;
+            using (var sync = new InSync(nameof(TestConnectGetPresenceChanges), this.fixture.ConnectionTimeout))
+            {
+                void OnPresenceChanged(SlackSocketClient sender, PresenceChange e)
+                {
+                    if (++presenceChangesRaisedCount == sender.Users.Count)
+                    {
+                        sync.Proceed();
+                    }
+                }
+
+                // Act
+                slackClient = this.fixture.CreateUserClient(maintainPresenceChangesStatus: true, presenceChanged: OnPresenceChanged);
+            }
+
+            // Assert
+            Assert.True(slackClient.Users.All(x => x.presence != null));
+        }
+
+        [Fact(Skip = "Not stable on AppVeyor")]
+        public void TestManualSubscribePresenceChangeAndManualPresenceChange()
+        {
+            // Arrange
+            slackClient = this.fixture.CreateUserClient();
+            using (var sync = new InSync())
+            {
+                slackClient.OnPresenceChanged += x =>
+                {
+                    if (x.user == slackClient.MySelf.id)
+                    {
+                        // Assert
+                        sync.Proceed();
+                    }
+                };
+
+                slackClient.SubscribePresenceChange(slackClient.MySelf.id);
+            }
+
+            using (var sync = new InSync())
+            {
+                slackClient.OnPresenceChanged += x =>
+                {
+                    if (x is ManualPresenceChange && x.user == slackClient.MySelf.id)
+                    {
+                        // Assert
+                        sync.Proceed();
+                    }
+                };
+
+                // Act
+                slackClient.EmitPresence(x => x.AssertOk(), Presence.away);
+                slackClient.EmitPresence(x => x.AssertOk(), Presence.auto);
+            }
         }
 
         private static DateTime PostMessage(SlackSocketClient client, string channel)

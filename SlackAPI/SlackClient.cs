@@ -303,7 +303,8 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<FileListResponse>(parameters.ToArray());
         }
 
-        void GetHistory<K>(Action<K> historyCallback, string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        void GetHistory<K>(Action<K> historyCallback, string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
+
             where K : MessageHistory
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
@@ -313,25 +314,28 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
             if (oldest.HasValue)
                 parameters.Add(new Tuple<string, string>("oldest", oldest.Value.ToProperTimeStamp()));
-            if (count.HasValue)
-                parameters.Add(new Tuple<string, string>("count", count.Value.ToString()));
+
+            if(count.HasValue)
+                parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
+            if (unreads.HasValue)
+                parameters.Add(new Tuple<string, string>("unreads", unreads.Value ? "1" : "0"));
 
             APIRequestWithToken(historyCallback, parameters.ToArray());
         }
 
-        public void GetChannelHistory(Action<ChannelMessageHistory> callback, Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public void GetChannelHistory(Action<ChannelMessageHistory> callback, Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            GetHistory(callback, channelInfo.id, latest, oldest, count);
+            GetHistory(callback, channelInfo.id, latest, oldest, count, unreads);
         }
 
-        public void GetDirectMessageHistory(Action<MessageHistory> callback, DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public void GetDirectMessageHistory(Action<MessageHistory> callback, DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            GetHistory(callback, conversationInfo.id, latest, oldest, count);
+            GetHistory(callback, conversationInfo.id, latest, oldest, count, unreads);
         }
 
-        public void GetGroupHistory(Action<GroupMessageHistory> callback, Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public void GetGroupHistory(Action<GroupMessageHistory> callback, Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            GetHistory(callback, groupInfo.id, latest, oldest, count);
+            GetHistory(callback, groupInfo.id, latest, oldest, count, unreads);
         }
 
         public void MarkChannel(Action<MarkResponse> callback, string channelId, DateTime ts)

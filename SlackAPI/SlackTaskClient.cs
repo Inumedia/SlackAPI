@@ -182,7 +182,7 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<FileListResponse>(parameters.ToArray());
         }
 
-        private Task<K> GetHistoryAsync<K>(string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        private Task<K> GetHistoryAsync<K>(string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
             where K : MessageHistory
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
@@ -192,25 +192,27 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
             if(oldest.HasValue)
                 parameters.Add(new Tuple<string, string>("oldest", oldest.Value.ToProperTimeStamp()));
-            if(count.HasValue)
-                parameters.Add(new Tuple<string,string>("count", count.Value.ToString()));
+            if (count.HasValue)
+                parameters.Add(new Tuple<string, string>("count", count.Value.ToString()));
+            if (unreads.HasValue)
+                parameters.Add(new Tuple<string, string>("unreads", unreads.Value ? "1" : "0"));
 
             return APIRequestWithTokenAsync<K>(parameters.ToArray());
         }
 
-        public Task<ChannelMessageHistory> GetChannelHistoryAsync(Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<ChannelMessageHistory> GetChannelHistoryAsync(Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            return GetHistoryAsync<ChannelMessageHistory>(channelInfo.id, latest, oldest, count);
+            return GetHistoryAsync<ChannelMessageHistory>(channelInfo.id, latest, oldest, count, unreads);
         }
 
-        public Task<MessageHistory> GetDirectMessageHistoryAsync(DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<MessageHistory> GetDirectMessageHistoryAsync(DirectMessageConversation conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            return GetHistoryAsync<MessageHistory>(conversationInfo.id, latest, oldest, count);
+            return GetHistoryAsync<MessageHistory>(conversationInfo.id, latest, oldest, count, unreads);
         }
 
-        public Task<GroupMessageHistory> GetGroupHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null)
+        public Task<GroupMessageHistory> GetGroupHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count);
+            return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count, unreads);
         }
 
         public Task<MarkResponse> MarkChannelAsync(string channelId, DateTime ts)
