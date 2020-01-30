@@ -530,7 +530,8 @@ namespace SlackAPI
             if (!string.IsNullOrEmpty(icon_emoji))
                 parameters.Add(new Tuple<string, string>("icon_emoji", icon_emoji));
 
-            parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+            if (as_user)
+                parameters.Add(new Tuple<string, string>("as_user", true.ToString()));
 
             return APIRequestWithTokenAsync<PostMessageResponse>(parameters.ToArray());
         }
