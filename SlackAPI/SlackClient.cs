@@ -543,7 +543,7 @@ namespace SlackAPI
             bool linkNames = false,
             IBlock[] blocks = null,
             Attachment[] attachments = null,
-            bool unfurl_links = false,
+            bool? unfurl_links = null,
             string icon_url = null,
             string icon_emoji = null,
             bool? as_user = null,
@@ -579,8 +579,8 @@ namespace SlackAPI
                                    NullValueHandling = NullValueHandling.Ignore
                                })));
 
-         if (unfurl_links)
-                parameters.Add(new Tuple<string, string>("unfurl_links", "1"));
+            if (unfurl_links.HasValue)
+                parameters.Add(new Tuple<string, string>("unfurl_links", unfurl_links.Value ? "true" : "false"));
 
             if (!string.IsNullOrEmpty(icon_url))
                 parameters.Add(new Tuple<string, string>("icon_url", icon_url));
