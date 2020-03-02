@@ -10,6 +10,9 @@ using Xunit;
 
 namespace SlackAPI.Tests
 {
+// Run UI tests on a single plateform to avoid Slack Captcha
+// (captcha is displayed when trying to login too often)
+#if NETFRAMEWORK
     [Collection("Integration tests")]
     public class UserUIInteraction
     {
@@ -70,4 +73,5 @@ namespace SlackAPI.Tests
             return accessTokenResponse;
         }
     }
+#endif
 }
