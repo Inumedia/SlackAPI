@@ -7,6 +7,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlackAPI", "SlackAPI\SlackA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlackAPI.Tests", "SlackAPI.Tests\SlackAPI.Tests.csproj", "{DEFA9559-0F8F-4C38-9644-67A080EDC46D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{532C9828-A2CC-4281-950A-248B06D42E9C}"
+ProjectSection(SolutionItems) = preProject
+	appveyor.yml = appveyor.yml
+	build.cake = build.cake
+	Directory.Build.props = Directory.Build.props
+	GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
+	README.md = README.md
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
