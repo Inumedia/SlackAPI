@@ -169,11 +169,7 @@ namespace SlackAPI
                 // the same function will try to add the path again.
                 // This may be removed in the future if TryAdd is verified as safe.
                 // See #190.
-#if NET45 || NETSTANDARD2_0
                 Trace.TraceError(e.ToString());
-#else
-                Debug.Write(e);
-#endif
             }
 
             return path;
