@@ -1,5 +1,6 @@
-#tool "nuget:?package=GitVersion.CommandLine"
-#addin "Cake.FileHelpers"
+#tool "nuget:?package=GitVersion.CommandLine&version=5.1.3"
+#addin "Cake.FileHelpers&version=3.2.1"
+#addin "Cake.Incubator&version=5.1.0"
 
 using System.Text.RegularExpressions;
 
@@ -11,7 +12,7 @@ var testProject = File("./SlackAPI.Tests/SlackApi.Tests.csproj");
 var testConfig = File("./SlackAPI.Tests/Configuration/config.json");
 var projects = new[] { project, testProject };
 var artifactsDirectory = "./artifacts";
-var versionSuffix = string.Empty;
+GitVersion gitVersion = null;
 var isReleaseBuild = false;
 
 Task("Clean")
@@ -24,67 +25,26 @@ Task("Clean")
 Task("Configure")
     .Does(() =>
 {
-    var buildNumber = 0;
+    gitVersion = GitVersion();
+
+    GitVersion(new GitVersionSettings {
+        UpdateAssemblyInfo = true,
+        UpdateAssemblyInfoFilePath = "GlobalAssemblyInfo.cs"
+    });
+
+    isReleaseBuild = AppVeyor.IsRunningOnAppVeyor
+        ? AppVeyor.Environment.Repository.Branch == "master"
+        : false;
+
+    Information("Is release build: '{0}'", isReleaseBuild);
+    Information("GitVersion details:\n{0}", gitVersion.Dump());
+
     if (AppVeyor.IsRunningOnAppVeyor)
     {
-        isReleaseBuild = AppVeyor.Environment.Repository.Branch == "master" && AppVeyor.Environment.Repository.Tag.IsTag;
-        buildNumber = AppVeyor.Environment.Build.Number;
-        Information("Build number is '{0}' (CI build)", buildNumber);
+        var buildVersion = gitVersion.SemVer + ".ci." + AppVeyor.Environment.Build.Number;
+        Information("Using build version: {0}", buildVersion);
+        AppVeyor.UpdateBuildVersion(buildVersion);
     }
-    else
-    {
-        buildNumber = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-        Information("Build number is '{0}' (local build)", buildNumber);
-    }
-
-    // If the build is a tag on master, generate a clean version (1.0.0)
-    // following SemVer 1.0.0 rules. NuGet supports only SemVer 1.0.0
-    // In other cases, generate a prerelease version (1.0.0-branch.123+sha.abcdefg)
-    // following SevVer 2.0.0 rules. MyGet supports SemVer 2.0.0
-    if (isReleaseBuild)
-    {
-        versionSuffix = "\"\"";
-    }
-    else
-    {
-        var gitVersion = GitVersion();
-        var gitBranch = (AppVeyor.IsRunningOnAppVeyor
-            ? AppVeyor.Environment.Repository.Branch
-            : gitVersion.BranchName);
-        gitBranch = Regex.Replace(gitBranch, @"[/\-_]", string.Empty);
-        gitBranch = gitBranch.Substring(0, Math.Min(10, gitBranch.Length));
-
-        Information("Current git branch is '{0}' (normalized)", gitBranch);
-
-        var gitCommitId = (AppVeyor.IsRunningOnAppVeyor
-            ? AppVeyor.Environment.Repository.Commit.Id
-            : gitVersion.Sha)
-            .Substring(0, 8);
-
-        Information("Current git sha is '{0}' (normalized)", gitCommitId);
-
-        var isPullRequest = AppVeyor.IsRunningOnAppVeyor && AppVeyor.Environment.PullRequest.IsPullRequest;
-        if (isPullRequest)
-        {
-            gitBranch = "PR";
-        }
-
-        Information("Is Pull Request: '{0}'", isPullRequest);
-
-
-        versionSuffix = $"{gitBranch}.{buildNumber}+sha.{gitCommitId}";
-    }
-
-    var versionPrefix = XmlPeek("./Directory.Build.props", "/Project/PropertyGroup/VersionPrefix");
-    var version = isReleaseBuild ? $"{versionPrefix}-release.{buildNumber}" : string.Join("-", versionPrefix, versionSuffix);
-    if (AppVeyor.IsRunningOnAppVeyor)
-    {
-        // Update AppVeyor build version so it will match the build version in assemblies and package
-        AppVeyor.UpdateBuildVersion(version);
-    }
-
-    Information("Using version '{0}'", version);
-    Information("Release type build (skip symbols): {0}", isReleaseBuild);
 });
 
 
@@ -98,8 +58,7 @@ Task("Build")
             project,
             new DotNetCoreBuildSettings
             {
-                Configuration = configuration,
-                VersionSuffix = versionSuffix
+                Configuration = configuration
             }
         );
     }
@@ -186,9 +145,9 @@ Task("Package")
         {
             Configuration = configuration,
             OutputDirectory = artifactsDirectory,
-            VersionSuffix = versionSuffix,
             IncludeSymbols = !isReleaseBuild,
-            IncludeSource = !isReleaseBuild
+            IncludeSource = !isReleaseBuild,
+            ArgumentCustomization = args => args.Append("/p:Version=\"" + gitVersion.NuGetVersion + "\"")
         }
     );
 
