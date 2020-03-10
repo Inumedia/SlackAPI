@@ -16,10 +16,8 @@ namespace SlackAPI
 
         static SlackClientBase()
         {
-#if !NETSTANDARD1_3 && !NETSTANDARD1_6
             // Force Tls 1.2 for Slack
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-#endif
         }
 
         protected SlackClientBase()
