@@ -128,7 +128,12 @@ namespace SlackAPI
             APIRequestWithToken(callback);
         }
 
-		public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name) {
+        public void GetUserByEmail(Action<UserEmailLookupResponse> callback, string email)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("email", email));
+        }
+
+        public void ChannelsCreate(Action<ChannelCreateResponse> callback, string name) {
 			APIRequestWithToken(callback, new Tuple<string, string>("name", name));
 		}
 
