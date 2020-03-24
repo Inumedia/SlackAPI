@@ -37,10 +37,9 @@ namespace SlackAPI
 
         private static JsonSerializerSettings CreateSettings()
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.Converters = Converters;
+	        JsonSerializerSettings settings = new JsonSerializerSettings {Converters = Converters};
 
-            return settings;
+	        return settings;
         }
     }
 }

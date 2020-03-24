@@ -20,8 +20,8 @@ namespace SlackAPI
         public const int PingInterval = 3000;
 
         public long PingRoundTripMilliseconds { get; private set; }
-        public bool IsReady { get { return HelloReceived; } }
-        public bool IsConnected { get { return underlyingSocket != null && underlyingSocket.Connected; } }
+        public bool IsReady => HelloReceived;
+        public bool IsConnected => underlyingSocket != null && underlyingSocket.Connected;
 
         public event Action OnHello;
         private LoginResponse loginDetails;
@@ -113,14 +113,12 @@ namespace SlackAPI
 
         public void HandlePongReceived(Pong pong)
         {
-            if (OnPongReceived != null)
-                OnPongReceived(pong);
+	        OnPongReceived?.Invoke(pong);
         }
 
         public void HandleReactionAdded(ReactionAdded reactionAdded)
         {
-            if (OnReactionAdded != null)
-                OnReactionAdded(reactionAdded);
+	        OnReactionAdded?.Invoke(reactionAdded);
         }
 
         public void HandleHello(Hello hello)
@@ -133,8 +131,7 @@ namespace SlackAPI
 
             HelloReceived = true;
 
-            if (OnHello != null)
-                OnHello();
+            OnHello?.Invoke();
         }
 
         public void HandlePresence(PresenceChange change)
@@ -226,8 +223,7 @@ namespace SlackAPI
 
         public void Message(NewMessage m)
         {
-            if (OnMessageReceived != null)
-                OnMessageReceived(m);
+	        OnMessageReceived?.Invoke(m);
         }
 
         public void FileShareMessage(FileShareMessage m)

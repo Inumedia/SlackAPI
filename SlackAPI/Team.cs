@@ -17,7 +17,7 @@ namespace SlackAPI
 
         public string id;
         public long limit_ts;
-        public DateTime LimitTimestamp { get { return new DateTime(1970, 1, 1).AddMilliseconds(limit_ts); } }
+        public DateTime LimitTimestamp => new DateTime(1970, 1, 1).AddMilliseconds(limit_ts);
         public int msg_edit_window_mins;
         public string name;
         public bool over_storage_limit, sso;

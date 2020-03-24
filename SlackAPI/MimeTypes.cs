@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SlackAPI
 {
-    public static class MimeType
+	public static class MimeType
     {
 
         private static Dictionary<String, String> MimeTypeDict = new Dictionary<String, String>()

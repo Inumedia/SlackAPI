@@ -25,7 +25,7 @@ namespace SlackAPI
         int currentId;
 
         Dictionary<string, Dictionary<string, Delegate>> routes;
-        public bool Connected { get { return socket != null && socket.State == WebSocketState.Open; } }
+        public bool Connected => socket != null && socket.State == WebSocketState.Open;
         public event Action<WebSocketException> ErrorSending;
         public event Action<WebSocketException> ErrorReceiving;
         public event Action<Exception> ErrorReceivingDesiralization;
@@ -93,8 +93,7 @@ namespace SlackAPI
 
             cts = new CancellationTokenSource();
             socket.ConnectAsync(new Uri(string.Format("{0}?svn_rev={1}&login_with_boot_data-0-{2}&on_login-0-{2}&connect-1-{2}", loginDetails.url, loginDetails.svn_rev, DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds)), cts.Token).Wait();
-            if(onConnected != null)
-                onConnected();
+            onConnected?.Invoke();
             SetupReceiving();
         }
 
@@ -117,7 +116,8 @@ namespace SlackAPI
                         Delegate d = m.CreateDelegate(genericAction, routingTo);
                         if (d == null)
                         {
-                            System.Diagnostics.Debug.WriteLine(string.Format("Couldn't create delegate for {0}.{1}", routingToType.FullName, m.Name));
+                            System.Diagnostics.Debug.WriteLine(
+	                            $"Couldn't create delegate for {routingToType.FullName}.{m.Name}");
                             continue;
                         }
                         if (!routes.ContainsKey(route.Type))
@@ -218,8 +218,7 @@ namespace SlackAPI
                         }
                         catch (WebSocketException wex)
                         {
-                            if (ErrorReceiving != null)
-                                ErrorReceiving(wex);
+	                        ErrorReceiving?.Invoke(wex);
                             Close();
                             break;
                         }
@@ -241,8 +240,7 @@ namespace SlackAPI
                         }
                         catch (JsonException jsonExcep)
                         {
-                            if (ErrorReceivingDesiralization != null)
-                                ErrorReceivingDesiralization(jsonExcep);
+	                        ErrorReceivingDesiralization?.Invoke(jsonExcep);
                             continue;
                         }
 
@@ -282,16 +280,15 @@ namespace SlackAPI
                 }
                 catch (Exception e)
                 {
-                    if (ErrorHandlingMessage != null)
-                        ErrorHandlingMessage(e);
+	                ErrorHandlingMessage?.Invoke(e);
                     throw e;
                 }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null"));
-                if (ErrorHandlingMessage != null)
-                    ErrorHandlingMessage(new InvalidDataException(string.Format("No valid route for {0} - {1}", message.type, message.subtype ?? "null")));
+                System.Diagnostics.Debug.WriteLine($"No valid route for {message.type} - {message.subtype ?? "null"}");
+                ErrorHandlingMessage?.Invoke(new InvalidDataException(
+	                $"No valid route for {message.type} - {message.subtype ?? "null"}"));
             }
         }
 
@@ -308,8 +305,7 @@ namespace SlackAPI
                 }
                 catch (WebSocketException wex)
                 {
-                    if (ErrorSending != null)
-                        ErrorSending(wex);
+	                ErrorSending?.Invoke(wex);
                     Close();
                     break;
                 }

@@ -11,13 +11,7 @@ namespace SlackAPI.Utilities
         private SingleLinkNode mHead;
         private SingleLinkNode mTail;
         public int Count;
-        public T Latest
-        {
-            get
-            {
-                return mHead.Next == null ? default(T) : mTail.Item;
-            }
-        }
+        public T Latest => mHead.Next == null ? default(T) : mTail.Item;
 
         public LockFreeQueue()
         {
@@ -32,13 +26,13 @@ namespace SlackAPI.Utilities
                 Interlocked.CompareExchange(ref pLocation, pNewValue, pComparand);
         }
 
-        public T Next { get { return mHead.Next == null ? default(T) : mHead.Next.Item; } }
+        public T Next => mHead.Next?.Item;
+
         public void Unshift(T pItem)
         {
             SingleLinkNode oldHead = null;
 
-            SingleLinkNode newNode = new SingleLinkNode();
-            newNode.Item = pItem;
+            SingleLinkNode newNode = new SingleLinkNode {Item = pItem};
 
             bool newNodeWasAdded = false;
             while (!newNodeWasAdded)
@@ -57,8 +51,7 @@ namespace SlackAPI.Utilities
             SingleLinkNode oldTail = null;
             SingleLinkNode oldTailNext;
 
-            SingleLinkNode newNode = new SingleLinkNode();
-            newNode.Item = pItem;
+            SingleLinkNode newNode = new SingleLinkNode {Item = pItem};
 
             bool newNodeWasAdded = false;
             while (!newNodeWasAdded)
@@ -150,7 +143,7 @@ namespace SlackAPI.Utilities
 
         public override string ToString()
         {
-            return String.Format("Item count: {0}", Count);
+            return $"Item count: {Count}";
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -166,20 +159,9 @@ namespace SlackAPI.Utilities
             LockFreeQueue<T> parent;
             SingleLinkNode currentNode;
 
-            T IEnumerator<T>.Current
-            {
-                get
-                {
-                    return currentNode.Item;
-                }
-            }
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return currentNode.Item;
-                }
-            }
+            T IEnumerator<T>.Current => currentNode.Item;
+
+            object IEnumerator.Current => currentNode.Item;
 
             public bool MoveNext()
             {

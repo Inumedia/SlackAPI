@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SlackAPI
+﻿namespace SlackAPI
 {
     public class Channel : Conversation
     {
@@ -17,7 +11,7 @@ namespace SlackAPI
         public bool is_channel;
         public bool is_group;
         //Is this deprecated by is_open?
-        public bool IsPrivateGroup { get { return id != null && id[0] == 'G'; } }
+        public bool IsPrivateGroup => id != null && id[0] == 'G';
 
         public int num_members;
         public OwnedStampedMessage topic;

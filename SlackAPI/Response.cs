@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SlackAPI
 {
@@ -21,7 +17,14 @@ namespace SlackAPI
         public void AssertOk()
         {
             if (!(ok))
-                throw new InvalidOperationException(string.Format("An error occurred: {0}", this.error));
+                throw new InvalidOperationException($"An error occurred: {this.error}");
         }
+
+        public ResponseMetadata response_metadata;
+    }
+
+    public class ResponseMetadata
+    {
+	    public string next_cursor;
     }
 }

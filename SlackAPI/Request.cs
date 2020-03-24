@@ -1,18 +1,13 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 
 namespace SlackAPI
 {
-    
-
-    class RequestState<K>
+	class RequestState<K>
         where K : Response
     {
         public HttpWebRequest request;
@@ -24,8 +19,7 @@ namespace SlackAPI
 
         public RequestState(HttpWebRequest requestData, Tuple<string, string>[] postParameters, Action<K> toCallback)
         {
-            if (requestData == null) throw new ArgumentNullException("requestData can not be null");
-            request = requestData;
+	        request = requestData ?? throw new ArgumentNullException("requestData can not be null");
             Post = postParameters;
             callback = toCallback;
         }
@@ -59,7 +53,8 @@ namespace SlackAPI
                             if (!first)
                                 writer.Write(',');
                             
-                            writer.Write(string.Format("{0}={1}", Uri.EscapeDataString(postEntry.Item1), Uri.EscapeDataString(postEntry.Item2)));
+                            writer.Write(
+	                            $"{Uri.EscapeDataString(postEntry.Item1)}={Uri.EscapeDataString(postEntry.Item2)}");
 
                             first = false;
                         }
@@ -153,7 +148,7 @@ namespace SlackAPI
             TypeInfo info = t.GetTypeInfo();
 
             path = info.GetCustomAttribute<RequestPath>();
-            if (path == null) throw new InvalidOperationException(string.Format("No valid request path for {0}", t.Name));
+            if (path == null) throw new InvalidOperationException($"No valid request path for {t.Name}");
 
             try
             {
