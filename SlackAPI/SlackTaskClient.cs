@@ -499,7 +499,8 @@ namespace SlackAPI
             bool? unfurl_links = null,
             string icon_url = null,
             string icon_emoji = null,
-            bool as_user = false)
+            bool as_user = false,
+            string thread_ts = null)
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
@@ -540,6 +541,9 @@ namespace SlackAPI
 
             if (as_user)
                 parameters.Add(new Tuple<string, string>("as_user", true.ToString()));
+
+            if (!string.IsNullOrEmpty(thread_ts))
+                parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
 
             return APIRequestWithTokenAsync<PostMessageResponse>(parameters.ToArray());
         }
