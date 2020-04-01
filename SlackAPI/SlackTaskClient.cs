@@ -108,6 +108,11 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<UserListResponse>();
         }
 
+        public Task<UserEmailLookupResponse> GetUserByEmailAsync(string email)
+        {
+            return APIRequestWithTokenAsync<UserEmailLookupResponse>(new Tuple<string, string>("email", email));
+        }
+
         public Task<ChannelCreateResponse> ChannelsCreateAsync(string name) {
             return APIRequestWithTokenAsync<ChannelCreateResponse>(new Tuple<string, string>("name", name));
         }
