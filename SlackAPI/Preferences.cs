@@ -73,5 +73,6 @@ namespace SlackAPI
         public string mac_ssb_bounce;
         public string last_snippet_type;
         public int display_real_names_override;
+        public string muted_channels;
     }
 }
