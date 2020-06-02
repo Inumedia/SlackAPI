@@ -45,6 +45,7 @@
         public string type = "button";
         public string value;
         public ActionConfirm confirm;
+        public string url;
     }
 
     //see: https://api.slack.com/docs/message-buttons#confirmation_fields
