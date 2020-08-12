@@ -214,7 +214,7 @@ namespace SlackAPI
                         WebSocketReceiveResult result = null;
                         try
                         {
-                            result = await socket.ReceiveAsync(buffer, cts.Token);
+                            result = await socket.ReceiveAsync(buffer, cts.Token).ConfigureAwait(false);
                         }
                         catch (WebSocketException wex)
                         {

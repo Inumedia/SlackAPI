@@ -61,11 +61,11 @@ namespace SlackAPI.Tests
             byte[] data = new byte[FileSize];
 
             // Act
-            var fileUploadResponse = await this.fixture.UserClientAsync.UploadFileAsync(data, FileName, new[] { this.fixture.Config.TestChannel });
+            var fileUploadResponse = await this.fixture.UserClientAsync.UploadFileAsync(data, FileName, new[] { this.fixture.Config.TestChannel }).ConfigureAwait(false);
 
             // Assert
             Assert.True(fileUploadResponse.ok);
-            var fileInfoResponse = await this.fixture.UserClientAsync.GetFileInfoAsync(fileUploadResponse.file.id);
+            var fileInfoResponse = await this.fixture.UserClientAsync.GetFileInfoAsync(fileUploadResponse.file.id).ConfigureAwait(false);
             Assert.True(fileInfoResponse.ok);
             Assert.Equal(FileSize, fileInfoResponse.file.size);
             Assert.Equal(FileName, fileInfoResponse.file.name);

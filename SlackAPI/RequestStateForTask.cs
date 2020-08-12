@@ -40,7 +40,7 @@ namespace SlackAPI
             HttpWebResponse response = null;
             try
             {
-                response = (HttpWebResponse)await this.request.GetResponseAsync();
+                response = (HttpWebResponse)await this.request.GetResponseAsync().ConfigureAwait(false);
                 Success = true;
             }
             catch (WebException we)
@@ -68,7 +68,7 @@ namespace SlackAPI
         {
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
-            using (Stream requestStream = await request.GetRequestStreamAsync())
+            using (Stream requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
             {
                 if (Post.Length > 0)
                 {
@@ -80,7 +80,7 @@ namespace SlackAPI
                             if (!first)
                                 writer.Write('&');
 
-                            await writer.WriteAsync(string.Format("{0}={1}", Uri.EscapeDataString(postEntry.Item1), Uri.EscapeDataString(postEntry.Item2)));
+                            await writer.WriteAsync(string.Format("{0}={1}", Uri.EscapeDataString(postEntry.Item1), Uri.EscapeDataString(postEntry.Item2))).ConfigureAwait(false);
 
                             first = false;
                         }
@@ -88,7 +88,7 @@ namespace SlackAPI
                 }
             }
 
-            return await this.ExecuteResult();
+            return await this.ExecuteResult().ConfigureAwait(false);
         }
     }
 }
