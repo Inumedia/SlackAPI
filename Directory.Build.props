@@ -1,9 +1,5 @@
 ﻿<Project>
     <PropertyGroup>
-        <VersionPrefix>1.1.0</VersionPrefix>
-        <!-- VersionSuffix is computed in build.cake depending of the type of the build -->
-        <VersionSuffix>dev.0+sha.0</VersionSuffix>
-
         <Description>A Slack wrapper for direct interaction with their APIs.</Description>
         <Copyright>Inumedia - Copyright ©  2018</Copyright>
         <AssemblyProduct>SlackAPI</AssemblyProduct>
@@ -15,5 +11,9 @@
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/Inumedia/SlackAPI</RepositoryUrl>
+
+        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+        <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+        <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     </PropertyGroup>
 </Project>

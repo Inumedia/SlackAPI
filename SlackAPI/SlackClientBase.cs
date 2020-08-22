@@ -12,7 +12,13 @@ namespace SlackAPI
     {
         protected readonly IWebProxy proxySettings;
         private readonly HttpClient httpClient;
-        protected const string APIBaseLocation = "https://slack.com/api/";
+        public string APIBaseLocation { get; set; } = "https://slack.com/api/";
+
+        static SlackClientBase()
+        {
+            // Force Tls 1.2 for Slack
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+        }
 
         protected SlackClientBase()
         {

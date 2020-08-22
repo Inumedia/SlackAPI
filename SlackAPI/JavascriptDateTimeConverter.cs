@@ -11,7 +11,7 @@ namespace SlackAPI
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(DateTime);
+            return objectType == typeof(DateTime) || objectType == typeof(DateTime?);
         }
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
@@ -20,7 +20,7 @@ namespace SlackAPI
             DateTime res = new DateTime(621355968000000000 + (long)(value * 10000000m)).ToLocalTime();
             System.Diagnostics.Debug.Assert(
                 Decimal.Equals(
-                    Decimal.Parse(res.ToProperTimeStamp()), 
+                    Decimal.Parse(res.ToProperTimeStamp(), CultureInfo.InvariantCulture), 
                     Decimal.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture)), 
                 "Precision loss :(");
             return res;

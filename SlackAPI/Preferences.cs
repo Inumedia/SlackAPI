@@ -55,7 +55,7 @@ namespace SlackAPI
         public string emoji_mode;
         public string highlight_words;
         //public string newxp_slackbot_step; //I don't even...
-        public SearchSort search_sort;
+        public string search_sort;
         public string push_loud_channels;
         public string push_mention_channels;
         public string push_loud_channels_set;
@@ -73,5 +73,6 @@ namespace SlackAPI
         public string mac_ssb_bounce;
         public string last_snippet_type;
         public int display_real_names_override;
+        public string muted_channels;
     }
 }

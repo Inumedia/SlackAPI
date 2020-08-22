@@ -225,6 +225,9 @@ packages
 *.lock.json
 
 # Cake
-tools/
+tools/*
+!tools/packages.config
+
+
 .vs/
 artifacts/

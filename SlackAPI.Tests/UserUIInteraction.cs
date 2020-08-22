@@ -10,6 +10,9 @@ using Xunit;
 
 namespace SlackAPI.Tests
 {
+// Run UI tests on a single plateform to avoid Slack Captcha
+// (captcha is displayed when trying to login too often)
+#if NETFRAMEWORK
     [Collection("Integration tests")]
     public class UserUIInteraction
     {
@@ -43,7 +46,7 @@ namespace SlackAPI.Tests
                 var slackClientHelpers = new SlackClientHelpers();
                 var uri = slackClientHelpers.GetAuthorizeUri(clientId, SlackScope.Identify);
                 driver.Navigate().GoToUrl(uri);
-                driver.FindElement(By.Id("oauth_authorizify")).Click();
+                driver.FindElement(By.CssSelector("button[type='submit']")).Click();
 
                 var code = Regex.Match(driver.Url, "code=(?<code>[^&]+)&state").Groups["code"].Value;
 
@@ -70,4 +73,5 @@ namespace SlackAPI.Tests
             return accessTokenResponse;
         }
     }
+#endif
 }

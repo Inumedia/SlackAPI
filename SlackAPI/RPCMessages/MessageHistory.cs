@@ -12,6 +12,7 @@ namespace SlackAPI
         public DateTime latest;
         public Message[] messages;
         public bool has_more;
+        public int unread_count_display;
 
         public bool channel_not_found;
         public bool invalid_ts_latest;
