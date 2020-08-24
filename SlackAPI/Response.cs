@@ -17,6 +17,8 @@ namespace SlackAPI
         /// if ok is false, then this is the reason-code
         /// </summary>
         public string error;
+        public string needed;
+        public string provided;
 
         public void AssertOk()
         {
