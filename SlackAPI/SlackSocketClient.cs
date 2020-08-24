@@ -52,17 +52,17 @@ namespace SlackAPI
             underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected, this.proxySettings);
         }
 
-        public void ErrorReceiving<K>(Action<WebSocketException> callback)
+        public void ErrorReceiving(Action<WebSocketException> callback)
         {
             if (callback != null) underlyingSocket.ErrorReceiving += callback;
         }
 
-        public void ErrorReceivingDesiralization<K>(Action<Exception> callback)
+        public void ErrorReceivingDesiralization(Action<Exception> callback)
         {
             if (callback != null) underlyingSocket.ErrorReceivingDesiralization += callback;
         }
 
-        public void ErrorHandlingMessage<K>(Action<Exception> callback)
+        public void ErrorHandlingMessage(Action<Exception> callback)
         {
             if (callback != null) underlyingSocket.ErrorHandlingMessage += callback;
         }
