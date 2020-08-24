@@ -17,7 +17,7 @@ namespace SlackAPI
         public bool hide_referers;
         public int msg_edit_window_mins;
         public bool srvices_only_admins;
-        public bool stats_only_admins;
+        public bool? stats_only_admins;
 
         public enum AuthMode
         {
