@@ -15,6 +15,7 @@ namespace SlackAPI
         public event Action<ReactionAdded> OnReactionAdded;
         public event Action<Pong> OnPongReceived;
         public event Action<PresenceChange> OnPresenceChanged;
+        public event Action OnConnectionLost;
 
         bool HelloReceived;
         public const int PingInterval = 3000;
@@ -50,6 +51,12 @@ namespace SlackAPI
 
         public void ConnectSocket(Action onSocketConnected){
             underlyingSocket = new SlackSocket(loginDetails, this, onSocketConnected, this.proxySettings);
+            underlyingSocket.ConnectionClosed += UnderlyingSocket_ConnectionClosed;
+        }
+        
+        private void UnderlyingSocket_ConnectionClosed()
+        {
+            OnConnectionLost?.Invoke();
         }
 
         public void ErrorReceiving(Action<WebSocketException> callback)
