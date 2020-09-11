@@ -147,7 +147,7 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
-        public void GetConversationsList(Action<ConversationsListResponse> callback, string cursor = "", bool ExcludeArchived = true, int limit = 100, string[] types = null)
+        public void GetConversationsList(Action<ConversationsListResponse> callback, string cursor = "", bool ExcludeArchived = true, int limit = 100, ConversationTypes[] types = null)
         {
 	        List<Tuple<string, string>> parameters = new List<Tuple<string, string>>()
 	        {
@@ -155,8 +155,8 @@ namespace SlackAPI
 	        };
 	        if (limit > 0)
 		        Tuple.Create("limit", limit.ToString());
-            if (types.Any())
-		        Tuple.Create("types", string.Join(",", types));
+            if (types != null && types.Any())
+		        Tuple.Create("types", Conversation.ConversationTypesToQueryParam(types));
 	        if (!string.IsNullOrEmpty(cursor))
 		        parameters.Add(new Tuple<string, string>("cursor", cursor));
 
