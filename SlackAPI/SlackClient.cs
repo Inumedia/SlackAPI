@@ -154,11 +154,11 @@ namespace SlackAPI
 		        Tuple.Create("exclude_archived", ExcludeArchived ? "1" : "0")
 	        };
 	        if (limit > 0)
-		        Tuple.Create("limit", limit.ToString()); 
+		        parameters.Add(Tuple.Create("limit", limit.ToString())); 
 	        if (types.Any())
-		        Tuple.Create("types", string.Join(",", types));
+		        parameters.Add(Tuple.Create("types", string.Join(",", types)));
 	        if (!string.IsNullOrEmpty(cursor))
-		        parameters.Add(new Tuple<string, string>("cursor", cursor));
+		        parameters.Add(Tuple.Create("cursor", cursor));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
