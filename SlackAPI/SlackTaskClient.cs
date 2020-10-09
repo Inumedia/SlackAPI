@@ -127,6 +127,22 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<ChannelInviteResponse>(parameters.ToArray());
         }
 
+        public Task<ConversationsListResponse> GetConversationsListAsync(string cursor = "", bool ExcludeArchived = true, int limit = 100, string[] types = null)
+        {
+	        List<Tuple<string, string>> parameters = new List<Tuple<string, string>>()
+	        {
+		        Tuple.Create("exclude_archived", ExcludeArchived ? "1" : "0")
+	        };
+	        if (limit > 0)
+		        parameters.Add(Tuple.Create("limit", limit.ToString()));
+	        if (types != null && types.Any())
+		        parameters.Add(Tuple.Create("types", string.Join(",", types)));
+	        if (!string.IsNullOrEmpty(cursor))
+		        parameters.Add(new Tuple<string, string>("cursor", cursor));
+
+	        return APIRequestWithTokenAsync<ConversationsListResponse>(parameters.ToArray());
+        }
+
         public Task<ChannelListResponse> GetChannelListAsync(bool ExcludeArchived = true)
         {
             return APIRequestWithTokenAsync<ChannelListResponse>(new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));

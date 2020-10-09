@@ -25,5 +25,12 @@ namespace SlackAPI
             if (!(ok))
                 throw new InvalidOperationException(string.Format("An error occurred: {0}", this.error));
         }
+
+        public ResponseMetaData response_metadata;
+    }
+
+    public class ResponseMetaData
+    {
+	    public string next_cursor;
     }
 }
