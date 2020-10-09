@@ -44,7 +44,7 @@ namespace SlackAPI
 
         public virtual async Task<LoginResponse> ConnectAsync()
         {
-            var loginDetails = await EmitLoginAsync();
+            var loginDetails = await EmitLoginAsync().ConfigureAwait(false);
             if(loginDetails.ok)
                 Connected(loginDetails);
 
@@ -651,7 +651,7 @@ namespace SlackAPI
             {
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
                 HttpResponseMessage response = PostRequest(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form);
-                string result = await response.Content.ReadAsStringAsync();
+                string result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return result.Deserialize<FileUploadResponse>();
             }
         }
