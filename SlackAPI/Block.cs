@@ -46,6 +46,12 @@
         public string block_id { get; set; }
         public IElement[] elements { get; set; }
     }
+    public class HeaderBlock : IBlock
+    {
+	    public string type { get; } = BlockTypes.Header;
+	    public Text text { get; set; }
+	    public string block_id { get; set; }
+    }
     public class Text : IElement
     {
         public string type { get; set; } = TextTypes.PlainText;
@@ -189,6 +195,7 @@
         public const string Actions = "actions";
         public const string Context = "context";
         public const string Image = "image";
+        public const string Header = "header";
     }
 
     public static class TextTypes
