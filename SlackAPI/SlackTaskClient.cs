@@ -44,7 +44,7 @@ namespace SlackAPI
 
         public virtual async Task<LoginResponse> ConnectAsync()
         {
-            var loginDetails = await EmitLoginAsync();
+            var loginDetails = await EmitLoginAsync().ConfigureAwait(false);
             if(loginDetails.ok)
                 Connected(loginDetails);
 
@@ -125,6 +125,22 @@ namespace SlackAPI
             parameters.Add(new Tuple<string, string>("user", userId));
 
             return APIRequestWithTokenAsync<ChannelInviteResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsListResponse> GetConversationsListAsync(string cursor = "", bool ExcludeArchived = true, int limit = 100, string[] types = null)
+        {
+	        List<Tuple<string, string>> parameters = new List<Tuple<string, string>>()
+	        {
+		        Tuple.Create("exclude_archived", ExcludeArchived ? "1" : "0")
+	        };
+	        if (limit > 0)
+		        parameters.Add(Tuple.Create("limit", limit.ToString()));
+	        if (types != null && types.Any())
+		        parameters.Add(Tuple.Create("types", string.Join(",", types)));
+	        if (!string.IsNullOrEmpty(cursor))
+		        parameters.Add(new Tuple<string, string>("cursor", cursor));
+
+	        return APIRequestWithTokenAsync<ConversationsListResponse>(parameters.ToArray());
         }
 
         public Task<ChannelListResponse> GetChannelListAsync(bool ExcludeArchived = true)
@@ -651,7 +667,7 @@ namespace SlackAPI
             {
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
                 HttpResponseMessage response = PostRequest(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form);
-                string result = await response.Content.ReadAsStringAsync();
+                string result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return result.Deserialize<FileUploadResponse>();
             }
         }

@@ -17,11 +17,20 @@ namespace SlackAPI
         /// if ok is false, then this is the reason-code
         /// </summary>
         public string error;
+        public string needed;
+        public string provided;
 
         public void AssertOk()
         {
             if (!(ok))
                 throw new InvalidOperationException(string.Format("An error occurred: {0}", this.error));
         }
+
+        public ResponseMetaData response_metadata;
+    }
+
+    public class ResponseMetaData
+    {
+	    public string next_cursor;
     }
 }
