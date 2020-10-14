@@ -608,7 +608,7 @@ namespace SlackAPI
         public Task<ScheduleMessageResponse> ScheduleMessageAsync(
             string channelId,
             string text,
-            DateTimeOffset post_at,
+            DateTime post_at,
             string botName = null,
             string parse = null,
             bool linkNames = false,
@@ -624,7 +624,7 @@ namespace SlackAPI
 
             parameters.Add(new Tuple<string, string>("channel", channelId));
             parameters.Add(new Tuple<string, string>("text", text));
-            parameters.Add(new Tuple<string, string>("post_at", post_at.ToUnixTimeSeconds().ToString()));
+            parameters.Add(new Tuple<string, string>("post_at", (post_at - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds.ToString()));
 
             if (!string.IsNullOrEmpty(botName))
                 parameters.Add(new Tuple<string, string>("username", botName));
