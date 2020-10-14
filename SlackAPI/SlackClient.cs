@@ -662,6 +662,73 @@ namespace SlackAPI
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
+
+
+        public void ScheduleMessage(
+            Action<ScheduleMessageResponse> callback,
+            string channelId,
+            string text,
+            DateTimeOffset post_at,
+            string botName = null,
+            string parse = null,
+            bool linkNames = false,
+            IBlock[] blocks = null,
+            Attachment[] attachments = null,
+            bool? unfurl_links = null,
+            string icon_url = null,
+            string icon_emoji = null,
+            bool? as_user = null,
+              string thread_ts = null)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("text", text));
+            parameters.Add(new Tuple<string, string>("post_at", post_at.ToUnixTimeSeconds().ToString()));
+
+            if (!string.IsNullOrEmpty(botName))
+                parameters.Add(new Tuple<string, string>("username", botName));
+
+            if (!string.IsNullOrEmpty(parse))
+                parameters.Add(new Tuple<string, string>("parse", parse));
+
+            if (linkNames)
+                parameters.Add(new Tuple<string, string>("link_names", "1"));
+
+            if (blocks != null && blocks.Length > 0)
+                parameters.Add(new Tuple<string, string>("blocks",
+                   JsonConvert.SerializeObject(blocks, Formatting.None,
+                      new JsonSerializerSettings // Shouldn't include a not set property
+                     {
+                          NullValueHandling = NullValueHandling.Ignore
+                      })));
+
+            if (attachments != null && attachments.Length > 0)
+                parameters.Add(new Tuple<string, string>("attachments",
+                    JsonConvert.SerializeObject(attachments, Formatting.None,
+                            new JsonSerializerSettings // Shouldn't include a not set property
+                               {
+                                NullValueHandling = NullValueHandling.Ignore
+                            })));
+
+            if (unfurl_links.HasValue)
+                parameters.Add(new Tuple<string, string>("unfurl_links", unfurl_links.Value ? "true" : "false"));
+
+            if (!string.IsNullOrEmpty(icon_url))
+                parameters.Add(new Tuple<string, string>("icon_url", icon_url));
+
+            if (!string.IsNullOrEmpty(icon_emoji))
+                parameters.Add(new Tuple<string, string>("icon_emoji", icon_emoji));
+
+            if (as_user.HasValue)
+                parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+
+            if (!string.IsNullOrEmpty(thread_ts))
+                parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
         public void DialogOpen(
            Action<DialogOpenResponse> callback,
            string triggerId,
