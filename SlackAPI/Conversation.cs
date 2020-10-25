@@ -8,6 +8,14 @@ namespace SlackAPI
 {
     public class Conversation
     {
+        public enum Type
+        {
+            public_channel,
+            private_channel,
+            mpim,
+            im
+        }
+
         public string id;
         public DateTime created;
         public DateTime last_read;
