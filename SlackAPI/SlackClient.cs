@@ -551,7 +551,7 @@ namespace SlackAPI
 
         public void JoinDirectMessageChannel(Action<JoinDirectMessageChannelResponse> callback, string user)
         {
-            var param = new Tuple<string, string>("user", user);
+            var param = new Tuple<string, string>("users", user);
             APIRequestWithToken(callback, param);
         }
 
