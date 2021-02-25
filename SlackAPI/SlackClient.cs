@@ -258,9 +258,9 @@ namespace SlackAPI
             GetHistory(callback, groupInfo.id, latest, oldest, count, unreads);
         }
 
-        public void GetConversationsHistory(Action<ConversationsMessageHistory> callback, Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
+        public void GetConversationsHistory(Action<ConversationsMessageHistory> callback, Channel conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            GetHistory(callback, groupInfo.id, latest, oldest, count, unreads);
+            GetHistory(callback, conversationInfo.id, latest, oldest, count, unreads);
         }
 
         public void MarkChannel(Action<MarkResponse> callback, string channelId, DateTime ts)

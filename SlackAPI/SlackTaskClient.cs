@@ -235,9 +235,9 @@ namespace SlackAPI
             return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count, unreads);
         }
 
-        public Task<ConversationsMessageHistory> GetConversationsHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
+        public Task<ConversationsMessageHistory> GetConversationsHistoryAsync(Channel conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
-            return GetHistoryAsync<ConversationsMessageHistory>(groupInfo.id, latest, oldest, count, unreads);
+            return GetHistoryAsync<ConversationsMessageHistory>(conversationInfo.id, latest, oldest, count, unreads);
         }
 
         public Task<MarkResponse> MarkChannelAsync(string channelId, DateTime ts)
