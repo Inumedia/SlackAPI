@@ -235,6 +235,11 @@ namespace SlackAPI
             return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count, unreads);
         }
 
+        public Task<ConversationsMessageHistory> GetConversationsHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
+        {
+            return GetHistoryAsync<ConversationsMessageHistory>(groupInfo.id, latest, oldest, count, unreads);
+        }
+
         public Task<MarkResponse> MarkChannelAsync(string channelId, DateTime ts)
         {
             return APIRequestWithTokenAsync<MarkResponse>(new Tuple<string, string>("channel", channelId),
@@ -345,6 +350,108 @@ namespace SlackAPI
         public Task<GroupUnarchiveResponse> GroupsUnarchiveAsync(string channelId)
         {
             return APIRequestWithTokenAsync<GroupUnarchiveResponse>(new Tuple<string, string>("channel", channelId));
+        }
+
+        #endregion
+
+        #region Conversations
+        public Task<ConversationsArchiveResponse> ConversationsArchiveAsync(string channelId)
+        {
+            return APIRequestWithTokenAsync<ConversationsArchiveResponse>(new Tuple<string, string>("channel", channelId));
+        }
+
+        public Task<ConversationsCloseResponse> ConversationsCloseAsync(string channelId)
+        {
+            return APIRequestWithTokenAsync<ConversationsCloseResponse>(new Tuple<string, string>("channel", channelId));
+        }
+
+        public Task<ConversationsCreateResponse> ConversationsCreateAsync(string name, bool? isPrivate = null, string teamId = null)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+            parameters.Add(new Tuple<string, string>("name", name));
+
+            if (isPrivate.HasValue)
+                parameters.Add(new Tuple<string, string>("is_private", isPrivate.Value ? "true" : "false"));
+
+            if (!string.IsNullOrEmpty(teamId))
+                parameters.Add(new Tuple<string, string>("team_id", teamId));
+
+            return APIRequestWithTokenAsync<ConversationsCreateResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsInviteResponse> ConversationsInviteAsync(string channelId, string[] userIds)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("users", string.Join(",", userIds)));
+
+            return APIRequestWithTokenAsync<ConversationsInviteResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsKickResponse> ConversationsKickAsync(string channelId, string userId)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("user", userId));
+
+            return APIRequestWithTokenAsync<ConversationsKickResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsLeaveResponse> ConversationsLeaveAsync(string channelId)
+        {
+            return APIRequestWithTokenAsync<ConversationsLeaveResponse>(new Tuple<string, string>("channel", channelId));
+        }
+
+        public Task<ConversationsMarkResponse> ConversationsMarkAsync(string channelId, DateTime ts)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("ts", ts.ToProperTimeStamp()));
+
+            return APIRequestWithTokenAsync<ConversationsMarkResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsOpenResponse> ConversationsOpenAsync(string channelId)
+        {
+            return APIRequestWithTokenAsync<ConversationsOpenResponse>(new Tuple<string, string>("channel", channelId));
+        }
+
+        public Task<ConversationsRenameResponse> ConversationsRenameAsync(string channelId, string name)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("name", name));
+
+            return APIRequestWithTokenAsync<ConversationsRenameResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsSetPurposeResponse> ConversationsSetPurposeAsync(string channelId, string purpose)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("purpose", purpose));
+
+            return APIRequestWithTokenAsync<ConversationsSetPurposeResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsSetTopicResponse> ConversationsSetTopicAsync(string channelId, string topic)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("topic", topic));
+
+            return APIRequestWithTokenAsync<ConversationsSetTopicResponse>(parameters.ToArray());
+        }
+
+        public Task<ConversationsUnarchiveResponse> ConversationsUnarchiveAsync(string channelId)
+        {
+            return APIRequestWithTokenAsync<ConversationsUnarchiveResponse>(new Tuple<string, string>("channel", channelId));
         }
 
         #endregion
@@ -492,7 +599,7 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("attachments", JsonConvert.SerializeObject(attachments)));
 
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
-            
+
             if (blocks != null && blocks.Length > 0)
                 parameters.Add(new Tuple<string, string>("blocks", JsonConvert.SerializeObject(blocks,
                     new JsonSerializerSettings()
@@ -562,7 +669,7 @@ namespace SlackAPI
 
             if (as_user)
                 parameters.Add(new Tuple<string, string>("as_user", true.ToString()));
-            
+
             if (!string.IsNullOrEmpty(thread_ts))
                 parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
 
