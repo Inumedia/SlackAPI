@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -129,9 +130,18 @@ namespace SlackAPI
             return httpWebRequest;
         }
 
-        protected HttpResponseMessage PostRequest(string requestUri, MultipartFormDataContent form)
+        protected Task<HttpResponseMessage> PostRequestAsync(string requestUri, MultipartFormDataContent form, string token)
         {
-            return httpClient.PostAsync(requestUri, form).Result;
+            var requestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                Content = form,
+                RequestUri = new Uri(requestUri),
+            };
+
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            return httpClient.SendAsync(requestMessage);
         }
 
         public void RegisterConverter(JsonConverter converter)

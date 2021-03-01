@@ -766,7 +766,6 @@ namespace SlackAPI
             Uri target = new Uri(Path.Combine(APIBaseLocation, useAsync ? "files.uploadAsync" : "files.upload"));
 
             List<string> parameters = new List<string>();
-            parameters.Add(string.Format("token={0}", APIToken));
 
             //File/Content
             if (!string.IsNullOrEmpty(fileType))
@@ -786,7 +785,7 @@ namespace SlackAPI
             using (MultipartFormDataContent form = new MultipartFormDataContent())
             {
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
-                HttpResponseMessage response = PostRequest(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form);
+                HttpResponseMessage response = PostRequestAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form, APIToken).Result;
                 string result = response.Content.ReadAsStringAsync().Result;
                 callback(result.Deserialize<FileUploadResponse>());
             }
