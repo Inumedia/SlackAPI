@@ -91,11 +91,7 @@ namespace SlackAPI
         public Task<K> APIRequestWithTokenAsync<K>(params Tuple<string,string>[] postParameters)
             where K : Response
         {
-            Tuple<string, string>[] tokenArray = new Tuple<string, string>[]{
-                new Tuple<string,string>("token", APIToken)
-            };
-
-            return APIRequestAsync<K>(tokenArray, postParameters);
+            return APIRequestAsync<K>(new Tuple<string, string>[] { }, postParameters, APIToken);
         }
 
         public Task<AuthTestResponse> TestAuthAsync()

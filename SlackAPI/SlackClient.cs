@@ -108,14 +108,7 @@ namespace SlackAPI
         public void APIRequestWithToken<K>(Action<K> callback, params Tuple<string, string>[] getParameters)
             where K : Response
         {
-            Tuple<string, string>[] tokenArray = new Tuple<string, string>[]{
-                new Tuple<string,string>("token", APIToken)
-            };
-
-            if (getParameters != null && getParameters.Length > 0)
-                tokenArray = tokenArray.Concat(getParameters).ToArray();
-
-            APIRequest(callback, tokenArray, new Tuple<string, string>[0]);
+            APIRequest(callback, getParameters, new Tuple<string, string>[0], APIToken);
         }
 
         public void TestAuth(Action<AuthTestResponse> callback)
