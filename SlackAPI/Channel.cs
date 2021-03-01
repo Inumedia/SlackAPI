@@ -10,6 +10,7 @@ namespace SlackAPI
     {
         public string name;
         public string creator;
+        public string user;
 
         public bool is_archived;
         public bool is_member;
