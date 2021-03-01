@@ -16,6 +16,7 @@ namespace SlackAPI
         public bool is_general;
         public bool is_channel;
         public bool is_group;
+        public bool is_im;
         //Is this deprecated by is_open?
         public bool IsPrivateGroup { get { return id != null && id[0] == 'G'; } }
 
