@@ -258,6 +258,11 @@ namespace SlackAPI
             GetHistory(callback, groupInfo.id, latest, oldest, count, unreads);
         }
 
+        public void GetConversationsHistory(Action<ConversationsMessageHistory> callback, Channel conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
+        {
+            GetHistory(callback, conversationInfo.id, latest, oldest, count, unreads);
+        }
+
         public void MarkChannel(Action<MarkResponse> callback, string channelId, DateTime ts)
         {
             APIRequestWithToken(callback,
@@ -372,6 +377,100 @@ namespace SlackAPI
         }
 
         #endregion
+
+        #region Conversations
+        public void ConversationsArchive(Action<ConversationsArchiveResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void ConversationsClose(Action<ConversationsCloseResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void ConversationsCreate(Action<ConversationsCreateResponse> callback, string name)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("name", name));
+        }
+
+        public void ConversationsInvite(Action<ConversationsInviteResponse> callback, string channelId, string[] userIds)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("users", string.Join(",", userIds)));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void ConversationsKick(Action<ConversationsKickResponse> callback, string channelId, string userId)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("user", userId));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void ConversationsLeave(Action<ConversationsLeaveResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void ConversationsMark(Action<ConversationsMarkResponse> callback, string channelId, DateTime ts)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("ts", ts.ToProperTimeStamp()));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void ConversationsOpen(Action<ConversationsOpenResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        public void ConversationsRename(Action<ConversationsRenameResponse> callback, string channelId, string name)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("name", name));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void ConversationsSetPurpose(Action<ConversationsSetPurposeResponse> callback, string channelId, string purpose)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("purpose", purpose));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void ConversationsSetTopic(Action<ConversationsSetPurposeResponse> callback, string channelId, string topic)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("channel", channelId));
+            parameters.Add(new Tuple<string, string>("topic", topic));
+
+            APIRequestWithToken(callback, parameters.ToArray());
+        }
+
+        public void ConversationsUnarchive(Action<ConversationsUnarchiveResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
+        #endregion
+
 
         public void SearchAll(Action<SearchResponseAll> callback, string query, string sorting = null, SearchSortDirection? direction = null, bool enableHighlights = false, int? count = null, int? page = null)
         {
