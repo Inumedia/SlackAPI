@@ -52,7 +52,7 @@ namespace SlackAPI.Tests
 
                 var accessTokenResponse = GetAccessToken(slackClientHelpers, clientId, clientSecret, redirectUrl, code);
                 Assert.True(accessTokenResponse.ok);
-                Assert.Equal("identify", accessTokenResponse.scope);
+                Assert.Equal(accessTokenResponse.access_token, this.fixture.Config.UserAuthToken);
             }
         }
 
