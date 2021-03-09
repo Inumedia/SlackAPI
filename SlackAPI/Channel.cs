@@ -26,5 +26,9 @@ namespace SlackAPI
         public OwnedStampedMessage purpose;
 
         public string[] members;
+        
+        //im related properties
+        public bool is_im;
+        public string user;
     }
 }
