@@ -91,11 +91,7 @@ namespace SlackAPI
         public Task<K> APIRequestWithTokenAsync<K>(params Tuple<string,string>[] postParameters)
             where K : Response
         {
-            Tuple<string, string>[] tokenArray = new Tuple<string, string>[]{
-                new Tuple<string,string>("token", APIToken)
-            };
-
-            return APIRequestAsync<K>(tokenArray, postParameters);
+            return APIRequestAsync<K>(new Tuple<string, string>[] { }, postParameters, APIToken);
         }
 
         public Task<AuthTestResponse> TestAuthAsync()
@@ -816,7 +812,6 @@ namespace SlackAPI
             Uri target = new Uri(Path.Combine(APIBaseLocation, useAsync ? "files.uploadAsync" : "files.upload"));
 
             List<string> parameters = new List<string>();
-            parameters.Add(string.Format("token={0}", APIToken));
 
             //File/Content
             if (!string.IsNullOrEmpty(fileType))
@@ -836,7 +831,7 @@ namespace SlackAPI
             using (MultipartFormDataContent form = new MultipartFormDataContent())
             {
                 form.Add(new ByteArrayContent(fileData), "file", fileName);
-                HttpResponseMessage response = PostRequest(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form);
+                HttpResponseMessage response = await PostRequestAsync(string.Format("{0}?{1}", target, string.Join("&", parameters.ToArray())), form, APIToken);
                 string result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return result.Deserialize<FileUploadResponse>();
             }

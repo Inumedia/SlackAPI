@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -33,7 +34,11 @@ namespace SlackAPI
 
         protected Uri GetSlackUri(string path, Tuple<string, string>[] getParameters)
         {
-            string parameters = getParameters
+            string parameters = default;
+
+            if (getParameters != null && getParameters.Length > 0)
+            {
+                parameters = getParameters
                 .Where(x => x.Item2 != null)
                 .Select(new Func<Tuple<string, string>, string>(a =>
                 {
@@ -54,11 +59,19 @@ namespace SlackAPI
                         return string.Format("{0}&{1}", a, b);
                 });
 
-            Uri requestUri = new Uri(string.Format("{0}?{1}", path, parameters));
+            }
+
+            Uri requestUri = default;
+
+            if (!string.IsNullOrEmpty(parameters))
+                requestUri = new Uri(string.Format("{0}?{1}", path, parameters));
+            else
+                requestUri = new Uri(path);
+
             return requestUri;
         }
 
-        protected void APIRequest<K>(Action<K> callback, Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
+        protected void APIRequest<K>(Action<K> callback, Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters, string token = "")
             where K : Response
         {
             RequestPath path = RequestPath.GetRequestPath<K>();
@@ -67,13 +80,16 @@ namespace SlackAPI
 
             Uri requestUri = GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
             HttpWebRequest request = CreateWebRequest(requestUri);
+
+            if (!string.IsNullOrEmpty(token))
+                request.Headers.Add("Authorization", "Bearer " + token);
 
             //This will handle all of the processing.
             RequestState<K> state = new RequestState<K>(request, postParameters, callback);
             state.Begin();
         }
 
-        public Task<K> APIRequestAsync<K>(Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters)
+        public Task<K> APIRequestAsync<K>(Tuple<string, string>[] getParameters, Tuple<string, string>[] postParameters, string token = "")
             where K : Response
         {
             RequestPath path = RequestPath.GetRequestPath<K>();
@@ -82,6 +98,9 @@ namespace SlackAPI
 
             Uri requestUri = GetSlackUri(Path.Combine(APIBaseLocation, path.Path), getParameters);
             HttpWebRequest request = CreateWebRequest(requestUri);
+
+            if (!string.IsNullOrEmpty(token))
+                request.Headers.Add("Authorization", "Bearer " + token);
 
             //This will handle all of the processing.
             var state = new RequestStateForTask<K>(request, postParameters);
@@ -111,9 +130,18 @@ namespace SlackAPI
             return httpWebRequest;
         }
 
-        protected HttpResponseMessage PostRequest(string requestUri, MultipartFormDataContent form)
+        protected Task<HttpResponseMessage> PostRequestAsync(string requestUri, MultipartFormDataContent form, string token)
         {
-            return httpClient.PostAsync(requestUri, form).Result;
+            var requestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                Content = form,
+                RequestUri = new Uri(requestUri),
+            };
+
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            return httpClient.SendAsync(requestMessage);
         }
 
         public void RegisterConverter(JsonConverter converter)
