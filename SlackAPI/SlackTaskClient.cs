@@ -123,7 +123,7 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<ChannelInviteResponse>(parameters.ToArray());
         }
 
-        public Task<ConversationsListResponse> GetConversationsListAsync(string cursor = "", bool ExcludeArchived = true, int limit = 100, string[] types = null)
+        public Task<ConversationsListResponse> GetConversationsListAsync(string cursor = "", bool ExcludeArchived = true, int limit = 1000, string[] types = null)
         {
 	        List<Tuple<string, string>> parameters = new List<Tuple<string, string>>()
 	        {
@@ -608,7 +608,7 @@ namespace SlackAPI
 
         public Task<JoinDirectMessageChannelResponse> JoinDirectMessageChannelAsync(string user)
         {
-            var param = new Tuple<string, string>("user", user);
+            var param = new Tuple<string, string>("users", user);
             return APIRequestWithTokenAsync<JoinDirectMessageChannelResponse>(param);
         }
 

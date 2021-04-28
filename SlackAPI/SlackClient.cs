@@ -156,6 +156,7 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
+        [Obsolete("Use GetConversationsListAsync instead")]
         public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
@@ -166,6 +167,7 @@ namespace SlackAPI
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
+        [Obsolete("Use JoinDirectMessageChannelAsync instead")]
         public void GetDirectMessageList(Action<DirectMessageConversationListResponse> callback)
         {
             APIRequestWithToken(callback);
