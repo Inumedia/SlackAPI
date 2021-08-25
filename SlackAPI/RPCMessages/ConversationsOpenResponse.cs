@@ -13,5 +13,5 @@ namespace SlackAPI
         public string already_open;
         public Channel channel;
         public string error;
-
+    }
 }
