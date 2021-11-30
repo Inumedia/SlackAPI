@@ -898,19 +898,21 @@ namespace SlackAPI
             APIRequestWithToken(callback, new Tuple<string, string>("file", file));
         }
 
-        public void PublishView(
-            Action<PublishViewResponse> callback,
+        public void PublishAppHomeTab(
+            Action<AppHomeTabResponse> callback,
             string userId,
             View view)
         {
-            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
-            parameters.Add(new Tuple<string, string>("userId", userId));
-            parameters.Add(new Tuple<string, string>("view", JsonConvert.SerializeObject(view, Formatting.None,
-                               new JsonSerializerSettings // Shouldn't include a not set property
-                               {
-                                   NullValueHandling = NullValueHandling.Ignore
-                               })));
+            view.type = ViewTypes.Home;
+            var parameters = new List<Tuple<string, string>>
+            {
+                new Tuple<string, string>("user_id", userId),
+                new Tuple<string, string>("view", JsonConvert.SerializeObject(view, Formatting.None,
+                    new JsonSerializerSettings // Shouldn't include a not set property
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    }))
+            };
 
             APIRequestWithToken(callback, parameters.ToArray());
         }        

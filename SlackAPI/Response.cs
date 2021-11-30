@@ -19,6 +19,7 @@ namespace SlackAPI
         public string error;
         public string needed;
         public string provided;
+        public string warning;
 
         public void AssertOk()
         {
@@ -31,6 +32,7 @@ namespace SlackAPI
 
     public class ResponseMetaData
     {
-	    public string next_cursor;
+        public string next_cursor;
+        public string[] messages;
     }
 }

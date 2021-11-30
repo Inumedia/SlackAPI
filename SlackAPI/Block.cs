@@ -184,7 +184,7 @@
 
     public class View
     {
-        public string type { get; set; } = ViewTypes.Home;
+        public string type { get; set; }
         public IBlock[] blocks { get; set; }
     }
 
