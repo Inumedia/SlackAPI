@@ -182,6 +182,12 @@
         public Confirm confirm { get; set; }
     }
 
+    public class View
+    {
+        public string type { get; set; } = ViewTypes.Home;
+        public IBlock[] blocks { get; set; }
+    }
+
     public static class ButtonStyles
     {
         public const string Primary = "primary";
@@ -196,6 +202,12 @@
         public const string Context = "context";
         public const string Image = "image";
         public const string Header = "header";
+    }
+
+    public static class ViewTypes
+    {
+        public const string Home = "home";
+        public const string Modal = "modal";
     }
 
     public static class TextTypes

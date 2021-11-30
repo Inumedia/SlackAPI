@@ -843,5 +843,21 @@ namespace SlackAPI
                     new Tuple<string, string>("channel", channelId),
                     new Tuple<string, string>("topic", newTopic));
         }
+
+        public Task<PublishViewResponse> PublishView(
+            string userId,
+            View view)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("userId", userId));
+            parameters.Add(new Tuple<string, string>("view", JsonConvert.SerializeObject(view, Formatting.None,
+                               new JsonSerializerSettings // Shouldn't include a not set property
+                               {
+                                   NullValueHandling = NullValueHandling.Ignore
+                               })));
+
+            return APIRequestWithTokenAsync<PublishViewResponse>(parameters.ToArray());
+        }
     }
 }
