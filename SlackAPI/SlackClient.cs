@@ -397,6 +397,11 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
+        public void ConversationsJoin(Action<ConversationsJoinResponse> callback, string channelId)
+        {
+            APIRequestWithToken(callback, new Tuple<string, string>("channel", channelId));
+        }
+
         public void ConversationsKick(Action<ConversationsKickResponse> callback, string channelId, string userId)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();

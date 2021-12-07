@@ -19,6 +19,7 @@ namespace SlackAPI
         public string error;
         public string needed;
         public string provided;
+        public string warning;
 
         public void AssertOk()
         {
