@@ -608,7 +608,7 @@ namespace SlackAPI
 
         public Task<JoinDirectMessageChannelResponse> JoinDirectMessageChannelAsync(string user)
         {
-            var param = new Tuple<string, string>("user", user);
+            var param = new Tuple<string, string>("users", user);
             return APIRequestWithTokenAsync<JoinDirectMessageChannelResponse>(param);
         }
 
