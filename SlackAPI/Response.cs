@@ -32,6 +32,7 @@ namespace SlackAPI
 
     public class ResponseMetaData
     {
-	    public string next_cursor;
+        public string next_cursor;
+        public string[] messages;
     }
 }
