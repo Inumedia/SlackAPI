@@ -99,9 +99,20 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<AuthTestResponse>();
         }
 
-        public Task<UserListResponse> GetUserListAsync()
+        public Task<UserListResponse> GetUserListAsync(int limit = 0, bool include_locale = false, string cursor = null, string team_id = null)
         {
-            return APIRequestWithTokenAsync<UserListResponse>();
+            var args = new List<Tuple<string, string>>();
+            args.Add(new Tuple<string, string>("limit", limit.ToString()));
+            args.Add(new Tuple<string, string>("include_locale", include_locale.ToString()));
+            if (cursor != null)
+            {
+                args.Add(new Tuple<string, string>("cursor", cursor));
+            }
+            if (team_id != null)
+            {
+                args.Add(new Tuple<string, string>("team_id", team_id));
+            }
+            return APIRequestWithTokenAsync<UserListResponse>(args.ToArray());
         }
 
         public Task<UserEmailLookupResponse> GetUserByEmailAsync(string email)
