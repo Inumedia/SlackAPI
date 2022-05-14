@@ -101,6 +101,10 @@ namespace SlackAPI
 
         public Task<UserListResponse> GetUserListAsync(int limit = 0, bool include_locale = false, string cursor = null, string team_id = null)
         {
+            if (limit < 0)
+            {
+                throw new ArgumentException(nameof(limit));
+            }
             var args = new List<Tuple<string, string>>();
             args.Add(new Tuple<string, string>("limit", limit.ToString()));
             args.Add(new Tuple<string, string>("include_locale", include_locale.ToString()));
