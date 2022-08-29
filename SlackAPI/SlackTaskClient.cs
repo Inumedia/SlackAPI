@@ -414,6 +414,11 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<ConversationsInviteResponse>(parameters.ToArray());
         }
 
+        public Task<ConversationsJoinResponse> ConversationsJoinAsync(string channelId)
+        {
+            return APIRequestWithTokenAsync<ConversationsJoinResponse>(new Tuple<string, string>("channel", channelId));
+        }
+
         public Task<ConversationsKickResponse> ConversationsKickAsync(string channelId, string userId)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
