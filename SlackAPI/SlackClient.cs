@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using SlackAPI.RPCMessages;
 
 namespace SlackAPI
@@ -25,8 +26,8 @@ namespace SlackAPI
 
         public List<string> starredChannels;
 
+        public List<User> Bots;
         public List<User> Users;
-        public List<Bot> Bots;
         public List<Channel> Channels;
         public List<Channel> Groups;
         public List<DirectMessageConversation> DirectMessages;
@@ -34,8 +35,8 @@ namespace SlackAPI
         public Dictionary<string, User> UserLookup;
         public Dictionary<string, Channel> ChannelLookup;
         public Dictionary<string, Channel> GroupLookup;
-        public Dictionary<string, DirectMessageConversation> DirectMessageLookup;
         public Dictionary<string, Conversation> ConversationLookup;
+        public Dictionary<string, DirectMessageConversation> DirectMessageLookup;
 
         public SlackClient(string token)
         {
@@ -48,60 +49,114 @@ namespace SlackAPI
             APIToken = token;
         }
 
-		public virtual void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null)
+		public virtual void Connect(Action<LoginResponse> onConnected = null, Action onSocketConnected = null, int timeoutSeconds = 60) 
         {
-            EmitLogin((loginDetails) =>
+            EmitLogin(loginDetails =>
             {
                 if (loginDetails.ok)
-                    Connected(loginDetails);
+                    Connected(loginDetails, timeoutSeconds);
 
                 if (onConnected != null)
                     onConnected(loginDetails);
             });
         }
 
-        protected virtual void Connected(LoginResponse loginDetails)
+        protected virtual void Connected(LoginResponse loginDetails, int timeoutSeconds)
         {
             MySelf = loginDetails.self;
-            MyData = loginDetails.users.First((c) => c.id == MySelf.id);
             MyTeam = loginDetails.team;
 
-            Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
-            Bots = new List<Bot>(loginDetails.bots.Where((c) => !c.deleted));
-            Channels = new List<Channel>(loginDetails.channels);
-            Groups = new List<Channel>(loginDetails.groups);
-            DirectMessages = new List<DirectMessageConversation>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.user) && c.id != MySelf.id));
-            starredChannels =
-                    Groups.Where((c) => c.is_starred).Select((c) => c.id)
-                .Union(
-                    DirectMessages.Where((c) => c.is_starred).Select((c) => c.user)
-                ).Union(
-                    Channels.Where((c) => c.is_starred).Select((c) => c.id)
-                ).ToList();
+            var taskWaiter = new CountdownEvent(2);
+            var channels = new List<Channel>();
 
-            UserLookup = new Dictionary<string, User>();
-            foreach (User u in Users) UserLookup.Add(u.id, u);
-
-            ChannelLookup = new Dictionary<string, Channel>();
-            ConversationLookup = new Dictionary<string, Conversation>();
-            foreach (Channel c in Channels)
+            GetUserList(response =>
             {
-                ChannelLookup.Add(c.id, c);
-                ConversationLookup.Add(c.id, c);
+                if (response.ok)
+                {
+                    MyData = response.members.First(c => c.id == MySelf.id);
+                    Users = new List<User>(response.members.Where(c => !c.deleted && !c.IsSlackBot));
+                    Bots = new List<User>(response.members.Where(c => !c.deleted && c.IsSlackBot));
+                }
+                else
+                {
+                    loginDetails.ok = false;
+                    loginDetails.error = response.error;                    
+                }
+
+                taskWaiter.Signal();
+            });
+
+            GetConversationsList(response =>
+            {
+                if (response.ok)
+                {
+                    channels.AddRange(response.channels);
+                }
+                else
+                {
+                    loginDetails.ok = false;
+                    loginDetails.error = response.error;
+                }
+
+                taskWaiter.Signal();
+            }, ExcludeArchived: true);
+
+            var released = taskWaiter.Wait(TimeSpan.FromSeconds(timeoutSeconds));
+
+            if (released && loginDetails.ok)
+            {
+                Channels = new List<Channel>(channels.Where(x => x.is_channel));
+                Groups = new List<Channel>(channels.Where(x => x.is_group));
+                starredChannels =
+                    Channels.Where(c => c.is_starred).Select(c => c.id)
+                        .Union(
+                            DirectMessages.Where(c => c.is_starred).Select(c => c.user)
+                        ).Union(
+                            Channels.Where(c => c.is_starred).Select(c => c.id)
+                        ).ToList();
+                DirectMessages = new List<DirectMessageConversation>(
+                    channels
+                        .Where(x => x.is_im && Users.Exists(u => u.id == x.user) && x.id != MySelf.id)
+                        .Select(x => new DirectMessageConversation
+                        {
+                            created = x.created,
+                            id = x.id,
+                            is_open = x.is_open,
+                            is_starred = x.is_starred,
+                            is_user_deleted = UserLookup[x.user].deleted,
+                            last_read = x.last_read,
+                            latest = x.latest,
+                            unread_count = x.unread_count,
+                            user = x.user
+                        }));
+
+                UserLookup = new Dictionary<string, User>();
+                foreach (User u in Users) UserLookup.Add(u.id, u);
+
+                ChannelLookup = new Dictionary<string, Channel>();
+                ConversationLookup = new Dictionary<string, Conversation>();
+                foreach (Channel c in Groups)
+                {
+                    ChannelLookup.Add(c.id, c);
+                    ConversationLookup.Add(c.id, c);
+                }
+
+                GroupLookup = new Dictionary<string, Channel>();
+                foreach (Channel g in Channels)
+                {
+                    GroupLookup.Add(g.id, g);
+                    ConversationLookup.Add(g.id, g);
+                }
+
+                DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
+                foreach (DirectMessageConversation im in DirectMessages) 
+                    DirectMessageLookup.Add(im.id, im);
+
             }
-
-            GroupLookup = new Dictionary<string, Channel>();
-            foreach (Channel g in Groups)
+            else if (!released && loginDetails.ok)
             {
-                GroupLookup.Add(g.id, g);
-                ConversationLookup.Add(g.id, g);
-            }
-
-            DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
-            foreach (DirectMessageConversation im in DirectMessages)
-            {
-                DirectMessageLookup.Add(im.id, im);
-                ConversationLookup.Add(im.id, im);
+                loginDetails.ok = false;
+                loginDetails.error = "Timed out loading login details";
             }
         }
 
@@ -170,16 +225,20 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
+
+        [Obsolete("Replaced by GetConversionsList", true)]
         public void GetChannelList(Action<ChannelListResponse> callback, bool ExcludeArchived = true)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
+        [Obsolete("Replaced by GetConversionsList", true)]
         public void GetGroupsList(Action<GroupListResponse> callback, bool ExcludeArchived = true)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
+        [Obsolete("Replaced by GetConversionsList", true)]
         public void GetDirectMessageList(Action<DirectMessageConversationListResponse> callback)
         {
             APIRequestWithToken(callback);
@@ -604,6 +663,16 @@ namespace SlackAPI
         public void GetInfo(Action<UserInfoResponse> callback, string user)
         {
             APIRequestWithToken(callback, new Tuple<string, string>("user", user));
+        }
+
+        public void GetBotInfo(Action<BotInfoResponse> callback, string botUser, string teamId = null)
+        {
+            var parameters = new List<Tuple<string, string>> { new Tuple<string, string>("bot", botUser) };
+
+            if (!string.IsNullOrWhiteSpace(teamId))
+                parameters.Add(new Tuple<string, string>("team_id", teamId));
+
+            APIRequestWithToken(callback, parameters.ToArray());
         }
 
         #endregion

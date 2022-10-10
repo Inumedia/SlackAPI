@@ -21,6 +21,7 @@ namespace SlackAPI
 
         public List<string> starredChannels;
 
+        public List<User> Bots;
         public List<User> Users;
         public List<Channel> Channels;
         public List<Channel> Groups;
@@ -46,40 +47,82 @@ namespace SlackAPI
         {
             var loginDetails = await EmitLoginAsync().ConfigureAwait(false);
             if(loginDetails.ok)
-                Connected(loginDetails);
+                await Connected(loginDetails);
 
             return loginDetails;
         }
 
-        protected virtual void Connected(LoginResponse loginDetails)
+        protected virtual async Task Connected(LoginResponse loginDetails)
         {
-            MySelf = loginDetails.self;
-            MyData = loginDetails.users.First((c) => c.id == MySelf.id);
-            MyTeam = loginDetails.team;
+            try
+            {
+                MySelf = loginDetails.self;
+                MyTeam = loginDetails.team;
 
-            Users = new List<User>(loginDetails.users.Where((c) => !c.deleted));
-            Channels = new List<Channel>(loginDetails.channels);
-            Groups = new List<Channel>(loginDetails.groups);
-            DirectMessages = new List<DirectMessageConversation>(loginDetails.ims.Where((c) => Users.Exists((a) => a.id == c.user) && c.id != MySelf.id));
-            starredChannels =
-                    Groups.Where((c) => c.is_starred).Select((c) => c.id)
-                .Union(
-                    DirectMessages.Where((c) => c.is_starred).Select((c) => c.user)
-                ).Union(
-                    Channels.Where((c) => c.is_starred).Select((c) => c.id)
-                ).ToList();
+                var userList = GetUserListAsync();
+                var conversionsListAsync = GetConversationsListAsync(ExcludeArchived: true);
 
-            UserLookup = new Dictionary<string, User>();
-            foreach (User u in Users) UserLookup.Add(u.id, u);
+                await Task.WhenAll(userList, conversionsListAsync).ConfigureAwait(false);
 
-            ChannelLookup = new Dictionary<string, Channel>();
-            foreach (Channel c in Channels) ChannelLookup.Add(c.id, c);
+                if (!userList.Result.ok)
+                {
+                    loginDetails.ok = false;
+                    loginDetails.error = userList.Result.error;
+                    return;
+                }
 
-            GroupLookup = new Dictionary<string, Channel>();
-            foreach (Channel g in Groups) GroupLookup.Add(g.id, g);
+                if (!conversionsListAsync.Result.ok)
+                {
+                    loginDetails.ok = false;
+                    loginDetails.error = conversionsListAsync.Result.error;
+                    return;
+                }
 
-            DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
-            foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
+                MyData = userList.Result.members.First(c => c.id == MySelf.id);
+                Bots = new List<User>(userList.Result.members.Where(c => !c.deleted && c.IsSlackBot));
+                Users = new List<User>(userList.Result.members.Where(c => !c.deleted && !c.IsSlackBot));
+                Channels = new List<Channel>(conversionsListAsync.Result.channels.Where(x => x.is_channel));
+                Groups = new List<Channel>(conversionsListAsync.Result.channels.Where(x => x.is_group));
+                DirectMessages = new List<DirectMessageConversation>(
+                    conversionsListAsync.Result.channels
+                    .Where(x => x.is_im && Users.Exists(u => u.id == x.user) && x.id != MySelf.id)
+                    .Select(x => new DirectMessageConversation
+                    {
+                        created = x.created,
+                        id = x.id,
+                        is_open = x.is_open,
+                        is_starred = x.is_starred,
+                        is_user_deleted = UserLookup[x.user].deleted,
+                        last_read = x.last_read,
+                        latest = x.latest,
+                        unread_count = x.unread_count,
+                        user = x.user
+                    }));
+                starredChannels =
+                        Groups.Where(c => c.is_starred).Select(c => c.id)
+                    .Union(
+                        DirectMessages.Where(c => c.is_starred).Select(c => c.user)
+                    ).Union(
+                        Channels.Where(c => c.is_starred).Select(c => c.id)
+                    ).ToList();
+
+                UserLookup = new Dictionary<string, User>();
+                foreach (User u in Users) UserLookup.Add(u.id, u);
+
+                ChannelLookup = new Dictionary<string, Channel>();
+                foreach (Channel c in Channels) ChannelLookup.Add(c.id, c);
+
+                GroupLookup = new Dictionary<string, Channel>();
+                foreach (Channel g in Groups) GroupLookup.Add(g.id, g);
+
+                DirectMessageLookup = new Dictionary<string, DirectMessageConversation>();
+                foreach (DirectMessageConversation im in DirectMessages) DirectMessageLookup.Add(im.id, im);
+            }
+            catch (Exception ex)
+            {
+                loginDetails.ok = false;
+                loginDetails.error = ex.Message;
+            }
         }
 
         public Task<K> APIRequestWithTokenAsync<K>()
@@ -168,16 +211,19 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<ConversationsMembersResponse>(parameters.ToArray());
         }
 
+        [Obsolete("Replaced by GetConversionsListAsync", true)]
         public Task<ChannelListResponse> GetChannelListAsync(bool ExcludeArchived = true)
         {
             return APIRequestWithTokenAsync<ChannelListResponse>(new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
+        [Obsolete("Replaced by GetConversionsListAsync", true)]
         public Task<GroupListResponse> GetGroupsListAsync(bool ExcludeArchived = true)
         {
             return APIRequestWithTokenAsync<GroupListResponse>(new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
+        [Obsolete("Replaced by GetConversionsListAsync", true)]
         public Task<DirectMessageConversationListResponse> GetDirectMessageListAsync()
         {
             return APIRequestWithTokenAsync<DirectMessageConversationListResponse>();
@@ -599,6 +645,21 @@ namespace SlackAPI
         public Task<UserCountsResponse> GetCountsAsync()
         {
             return APIRequestWithTokenAsync<UserCountsResponse>();
+        }
+
+        public Task<UserInfoResponse> GetInfoAsync(string user)
+        {
+            return APIRequestWithTokenAsync<UserInfoResponse>(new Tuple<string, string>("user", user));
+        }
+
+        public Task<BotInfoResponse> GetBotInfoAsync(string botUser, string teamId = null)
+        {
+            var parameters = new List<Tuple<string, string>> { new Tuple<string, string>("bot", botUser) };
+
+            if (!string.IsNullOrWhiteSpace(teamId))
+                parameters.Add(new Tuple<string, string>("team_id", teamId));
+
+            return APIRequestWithTokenAsync<BotInfoResponse>(parameters.ToArray());
         }
 
         public Task<LoginResponse> EmitLoginAsync(string agent = "Inumedia.SlackAPI")

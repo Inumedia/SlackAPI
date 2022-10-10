@@ -33,20 +33,23 @@ namespace SlackAPI
             this.maintainPresenceChanges = maintainPresenceChanges;
         }
 
-        public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null)
+        public override void Connect(Action<LoginResponse> onConnected, Action onSocketConnected = null, int timeoutSeconds = 60)
         {
-            base.Connect((s) => {
+            base.Connect(s => {
                 if (s.ok)
+                {
                     ConnectSocket(onSocketConnected);
+                    Connected(s, timeoutSeconds);
+                }
 
                 onConnected(s);
             });
         }
 
-        protected override void Connected(LoginResponse loginDetails)
+        protected override void Connected(LoginResponse login, int timeoutSeconds)
         {
-            this.loginDetails = loginDetails;
-            base.Connected(loginDetails);
+            this.loginDetails = login;
+            base.Connected(loginDetails, timeoutSeconds);
         }
 
         public void ConnectSocket(Action onSocketConnected){
