@@ -101,10 +101,12 @@ namespace SlackAPI.Tests.Configuration
         {
             SlackSocketClient client;
 
+            var slackNowTakesAgesToConnectTimeout = TimeSpan.FromSeconds(60);
+
             LoginResponse loginResponse = null;
-            using (var syncClient = new InSync($"{nameof(SlackClient.Connect)} - Connected callback"))
-            using (var syncClientSocket = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected callback"))
-            using (var syncClientSocketHello = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected hello callback"))
+            using (var syncClient = new InSync($"{nameof(SlackClient.Connect)} - Connected callback", slackNowTakesAgesToConnectTimeout))
+            using (var syncClientSocket = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected callback", slackNowTakesAgesToConnectTimeout))
+            using (var syncClientSocketHello = new InSync($"{nameof(SlackClient.Connect)} - SocketConnected hello callback", slackNowTakesAgesToConnectTimeout))
             {
                 client = new SlackSocketClient(authToken, proxySettings, maintainPresenceChanges);
 
