@@ -829,6 +829,25 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<ReactionAddedResponse>(parameters.ToArray());
         }
 
+        public Task<ReactionRemovedResponse> RemoveReactionAsync(
+            string name = null,
+            string channel = null,
+            string timestamp = null)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            if (!string.IsNullOrEmpty(name))
+                parameters.Add(new Tuple<string, string>("name", name));
+
+            if (!string.IsNullOrEmpty(channel))
+                parameters.Add(new Tuple<string, string>("channel", channel));
+
+            if (!string.IsNullOrEmpty(timestamp))
+                parameters.Add(new Tuple<string, string>("timestamp", timestamp));
+
+            return APIRequestWithTokenAsync<ReactionRemovedResponse>(parameters.ToArray());
+        }
+
         public Task<DialogOpenResponse> DialogOpenAsync(
            string triggerId,
            Dialog dialog)
