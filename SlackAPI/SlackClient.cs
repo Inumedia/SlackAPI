@@ -678,8 +678,10 @@ namespace SlackAPI
             bool? unfurl_links = null,
             string icon_url = null,
             string icon_emoji = null,
-            bool? as_user = null,
-	          string thread_ts = null)
+            bool? as_user = null, 
+            string thread_ts = null, 
+            bool? reply_broadcast = null
+            )
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
@@ -725,6 +727,9 @@ namespace SlackAPI
 
             if (!string.IsNullOrEmpty(thread_ts))
                 parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
+            
+            if (!string.IsNullOrEmpty(thread_ts) && reply_broadcast.HasValue)
+                parameters.Add(new Tuple<string, string>("reply_broadcast", reply_broadcast.ToString()));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
@@ -739,7 +744,9 @@ namespace SlackAPI
             Block[] blocks = null,
             Attachment[] attachments = null,
             bool as_user = false,
-	    string thread_ts = null)
+	        string thread_ts = null,
+            bool? reply_broadcast = null
+            )
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
 
@@ -770,6 +777,12 @@ namespace SlackAPI
                             })));
 
             parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+            
+            if (!string.IsNullOrEmpty(thread_ts))
+                parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
+            
+            if (!string.IsNullOrEmpty(thread_ts) && reply_broadcast.HasValue)
+                parameters.Add(new Tuple<string, string>("reply_broadcast", reply_broadcast.ToString()));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
@@ -789,7 +802,9 @@ namespace SlackAPI
             string icon_url = null,
             string icon_emoji = null,
             bool? as_user = null,
-              string thread_ts = null)
+            string thread_ts = null,
+            bool? reply_broadcast = null
+            )
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
@@ -836,6 +851,9 @@ namespace SlackAPI
 
             if (!string.IsNullOrEmpty(thread_ts))
                 parameters.Add(new Tuple<string, string>("thread_ts", thread_ts));
+
+            if (!string.IsNullOrEmpty(thread_ts) && reply_broadcast.HasValue)
+                parameters.Add(new Tuple<string, string>("reply_broadcast", reply_broadcast.ToString()));
 
             APIRequestWithToken(callback, parameters.ToArray());
         }
