@@ -6,6 +6,18 @@
 
 This is a third party implementation of Slack's API written in C#. This supports their WebAPI as well as their Real Time Messaging API.
 
+## How can I get it?
+
+First, [install NuGet](https://docs.microsoft.com/en-gb/nuget/install-nuget-client-tools). Then, install [SlackAPI](https://www.nuget.org/packages/SlackAPI/) from the package manager console:
+
+```bash
+# dotnet cli
+$ dotnet add package SlackAPI
+
+# alternatively, use a package manager
+$ Install-Package SlackAPI
+```
+
 # Examples
 
 Some examples can be found on the Wiki: https://github.com/Inumedia/SlackAPI/wiki/Examples
