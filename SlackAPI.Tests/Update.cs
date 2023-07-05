@@ -69,7 +69,7 @@ namespace SlackAPI.Tests
             var client = this.fixture.UserClient;
             using (var sync = new InSync(nameof(SlackClient.EmitPresence)))
             {
-                client.EmitPresence((presence) =>
+                client.EmitPresence(presence =>
                 {
                     presence.AssertOk();
                     sync.Proceed();

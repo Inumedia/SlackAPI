@@ -148,7 +148,7 @@ namespace SlackAPI
         {
             if (converter == null)
             {
-                throw new ArgumentNullException("converter");
+                throw new ArgumentNullException(nameof(converter));
             }
 
             Extensions.Converters.Add(converter);

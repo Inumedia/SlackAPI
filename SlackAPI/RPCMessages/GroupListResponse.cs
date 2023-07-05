@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace SlackAPI
 {
     [RequestPath("groups.list")]
+    [Obsolete("Replaced by ConversationsListResponse", true)]
     public class GroupListResponse : Response
     {
         public Channel[] groups;
