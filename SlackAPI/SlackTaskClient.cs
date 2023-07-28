@@ -245,6 +245,8 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<K>(parameters.ToArray());
         }
 
+
+
         public Task<ChannelMessageHistory> GetChannelHistoryAsync(Channel channelInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
             return GetHistoryAsync<ChannelMessageHistory>(channelInfo.id, latest, oldest, count, unreads);
@@ -271,6 +273,31 @@ namespace SlackAPI
                 new Tuple<string, string>("ts", ts.ToProperTimeStamp())
             );
         }
+
+        public Task<ConversationReplyResponse> GetConversationsReplyHistoryAsync(string channel, string threadTs, DateTime? latest = null, DateTime? oldest = null, string cursor = null, int? limit = null, bool? inclusive = null, bool? include_all_metadata = null)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>()
+            {
+                new Tuple<string, string>("channel", channel),
+                new Tuple<string, string>("ts", threadTs)
+            };
+
+            if (latest.HasValue)
+                parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
+            if (oldest.HasValue)
+                parameters.Add(new Tuple<string, string>("oldest", oldest.Value.ToProperTimeStamp()));
+            if (!string.IsNullOrEmpty(cursor))
+                parameters.Add(new Tuple<string, string>("cursor", cursor));
+            if (limit.HasValue)
+                parameters.Add(new Tuple<string, string>("limit", limit.Value.ToString()));
+            if (inclusive.HasValue)
+                parameters.Add(new Tuple<string, string>("inclusive", inclusive.Value ? "1" : "0"));
+            if (include_all_metadata.HasValue)
+                parameters.Add(new Tuple<string, string>("include_all_metadata", include_all_metadata.Value ? "1" : "0"));
+
+            return APIRequestWithTokenAsync<ConversationReplyResponse>(parameters.ToArray());
+        }
+
 
         public Task<FileInfoResponse> GetFileInfoAsync(string fileId, int? page = null, int? count = null)
         {
