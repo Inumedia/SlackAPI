@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI.Utilities
+﻿namespace SlackAPI.Utilities
 {
     public abstract class ILockFree<T> where T : class
     {
