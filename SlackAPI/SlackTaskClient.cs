@@ -124,10 +124,12 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<UserEmailLookupResponse>(new Tuple<string, string>("email", email));
         }
 
+        [Obsolete("Use conversations API")]
         public Task<ChannelCreateResponse> ChannelsCreateAsync(string name) {
             return APIRequestWithTokenAsync<ChannelCreateResponse>(new Tuple<string, string>("name", name));
         }
 
+        [Obsolete("Use conversations API")]
         public Task<ChannelInviteResponse> ChannelsInviteAsync(string userId, string channelId)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
@@ -166,16 +168,6 @@ namespace SlackAPI
                 parameters.Add(new Tuple<string, string>("cursor", cursor));
 
             return APIRequestWithTokenAsync<ConversationsMembersResponse>(parameters.ToArray());
-        }
-
-        public Task<ChannelListResponse> GetChannelListAsync(bool ExcludeArchived = true)
-        {
-            return APIRequestWithTokenAsync<ChannelListResponse>(new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
-        }
-
-        public Task<GroupListResponse> GetGroupsListAsync(bool ExcludeArchived = true)
-        {
-            return APIRequestWithTokenAsync<GroupListResponse>(new Tuple<string, string>("exclude_archived", ExcludeArchived ? "1" : "0"));
         }
 
         public Task<DirectMessageConversationListResponse> GetDirectMessageListAsync()
@@ -255,11 +247,6 @@ namespace SlackAPI
             return GetHistoryAsync<MessageHistory>(conversationInfo.id, latest, oldest, count, unreads);
         }
 
-        public Task<GroupMessageHistory> GetGroupHistoryAsync(Channel groupInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
-        {
-            return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count, unreads);
-        }
-
         public Task<ConversationsMessageHistory> GetConversationsHistoryAsync(Channel conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
         {
             return GetHistoryAsync<ConversationsMessageHistory>(conversationInfo.id, latest, oldest, count, unreads);
@@ -287,24 +274,10 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<FileInfoResponse>(parameters.ToArray());
         }
         #region Groups
-        public Task<GroupArchiveResponse> GroupsArchiveAsync(string channelId)
-        {
-            return APIRequestWithTokenAsync<GroupArchiveResponse>(new Tuple<string, string>("channel", channelId));
-        }
-
-        public Task<GroupCloseResponse> GroupsCloseAsync(string channelId)
-        {
-            return APIRequestWithTokenAsync<GroupCloseResponse>(new Tuple<string, string>("channel", channelId));
-        }
 
         public Task<GroupCreateResponse> GroupsCreateAsync(string name)
         {
             return APIRequestWithTokenAsync<GroupCreateResponse>(new Tuple<string, string>("name", name));
-        }
-
-        public Task<GroupCreateChildResponse> GroupsCreateChildAsync(string channelId)
-        {
-            return APIRequestWithTokenAsync<GroupCreateChildResponse>(new Tuple<string, string>("channel", channelId));
         }
 
         public Task<GroupInviteResponse> GroupsInviteAsync(string userId, string channelId)
@@ -317,64 +290,15 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<GroupInviteResponse>(parameters.ToArray());
         }
 
-        public Task<GroupKickResponse> GroupsKickAsync(string userId, string channelId)
-        {
-            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
-            parameters.Add(new Tuple<string, string>("channel", channelId));
-            parameters.Add(new Tuple<string, string>("user", userId));
-
-            return APIRequestWithTokenAsync<GroupKickResponse>(parameters.ToArray());
-        }
-
-        public Task<GroupLeaveResponse> GroupsLeaveAsync(string channelId)
-        {
-            return APIRequestWithTokenAsync<GroupLeaveResponse>(new Tuple<string, string>("channel", channelId));
-        }
-
         public Task<GroupMarkResponse> GroupsMarkAsync(string channelId, DateTime ts)
         {
             return APIRequestWithTokenAsync<GroupMarkResponse>(new Tuple<string, string>("channel", channelId), new Tuple<string, string>("ts", ts.ToProperTimeStamp()));
         }
 
+        [Obsolete]
         public Task<GroupOpenResponse> GroupsOpenAsync(string channelId)
         {
             return APIRequestWithTokenAsync<GroupOpenResponse>(new Tuple<string, string>("channel", channelId));
-        }
-
-        public Task<GroupRenameResponse> GroupsRenameAsync(string channelId, string name)
-        {
-            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
-            parameters.Add(new Tuple<string, string>("channel", channelId));
-            parameters.Add(new Tuple<string, string>("name", name));
-
-            return APIRequestWithTokenAsync<GroupRenameResponse>(parameters.ToArray());
-        }
-
-        public Task<GroupSetPurposeResponse> GroupsSetPurposeAsync(string channelId, string purpose)
-        {
-            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
-            parameters.Add(new Tuple<string, string>("channel", channelId));
-            parameters.Add(new Tuple<string, string>("purpose", purpose));
-
-            return APIRequestWithTokenAsync<GroupSetPurposeResponse>(parameters.ToArray());
-        }
-
-        public Task<GroupSetTopicResponse> GroupsSetTopicAsync(string channelId, string topic)
-        {
-            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
-            parameters.Add(new Tuple<string, string>("channel", channelId));
-            parameters.Add(new Tuple<string, string>("topic", topic));
-
-            return APIRequestWithTokenAsync<GroupSetTopicResponse>(parameters.ToArray());
-        }
-
-        public Task<GroupUnarchiveResponse> GroupsUnarchiveAsync(string channelId)
-        {
-            return APIRequestWithTokenAsync<GroupUnarchiveResponse>(new Tuple<string, string>("channel", channelId));
         }
 
         #endregion
