@@ -9,7 +9,7 @@ namespace SlackAPI
     public class Message : SlackSocketMessage
     {
         public string channel;
-        public DateTime ts;
+        public string ts;
         public string user;
         /// <summary>
         /// Isn't always set. Should look up if not set.
@@ -22,6 +22,6 @@ namespace SlackAPI
         public Reaction[] reactions;
         //Wibblr? Not really sure what this applies to.  :<
 
-        public DateTime? thread_ts;
+        public string thread_ts;
     }
 }
