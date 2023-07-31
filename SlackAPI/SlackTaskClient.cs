@@ -153,7 +153,7 @@ namespace SlackAPI
 
 	        return APIRequestWithTokenAsync<ConversationsListResponse>(parameters.ToArray());
         }
-        
+
         public Task<ConversationsMembersResponse> GetConversationsMembersAsync(string channelId, string cursor = "", int limit = 100)
         {
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>
@@ -227,12 +227,16 @@ namespace SlackAPI
             return APIRequestWithTokenAsync<FileListResponse>(parameters.ToArray());
         }
 
-        private Task<K> GetHistoryAsync<K>(string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
+        private Task<K> GetHistoryAsync<K>(string channel, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false, string cursor = null, int? limit = null)
             where K : MessageHistory
         {
             List<Tuple<string,string>> parameters = new List<Tuple<string,string>>();
             parameters.Add(new Tuple<string, string>("channel", channel));
 
+            if(cursor != null)
+                parameters.Add(new Tuple<string, string>("cursor", cursor));
+            if(limit.HasValue)
+                parameters.Add(new Tuple<string, string>("limit", limit.ToString()));
             if(latest.HasValue)
                 parameters.Add(new Tuple<string, string>("latest", latest.Value.ToProperTimeStamp()));
             if(oldest.HasValue)
@@ -260,9 +264,9 @@ namespace SlackAPI
             return GetHistoryAsync<GroupMessageHistory>(groupInfo.id, latest, oldest, count, unreads);
         }
 
-        public Task<ConversationsMessageHistory> GetConversationsHistoryAsync(Channel conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false)
+        public Task<ConversationsMessageHistory> GetConversationsHistoryAsync(Channel conversationInfo, DateTime? latest = null, DateTime? oldest = null, int? count = null, bool? unreads = false, string cursor = null, int? limit = null)
         {
-            return GetHistoryAsync<ConversationsMessageHistory>(conversationInfo.id, latest, oldest, count, unreads);
+            return GetHistoryAsync<ConversationsMessageHistory>(conversationInfo.id, latest, oldest, count, unreads, cursor, limit);
         }
 
         public Task<MarkResponse> MarkChannelAsync(string channelId, DateTime ts)
