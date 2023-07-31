@@ -170,6 +170,7 @@ namespace SlackAPI
             APIRequestWithToken(callback, parameters.ToArray());
         }
 
+        [Obsolete("Use conversations API")]
         public void GetDirectMessageList(Action<DirectMessageConversationListResponse> callback)
         {
             APIRequestWithToken(callback);
