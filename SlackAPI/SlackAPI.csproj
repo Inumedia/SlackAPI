@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Configuration">
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard2.1</TargetFrameworks>
     <DebugType>Full</DebugType>
     <RootNamespace>SlackAPI</RootNamespace>
     <AssemblyName>SlackAPI</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
