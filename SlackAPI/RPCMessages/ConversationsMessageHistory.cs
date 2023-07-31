@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI.RPCMessages
+﻿namespace SlackAPI.RPCMessages
 {
     [RequestPath("conversations.history")]
     public class ConversationsMessageHistory : MessageHistory

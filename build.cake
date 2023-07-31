@@ -102,7 +102,7 @@ Task("Test")
     // - replace assembly name in test report
     // - manualy push test result
 
-    foreach (var framework in new[] { "net452", "netcoreapp2.1"})
+    foreach (var framework in new[] { "net452", "netcoreapp3.1"})
     {
         DotNetCoreTest(
             testProject,

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI.WebSocketMessages
+﻿namespace SlackAPI.WebSocketMessages
 {
     [SlackSocketRouting("pong")]
     public class Pong : SlackSocketMessage

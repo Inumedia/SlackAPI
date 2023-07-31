@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SlackAPI
+﻿namespace SlackAPI
 {
     [RequestPath("groups.history")]
     public class GroupMessageHistory : MessageHistory
