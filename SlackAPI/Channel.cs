@@ -18,8 +18,12 @@ namespace SlackAPI
         public bool is_channel;
         public bool is_group;
         public bool is_im;
-        //Is this deprecated by is_open?
-        public bool IsPrivateGroup { get { return id != null && id[0] == 'G'; } }
+        public bool is_mpim;
+        public bool is_private;
+        public bool is_shared;
+        public bool is_org_shared;
+        public bool is_ext_shared;
+        public bool is_pending_ext_shared;
 
         public int num_members;
         public OwnedStampedMessage topic;
