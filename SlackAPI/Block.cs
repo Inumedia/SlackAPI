@@ -181,6 +181,12 @@
         public string initial_date { get; set; }
         public Confirm confirm { get; set; }
     }
+    
+    public class MarkdownElement : IElement
+    {
+        public string type { get; } = ElementTypes.Markdown;
+        public string text { get; set; }
+    }
 
     public class View
     {
@@ -227,10 +233,18 @@
         public const string ConversationSelect = "conversation_select";
         public const string Overflow = "overflow";
         public const string DatePicker = "datepicker";
+        public const string Markdown = "mrkdwn";
     }
 
-    public interface IElement { }
+    public interface IElement
+    {
+        string type { get; }
+    }
 
-    public interface IBlock { }
+    public interface IBlock
+    {
+        string type { get; }
+        string block_id { get; set; }
+    }
 
 }
