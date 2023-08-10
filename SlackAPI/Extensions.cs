@@ -15,7 +15,7 @@ namespace SlackAPI
         };
 
         /// <summary>
-        /// Converts to a property JavaScript timestamp interpreted by Slack.  Also handles converting to UTC.
+        /// Converts to a proper JavaScript timestamp interpreted by Slack.  Also handles converting to UTC.
         /// </summary>
         /// <param name="that"></param>
         /// <returns></returns>
