@@ -7,7 +7,12 @@ namespace SlackAPI
 {
     public static class Extensions
     {
-        internal static readonly IList<JsonConverter> Converters = new List<JsonConverter> { new JavascriptDateTimeConverter() };
+        internal static readonly IList<JsonConverter> Converters = new List<JsonConverter>
+        {
+            new JavascriptDateTimeConverter(),
+            new BlockConverter(),
+            new ElementConverter()
+        };
 
         /// <summary>
         /// Converts to a propert JavaScript timestamp interpretted by Slack.  Also handles converting to UTC.

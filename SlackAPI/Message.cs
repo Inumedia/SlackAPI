@@ -17,6 +17,7 @@ namespace SlackAPI
         public string username;
         public string text;
         public Attachment[] attachments;
+        public Block[] blocks;
         public bool is_starred;
         public string permalink;
         public Reaction[] reactions;

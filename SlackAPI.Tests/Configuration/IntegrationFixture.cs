@@ -90,7 +90,7 @@ namespace SlackAPI.Tests.Configuration
         {
             var currentAssembly = this.GetType().GetTypeInfo().Assembly.Location;
             var assemblyDirectory = Path.GetDirectoryName(currentAssembly);
-            string fileName = Path.Combine(assemblyDirectory, @"configuration\config.json");
+            string fileName = Path.Combine(assemblyDirectory, @"Configuration\config.default.json");
             string json = System.IO.File.ReadAllText(fileName);
 
             var jsonObject = new {slack = (SlackConfig)null };
