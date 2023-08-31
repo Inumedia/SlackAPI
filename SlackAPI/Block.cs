@@ -52,6 +52,15 @@
 	    public Text text { get; set; }
 	    public string block_id { get; set; }
     }
+
+    public class InputBlock : IBlock
+    {
+        public string type => BlockTypes.Input;
+        public string block_id { get; set; }
+        public IElement element { get; set; }
+        public ILabel label { get; set; }
+    }
+
     public class Text : IElement
     {
         public string type { get; set; } = TextTypes.PlainText;
@@ -188,6 +197,13 @@
         public string text { get; set; }
     }
 
+    public class InputElement : IElement
+    {
+        public string type => ElementTypes.PlainTextInput;
+        public bool multiline { get; set; }
+        public string action_id { get; set; }
+    }
+
     public class View
     {
         public string type { get; set; }
@@ -208,6 +224,7 @@
         public const string Context = "context";
         public const string Image = "image";
         public const string Header = "header";
+        public const string Input = "input";
     }
 
     public static class ViewTypes
@@ -234,8 +251,13 @@
         public const string Overflow = "overflow";
         public const string DatePicker = "datepicker";
         public const string Markdown = "mrkdwn";
+        public const string PlainTextInput = "plain_text_input";
     }
 
+    public static class LabelTypes
+    {
+        public const string PlainText = "plain_text";
+    }
 
     public interface IElement
     {
@@ -246,5 +268,17 @@
     {
         string type { get; }
         string block_id { get; set; }
+    }
+
+    public interface ILabel
+    {
+        string type { get; }
+    }
+
+    public class Label : ILabel
+    {
+        public string type => LabelTypes.PlainText;
+        public string text { get; set; }
+        public bool emoji { get; set; }
     }
 }

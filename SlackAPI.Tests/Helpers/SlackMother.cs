@@ -198,6 +198,22 @@
                 }
             }
         };
+
+        public static IBlock[] InputBlock => new IBlock[]
+        {
+            new InputBlock()
+            {
+                element = new InputElement()
+                {
+                    multiline = true,
+                    action_id = "asdf"
+                },
+                label = new Label()
+                {
+                    text = "My Label"
+                }
+            }
+        };
         public static Attachment[] SomeAttachments => new[]
         {
             new Attachment()
